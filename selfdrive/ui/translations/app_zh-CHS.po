@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Language: zh-CHS\n"
-"Plural-Forms: nplurals=1; plural=0;\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: openpilot/selfdrive/ui/layouts/settings/device.py
 msgid " Steering torque response calibration is complete."
@@ -143,11 +143,11 @@ msgstr "更改语言"
 
 #: openpilot/selfdrive/ui/layouts/settings/toggles.py
 msgid "Changing this setting will restart sunnypilot if the car is powered on."
-msgstr ""
+msgstr "更改此设置将在车辆通电时重启 sunnypilot。"
 
 #: system/ui/sunnypilot/widgets/sunnylink_pairing_dialog.py
 msgid "Choose your sponsorship tier and confirm your support"
-msgstr ""
+msgstr "选择您的赞助等级并确认支持。"
 
 #: openpilot/selfdrive/ui/widgets/pairing_dialog.py
 msgid "Click \"add new device\" and scan the QR code on the right"
@@ -171,7 +171,7 @@ msgstr "拒绝"
 
 #: openpilot/selfdrive/ui/layouts/onboarding.py
 msgid "Decline, uninstall sunnypilot"
-msgstr ""
+msgstr "拒绝，卸载 sunnypilot"
 
 #: openpilot/selfdrive/ui/layouts/settings/settings.py
 msgid "Developer"
@@ -235,7 +235,7 @@ msgstr "实验模式已开启"
 
 #: system/ui/sunnypilot/widgets/sunnylink_pairing_dialog.py
 msgid "Early Access: Become a sunnypilot Sponsor"
-msgstr ""
+msgstr "抢先体验：成为 sunnypilot 赞助者"
 
 #: openpilot/selfdrive/ui/layouts/settings/developer.py
 #: openpilot/selfdrive/ui/layouts/settings/toggles.py
@@ -264,15 +264,15 @@ msgstr "启用网络共享"
 
 #: openpilot/selfdrive/ui/layouts/settings/toggles.py
 msgid "Enable driver monitoring even when sunnypilot is not engaged."
-msgstr ""
+msgstr "即使 sunnypilot 未接合也启用驾驶员监控。"
 
 #: openpilot/selfdrive/ui/layouts/settings/toggles.py
 msgid "Enable sunnypilot"
-msgstr ""
+msgstr "启用 sunnypilot"
 
 #: openpilot/selfdrive/ui/layouts/settings/toggles.py
 msgid "Enable the sunnypilot longitudinal control (alpha) toggle to allow Experimental mode."
-msgstr ""
+msgstr "启用 sunnypilot 纵向控制（测试版）开关以允许实验模式。"
 
 #: system/ui/widgets/network.py
 msgid "Enter APN"
@@ -292,7 +292,7 @@ msgstr "输入密码"
 
 #: system/ui/sunnypilot/widgets/tree_dialog.py
 msgid "Enter search query"
-msgstr ""
+msgstr "输入搜索关键词"
 
 #: openpilot/selfdrive/ui/widgets/ssh_key.py
 msgid "Enter your GitHub username"
@@ -328,7 +328,7 @@ msgstr "Firehose 模式"
 
 #: system/ui/sunnypilot/widgets/sunnylink_pairing_dialog.py
 msgid "Follow the prompts to complete the pairing process"
-msgstr ""
+msgstr "按照提示完成配对过程。"
 
 #: system/ui/widgets/network.py
 msgid "Forget"
@@ -364,7 +364,7 @@ msgstr "IP 地址"
 
 #: system/ui/sunnypilot/widgets/sunnylink_pairing_dialog.py
 msgid "If sponsorship status was not updated, please contact a moderator on the community forum at https://community.sunnypilot.ai"
-msgstr ""
+msgstr "如果赞助状态未更新，请在社区论坛 https://community.sunnypilot.ai 联系版主。"
 
 #: openpilot/selfdrive/ui/layouts/settings/software.py
 msgid "Install Update"
@@ -372,7 +372,7 @@ msgstr "安装更新"
 
 #: system/ui/sunnypilot/widgets/sunnylink_pairing_dialog.py
 msgid "Join our Community Forum at https://community.sunnypilot.ai and reach out to a moderator if you have issues"
-msgstr ""
+msgstr "加入我们的社区论坛 https://community.sunnypilot.ai，如有问题请联系版主。"
 
 #: openpilot/selfdrive/ui/layouts/settings/developer.py
 msgid "Joystick Debug Mode"
@@ -388,7 +388,7 @@ msgstr "LTE"
 
 #: openpilot/selfdrive/ui/layouts/settings/developer.py
 msgid "Lateral Maneuver Mode"
-msgstr ""
+msgstr "横向操作模式"
 
 #: openpilot/selfdrive/ui/layouts/settings/developer.py
 msgid "Longitudinal Maneuver Mode"
@@ -466,7 +466,7 @@ msgstr "配对设备"
 
 #: system/ui/sunnypilot/widgets/sunnylink_pairing_dialog.py
 msgid "Pair your GitHub account"
-msgstr ""
+msgstr "配对您的 GitHub 账号"
 
 #: openpilot/selfdrive/ui/widgets/pairing_dialog.py
 msgid "Pair your device to your comma account"
@@ -515,7 +515,7 @@ msgstr "查看"
 
 #: system/ui/sunnypilot/widgets/sunnylink_pairing_dialog.py
 msgid "Re-enter the \"sunnylink\" panel to verify sponsorship status"
-msgstr ""
+msgstr "重新进入 \"sunnylink\" 面板以验证赞助状态。"
 
 #: openpilot/selfdrive/ui/layouts/settings/device.py
 msgid "Reboot"
@@ -575,7 +575,7 @@ msgstr "查看训练指南"
 
 #: openpilot/selfdrive/ui/layouts/settings/device.py
 msgid "Review the rules, features, and limitations of sunnypilot"
-msgstr ""
+msgstr "查看 sunnypilot 的使用规则、功能和限制。"
 
 #: openpilot/selfdrive/ui/layouts/settings/software.py
 msgid "SELECT"
@@ -587,11 +587,11 @@ msgstr "SSH 密钥"
 
 #: system/ui/sunnypilot/widgets/sunnylink_pairing_dialog.py
 msgid "Scan the QR code to login to your GitHub account"
-msgstr ""
+msgstr "扫描二维码登录您的 GitHub 账号。"
 
 #: system/ui/sunnypilot/widgets/sunnylink_pairing_dialog.py
 msgid "Scan the QR code to visit sunnyhaibin's GitHub Sponsors page"
-msgstr ""
+msgstr "扫描二维码访问 sunnyhaibin 的 GitHub 赞助页面。"
 
 #: system/ui/widgets/network.py
 msgid "Scanning Wi-Fi networks..."
@@ -599,7 +599,7 @@ msgstr "正在扫描 Wi‑Fi 网络…"
 
 #: system/ui/sunnypilot/widgets/tree_dialog.py
 msgid "Search"
-msgstr ""
+msgstr "搜索"
 
 #: system/ui/widgets/option_dialog.py
 msgid "Select"
@@ -703,11 +703,11 @@ msgstr "等待开始"
 
 #: openpilot/selfdrive/ui/layouts/onboarding.py
 msgid "Welcome to sunnypilot"
-msgstr ""
+msgstr "欢迎使用 sunnypilot"
 
 #: openpilot/selfdrive/ui/layouts/settings/toggles.py
 msgid "When enabled, pressing the accelerator pedal will disengage sunnypilot."
-msgstr ""
+msgstr "启用后，踩下加速踏板将脱离 sunnypilot。"
 
 #: openpilot/selfdrive/ui/layouts/sidebar.py
 msgid "Wi-Fi"
@@ -723,11 +723,11 @@ msgstr "密码错误"
 
 #: openpilot/selfdrive/ui/layouts/onboarding.py
 msgid "You must accept the Terms of Service in order to use sunnypilot."
-msgstr ""
+msgstr "您必须接受服务条款才能使用 sunnypilot。"
 
 #: openpilot/selfdrive/ui/layouts/onboarding.py
 msgid "You must accept the Terms of Service to use sunnypilot. Read the latest terms at https://sunnypilot.ai/terms before continuing."
-msgstr ""
+msgstr "您必须接受服务条款才能使用 sunnypilot。请在继续前阅读最新条款 https://sunnypilot.ai/terms。"
 
 #: openpilot/selfdrive/ui/onroad/driver_camera_dialog.py
 msgid "camera starting"
@@ -799,19 +799,19 @@ msgstr "右"
 
 #: openpilot/selfdrive/ui/layouts/settings/developer.py
 msgid "sunnypilot Longitudinal Control (Alpha)"
-msgstr ""
+msgstr "sunnypilot 纵向控制（测试版）"
 
 #: openpilot/selfdrive/ui/onroad/alert_renderer.py
 msgid "sunnypilot Unavailable"
-msgstr ""
+msgstr "sunnypilot 不可用"
 
 #: openpilot/selfdrive/ui/layouts/settings/toggles.py
 msgid "sunnypilot longitudinal control may come in a future update."
-msgstr ""
+msgstr "sunnypilot 纵向控制可能在未来的更新中推出。"
 
 #: openpilot/selfdrive/ui/layouts/settings/device.py
 msgid "sunnypilot requires the device to be mounted within 4° left or right and within 5° up or 9° down."
-msgstr ""
+msgstr "sunnypilot 要求设备左右倾斜在 4° 以内，上下倾斜在上 5°、下 9° 以内。"
 
 #: system/ui/widgets/network.py
 msgid "unmetered"
@@ -871,3 +871,858 @@ msgstr "✓ 已订阅"
 msgid "🔥 Firehose Mode 🔥"
 msgstr "🔥 Firehose 模式 🔥"
 
+
+msgid "(Only for highest tiers, and does NOT bring ANY benefit to you yet. We are just testing data volume.)"
+msgstr "（仅限最高等级，目前不会带来任何好处。我们只是在测试数据量。）"
+
+msgid "A chime and on-screen alert will play when you are stopped, and the vehicle in front of you start moving."
+msgstr "当您停车且前车开始移动时，会播放提示音和屏幕提醒。"
+
+msgid "ALL TIME"
+msgstr "全部时间"
+
+msgid "Actuator Delay:"
+msgstr "执行器延迟："
+
+msgid "Adjust Lane Turn Speed"
+msgstr "调整车道转弯速度"
+
+msgid "Adjust Software Delay"
+msgstr "调整软件延迟"
+
+msgid "Adjust the software delay when Live Learning Steer Delay is toggled off. The default software delay value is 0.2"
+msgstr "当实时学习转向延迟关闭时调整软件延迟。默认软件延迟值为 0.2"
+
+msgid "All"
+msgstr "全部"
+
+msgid "All states (~6.0 GB)"
+msgstr "所有状态 (~6.0 GB)"
+
+msgid "Allows the driver to provide limited steering input while openpilot is engaged."
+msgstr "允许驾驶员在 openpilot 接合时提供有限的转向输入。"
+
+msgid "Always On"
+msgstr "始终开启"
+
+msgid "Apply a custom timeout for settings UI."
+msgstr "为设置界面应用自定义超时。"
+
+msgid "Are you sure you want to backup your current sunnypilot settings?"
+msgstr "确定要备份当前的 sunnypilot 设置吗？"
+
+msgid "Are you sure you want to enter Always Offroad mode?"
+msgstr "确定要进入始终离线模式吗？"
+
+msgid "Are you sure you want to exit Always Offroad mode?"
+msgstr "确定要退出始终离线模式吗？"
+
+msgid "Are you sure you want to reset all sunnypilot settings to default? Once the settings are reset, there is no going back."
+msgstr "确定要将所有 sunnypilot 设置重置为默认值吗？重置后无法撤销。"
+
+msgid "Are you sure you want to restore the last backed up sunnypilot settings?"
+msgstr "确定要还原上次备份的 sunnypilot 设置吗？"
+
+msgid "Assist"
+msgstr "辅助"
+
+msgid "Assist: Adjusts the vehicle's cruise speed based on the current road's speed limit when operating the +/- buttons."
+msgstr "辅助：操作 +/- 按钮时根据当前道路限速调整车辆巡航速度。"
+
+msgid "Auto (Dark)"
+msgstr "自动（暗色）"
+
+msgid "Auto (Default)"
+msgstr "自动（默认）"
+
+msgid "Auto Lane Change by Blinker"
+msgstr "转向灯自动变道"
+
+msgid "Auto Lane Change: Delay with Blind Spot"
+msgstr "自动变道：盲区延迟"
+
+msgid "Backup Failed"
+msgstr "备份失败"
+
+msgid "Backup Settings"
+msgstr "备份设置"
+
+msgid "Become a sponsor of sunnypilot to get early access to sunnylink features when they become available."
+msgstr "成为 sunnypilot 赞助者以在 sunnylink 功能可用时获得早期访问。"
+
+msgid "Bottom"
+msgstr "底部"
+
+msgid "CLEAR"
+msgstr "清除"
+
+msgid "Cancel Download"
+msgstr "取消下载"
+
+msgid "Car First"
+msgstr "车辆优先"
+
+msgid "Car First: Use Speed Limit data from Car if available, else use from OpenStreetMaps"
+msgstr "车辆优先：优先使用车辆限速数据，不可用时使用 OpenStreetMaps"
+
+msgid "Car Only"
+msgstr "仅车辆"
+
+msgid "Car Only: Use Speed Limit data only from Car"
+msgstr "仅车辆：仅使用车辆限速数据"
+
+msgid "Choose how Automatic Lane Centering (ALC) behaves after the brake pedal is manually pressed in sunnypilot."
+msgstr "选择手动踩下制动踏板后 sunnypilot 自动车道居中 (ALC) 的行为。"
+
+msgid "Clear Model Cache"
+msgstr "清除模型缓存"
+
+msgid "Click the Sponsor button for more details"
+msgstr "点击赞助按钮了解更多详情"
+
+msgid "Colors represent vehicle fingerprint status:"
+msgstr "颜色代表车辆指纹状态："
+
+msgid "Combined"
+msgstr "组合"
+
+msgid "Combined: Use combined Speed Limit data from Car & OpenStreetMaps"
+msgstr "组合：使用车辆和 OpenStreetMaps 的组合限速数据"
+
+msgid "Confirm"
+msgstr "确认"
+
+msgid "Controls state of the device after boot/sleep."
+msgstr "控制设备启动/休眠后的状态。"
+
+msgid "Cooperative Steering (Beta)"
+msgstr "协同转向（测试版）"
+
+msgid "Country"
+msgstr "国家"
+
+msgid "Cruise"
+msgstr "巡航"
+
+msgid "Current Model"
+msgstr "当前模型"
+
+msgid "Custom ACC Speed Increments"
+msgstr "自定义 ACC 速度增量"
+
+msgid "Custom Longitudinal Tuning"
+msgstr "自定义纵向调校"
+
+msgid "Customize Lane Change"
+msgstr "自定义变道"
+
+msgid "Customize MADS"
+msgstr "自定义 MADS"
+
+msgid "Customize Source"
+msgstr "自定义来源"
+
+msgid "Customize Torque Params"
+msgstr "自定义扭矩参数"
+
+msgid "DELETE"
+msgstr "删除"
+
+msgid "DISABLED"
+msgstr "已禁用"
+
+msgid "Database Update"
+msgstr "数据库更新"
+
+msgid "Default"
+msgstr "默认"
+
+msgid "Default: Device will boot/wake-up normally & will be ready to engage."
+msgstr "默认：设备将正常启动/唤醒并可随时接合。"
+
+msgid "Delay before lateral control resumes after the turn signal ends."
+msgstr "转向灯结束后横向控制恢复前的延迟。"
+
+msgid "Developer UI"
+msgstr "开发者界面"
+
+msgid "Disable"
+msgstr "禁用"
+
+msgid "Disable Updates"
+msgstr "禁用更新"
+
+msgid "Disable the sunnypilot Longitudinal Control (alpha) toggle to allow Intelligent Cruise Button Management."
+msgstr "禁用 sunnypilot 纵向控制（测试版）开关以允许智能巡航按键管理。"
+
+msgid "Disengage"
+msgstr "断开"
+
+msgid "Disengage to Enter Always Offroad Mode"
+msgstr "断开以进入始终离线模式"
+
+msgid "Disengage: ALC will disengage when the brake pedal is pressed."
+msgstr "断开：踩下制动踏板时 ALC 将断开。"
+
+msgid "Display"
+msgstr "显示"
+
+msgid "Display Metrics Below Chevron"
+msgstr "在 Chevron 下方显示指标"
+
+msgid "Display Road Name"
+msgstr "显示路名"
+
+msgid "Display Turn Signals"
+msgstr "显示转向灯"
+
+msgid "Display real-time parameters and metrics from various sources."
+msgstr "显示来自各种来源的实时参数和指标。"
+
+msgid "Display steering arc on the driving screen when lateral control is enabled."
+msgstr "横向控制启用时在驾驶屏幕上显示转向弧。"
+
+msgid "Displays the name of the road the car is traveling on."
+msgstr "显示车辆行驶道路的名称。"
+
+msgid "Distance"
+msgstr "距离"
+
+msgid "Downloaded Maps"
+msgstr "已下载地图"
+
+msgid "Downloading Map"
+msgstr "下载地图"
+
+msgid "Downloading Maps..."
+msgstr "下载地图中..."
+
+msgid "Drives"
+msgstr "行程"
+
+msgid "Driving Model"
+msgstr "驾驶模型"
+
+msgid "Dynamic"
+msgstr "动态"
+
+msgid "Enable \"Always Offroad\" in Device panel, or turn vehicle off to toggle."
+msgstr "在设备面板启用\"始终离线\"，或关闭车辆以切换。"
+
+msgid "Enable Always Offroad"
+msgstr "启用始终离线"
+
+msgid "Enable Custom Tuning"
+msgstr "启用自定义调校"
+
+msgid "Enable Dynamic Experimental Control"
+msgstr "启用动态实验控制"
+
+msgid "Enable Standstill Timer"
+msgstr "启用停车计时器"
+
+msgid "Enable Tesla Rainbow Mode"
+msgstr "启用 Tesla 彩虹模式"
+
+msgid "Enable custom Short & Long press increments for cruise speed increase/decrease."
+msgstr "启用以自定义巡航速度增减的短按和长按增量。"
+
+msgid "Enable sunnylink"
+msgstr "启用 sunnylink"
+
+msgid "Enable sunnylink uploader (infrastructure test)"
+msgstr "启用 sunnylink 上传器（基础设施测试）"
+
+msgid "Enable the beloved MADS feature. "
+msgstr "启用备受喜爱的 MADS 功能。"
+
+msgid "Enable this to enforce sunnypilot to steer with Torque lateral control."
+msgstr "启用以强制 sunnypilot 使用扭矩横向控制转向。"
+
+msgid "Enable toggle to allow the model to determine when to use sunnypilot ACC or sunnypilot End to End Longitudinal."
+msgstr "启用开关以允许模型决定何时使用 sunnypilot ACC 或 sunnypilot 端到端纵向控制。"
+
+msgid "Enables or disables the GitHub runner service."
+msgstr "启用或禁用 GitHub runner 服务。"
+
+msgid "Enforce Factory Longitudinal Control"
+msgstr "强制原厂纵向控制"
+
+msgid "Enforce Torque Lateral Control"
+msgstr "强制扭矩横向控制"
+
+msgid "Engage lateral and longitudinal control with cruise control engagement."
+msgstr "通过巡航控制接合来激活横向和纵向控制。"
+
+msgid "Enter model year (e.g., 2021) and model (Toyota Corolla):"
+msgstr "输入车型年份（如 2021）和车型（如 Toyota Corolla）："
+
+msgid "Error Log"
+msgstr "错误日志"
+
+msgid "Error: Invalid download. Retry."
+msgstr "错误：下载无效，请重试。"
+
+msgid "Exit Always Offroad"
+msgstr "退出始终离线"
+
+msgid "Experimental feature to enable auto-resume during stop-and-go for certain supported Subaru platforms."
+msgstr "实验功能：为部分支持的 Subaru 平台启用启停自动恢复。"
+
+msgid "FAULT"
+msgstr "故障"
+
+msgid "FETCHING..."
+msgstr "获取中..."
+
+msgid "Fetching Latest Models"
+msgstr "获取最新模型"
+
+msgid "Fingerprinted automatically"
+msgstr "自动指纹识别"
+
+msgid "Fixed"
+msgstr "固定"
+
+msgid "Fixed: Adds a fixed offset [Speed Limit + Offset]"
+msgstr "固定：添加固定偏移 [限速 + 偏移]"
+
+msgid "For applicable vehicles, always display the true vehicle current speed from wheel speed sensors."
+msgstr "对于适用车辆，始终显示来自轮速传感器的真实车速。"
+
+msgid "For maximum effectiveness, bring your device inside and connect to a good USB-C adapter and Wi-Fi weekly.\n\n"
+msgstr "为获得最佳效果，请每周将设备带入室内并连接 USB-C 适配器和 Wi-Fi。\n\n"
+
+msgid "For secure backup, restore, and remote configuration"
+msgstr "用于安全备份、还原和远程配置"
+
+
+msgid "Friction"
+msgstr "摩擦力"
+
+msgid "GitHub Runner Service"
+msgstr "GitHub Runner 服务"
+
+msgid "Green Traffic Light Alert (Beta)"
+msgstr "绿灯提醒（测试版）"
+
+msgid "Hours"
+msgstr "小时"
+
+msgid "Info"
+msgstr "信息"
+
+msgid "Intelligent Cruise Button Management (ICBM) (Alpha)"
+msgstr "智能巡航按键管理 ICBM（测试版）"
+
+msgid "Intelligent Cruise Button Management is currently unavailable on this platform."
+msgstr "智能巡航按键管理当前在此平台上不可用。"
+
+msgid "Interactivity Timeout"
+msgstr "交互超时"
+
+msgid "KM"
+msgstr "公里"
+
+msgid "Last checked {}"
+msgstr "上次检查 {}"
+
+msgid "Lateral Acceleration Factor"
+msgstr "横向加速因子"
+
+msgid "Lead Departure Alert (Beta)"
+msgstr "前车起步提醒（测试版）"
+
+msgid "Less Restrict Settings for Self-Tune (Beta)"
+msgstr "自调校宽松设置（测试版）"
+
+msgid "Live Learning Steer Delay"
+msgstr "实时学习转向延迟"
+
+msgid "Live Steer Delay:"
+msgstr "实时转向延迟："
+
+msgid "Long Press Increment"
+msgstr "长按增量"
+
+msgid "Manual Real-Time Tuning"
+msgstr "手动实时调校"
+
+msgid "Manually selected fingerprint"
+msgstr "手动选择指纹"
+
+msgid "Map First"
+msgstr "地图优先"
+
+msgid "Map First: Use Speed Limit data from OpenStreetMaps if available, else use from Car"
+msgstr "地图优先：优先使用 OpenStreetMaps 限速数据，不可用时使用车辆数据"
+
+msgid "Map Only"
+msgstr "仅地图"
+
+msgid "Map Only: Use Speed Limit data only from OpenStreetMaps"
+msgstr "仅地图：仅使用 OpenStreetMaps 限速数据"
+
+msgid "Mapd Version"
+msgstr "Mapd 版本"
+
+msgid "Max Time Offroad"
+msgstr "最长离线时间"
+
+msgid "Miles"
+msgstr "英里"
+
+msgid "Minimum Speed to Pause Lateral Control"
+msgstr "暂停横向控制最低速度"
+
+msgid "Model download has started in the background. We suggest resetting calibration. Would you like to do that now?"
+msgstr "模型下载已在后台开始。建议重置校准。是否立即执行？"
+
+msgid "Models"
+msgstr "模型"
+
+msgid "Modular Assistive Driving System (MADS)"
+msgstr "模块化辅助驾驶系统 (MADS)"
+
+msgid "Navigation"
+msgstr "导航"
+
+msgid "Near"
+msgstr "附近"
+
+msgid "Neural Network Lateral Control (NNLC)"
+msgstr "神经网络横向控制 (NNLC)"
+
+msgid "No"
+msgstr "否"
+
+msgid "No vehicle selected"
+msgstr "未选择车辆"
+
+msgid "None"
+msgstr "无"
+
+msgid "None: No Offset"
+msgstr "无：无偏移"
+
+msgid "Not Paired"
+msgstr "未配对"
+
+msgid "Not Sponsor"
+msgstr "未赞助"
+
+msgid "Not fingerprinted or manually selected"
+msgstr "未指纹识别或手动选择"
+
+msgid "Note: For vehicles without LFA/LKAS button, disabling this will prevent lateral control engagement."
+msgstr "注意：对于没有 LFA/LKAS 按钮的车辆，禁用此功能将阻止横向控制接合。"
+
+msgid "Note: Once lateral control is engaged via UEM, it will remain engaged until it is manually disabled via the MADS button or car shut off."
+msgstr "注意：通过 UEM 接合横向控制后，它将保持接合直到通过 MADS 按钮手动禁用或车辆关闭。"
+
+msgid "Nudge"
+msgstr "轻推"
+
+msgid "Nudgeless"
+msgstr "无轻推"
+
+msgid "OSM"
+msgstr "OSM"
+
+msgid "Off"
+msgstr "关闭"
+
+msgid "Off-Policy Model"
+msgstr "离线策略模型"
+
+msgid "Off: Disables the Speed Limit functions."
+msgstr "关闭：禁用限速功能。"
+
+msgid "Offroad"
+msgstr "离线"
+
+msgid "Offroad: Device will be in Always Offroad mode after boot/wake-up."
+msgstr "离线：设备在启动/唤醒后将处于始终离线模式。"
+
+msgid "On-Policy Model"
+msgstr "在线策略模型"
+
+msgid "Only available when vehicle is off, or always offroad mode is on"
+msgstr "仅在车辆关闭或始终离线模式开启时可用"
+
+msgid "Onroad Brightness"
+msgstr "驾驶屏亮度"
+
+msgid "Onroad Brightness Delay"
+msgstr "驾驶屏亮度延迟"
+
+msgid "Onroad Uploads"
+msgstr "驾驶数据上传"
+
+msgid "PAST WEEK"
+msgstr "过去一周"
+
+msgid "Pair GitHub Account"
+msgstr "配对 GitHub 账户"
+
+msgid "Pair your GitHub account to grant your device sponsor benefits, including API access on sunnylink."
+msgstr "配对您的 GitHub 账户以授予设备赞助权益，包括 sunnylink 的 API 访问。"
+
+msgid "Paired"
+msgstr "已配对"
+
+msgid "Pause"
+msgstr "暂停"
+
+msgid "Pause Lateral Control with Blinker"
+msgstr "转向灯暂停横向控制"
+
+msgid "Pause lateral control with blinker when traveling below the desired speed selected."
+msgstr "当行驶速度低于所选期望速度时，通过转向灯暂停横向控制。"
+
+msgid "Pause: ALC will pause when the brake pedal is pressed."
+msgstr "暂停：踩下制动踏板时 ALC 将暂停。"
+
+msgid "Percent: Adds a percent offset [Speed Limit + (Offset % Speed Limit)]"
+msgstr "百分比：添加百分比偏移 [限速 + (偏移 % 限速)]"
+
+msgid "Please enable \"Always Offroad\" mode or turn off the vehicle to adjust these toggles."
+msgstr "请启用\"始终离线\"模式或关闭车辆以调整这些开关。"
+
+msgid "Please reboot and try again."
+msgstr "请重启并重试。"
+
+msgid "Policy Model"
+msgstr "策略模型"
+
+msgid "Post-Blinker Delay"
+msgstr "转向灯后延迟"
+
+msgid "Quickboot Mode"
+msgstr "快速启动模式"
+
+msgid "Quiet Mode"
+msgstr "静音模式"
+
+msgid "REFRESH"
+msgstr "刷新"
+
+msgid "REGIST..."
+msgstr "注册中..."
+
+
+msgid "Real-Time & Offline"
+msgstr "实时和离线"
+
+msgid "Real-time Acceleration Bar"
+msgstr "实时加速条"
+
+msgid "Refresh Model List"
+msgstr "刷新模型列表"
+
+msgid "Remain Active"
+msgstr "保持激活"
+
+msgid "Remain Active: ALC will remain active when the brake pedal is pressed."
+msgstr "保持激活：踩下制动踏板时 ALC 将保持激活。"
+
+msgid "Reset Settings"
+msgstr "重置设置"
+
+msgid "Restore Failed"
+msgstr "还原失败"
+
+msgid "Restore Settings"
+msgstr "还原设置"
+
+msgid "Right"
+msgstr "右侧"
+
+msgid "Right & Bottom"
+msgstr "右侧和底部"
+
+msgid "SPONSOR"
+msgstr "赞助"
+
+msgid "SUNNYLINK"
+msgstr "SUNNYLINK"
+
+msgid "Scan"
+msgstr "扫描"
+
+msgid "Scanning..."
+msgstr "扫描中..."
+
+msgid "Screen Off"
+msgstr "屏幕关闭"
+
+msgid "Search your vehicle"
+msgstr "搜索您的车辆"
+
+msgid "Select Torque Control Tune Version"
+msgstr "选择扭矩控制调校版本"
+
+msgid "Select a Model"
+msgstr "选择模型"
+
+msgid "Select a vehicle"
+msgstr "选择车辆"
+
+msgid "Select vehicle to force fingerprint manually."
+msgstr "选择车辆以强制手动指纹识别。"
+
+msgid "Self-Tune"
+msgstr "自调校"
+
+msgid "Settings backup completed."
+msgstr "设置备份完成。"
+
+msgid "Settings restored. Confirm to restart the interface."
+msgstr "设置已还原。确认重启界面。"
+
+msgid "Short Press Increment"
+msgstr "短按增量"
+
+msgid "Show Advanced Controls"
+msgstr "显示高级控制"
+
+msgid "Show Blind Spot Warnings"
+msgstr "显示盲区警告"
+
+msgid "Show a timer on the HUD when the car is at a standstill."
+msgstr "车辆静止时在 HUD 上显示计时器。"
+
+msgid "Smart Cruise Control - Map"
+msgstr "智能巡航控制 - 地图"
+
+msgid "Smart Cruise Control - Vision"
+msgstr "智能巡航控制 - 视觉"
+
+msgid "Software Delay:"
+msgstr "软件延迟："
+
+msgid "Speed"
+msgstr "速度"
+
+msgid "Speed Limit"
+msgstr "限速"
+
+msgid "Speed Limit Offset"
+msgstr "限速偏移"
+
+msgid "Speed Limit Source"
+msgstr "限速来源"
+
+msgid "Speedometer: Always Display True Speed"
+msgstr "速度表：始终显示真实速度"
+
+msgid "Speedometer: Hide from Onroad Screen"
+msgstr "速度表：在驾驶屏幕隐藏"
+
+msgid "Sponsor Status"
+msgstr "赞助状态"
+
+msgid "Sponsorship isn't required for basic backup/restore"
+msgstr "基本备份/还原不需要赞助"
+
+msgid "Start Download"
+msgstr "开始下载"
+
+msgid "Start the vehicle to check vehicle compatibility."
+msgstr "启动车辆以检查车辆兼容性。"
+
+msgid "State"
+msgstr "状态"
+
+msgid "Steering"
+msgstr "转向"
+
+msgid "Steering Arc"
+msgstr "转向弧"
+
+msgid "Steering Mode on Brake Pedal"
+msgstr "制动踏板转向模式"
+
+msgid "Stop and Go (Beta)"
+msgstr "启停（测试版）"
+
+msgid "Stop and Go Hack (Alpha)"
+msgstr "启停破解（测试版）"
+
+msgid "Stop and Go for Manual Parking Brake (Beta)"
+msgstr "手动驻车启停（测试版）"
+
+msgid "System reboot required for changes to take effect. Reboot now?"
+msgstr "需要重启系统以使更改生效。立即重启？"
+
+msgid "The reset cannot be undone. You have been warned."
+msgstr "重置不可撤销，特此警告。"
+
+msgid "This feature can only be used with sunnypilot longitudinal control enabled."
+msgstr "此功能仅可在 sunnypilot 纵向控制启用时使用。"
+
+msgid "This feature defaults to OFF, and does not allow selection due to vehicle limitations."
+msgstr "此功能默认为关闭，由于车辆限制不允许选择。"
+
+msgid "This feature defaults to ON, and does not allow selection due to vehicle limitations."
+msgstr "此功能默认为开启，由于车辆限制不允许选择。"
+
+msgid "This feature is currently not available on this platform."
+msgstr "此功能当前在此平台上不可用。"
+
+msgid "This feature is not supported on this platform due to vehicle limitations."
+msgstr "由于车辆限制，此平台不支持此功能。"
+
+msgid "This feature is unavailable while the car is onroad."
+msgstr "此功能在车辆行驶中不可用。"
+
+msgid "This feature requires sunnypilot longitudinal control to be available."
+msgstr "此功能需要 sunnypilot 纵向控制可用。"
+
+msgid "This is the master switch, it will allow you to cutoff any sunnylink requests should you want to do that."
+msgstr "这是主开关，可让您在需要时切断所有 sunnylink 请求。"
+
+msgid "This platform only supports Disengage mode due to vehicle limitations."
+msgstr "由于车辆限制，此平台仅支持断开模式。"
+
+msgid "This platform supports all MADS settings."
+msgstr "此平台支持所有 MADS 设置。"
+
+msgid "This platform supports limited MADS settings."
+msgstr "此平台支持有限的 MADS 设置。"
+
+msgid "This setting will take effect immediately."
+msgstr "此设置将立即生效。"
+
+msgid "This setting will take effect once the device enters offroad state."
+msgstr "此设置将在设备进入离线状态后生效。"
+
+msgid "This will delete ALL downloaded maps\n\nAre you sure you want to delete all maps?"
+msgstr "这将删除所有已下载的地图\n\n确定要删除所有地图吗？"
+
+msgid "This will delete ALL downloaded models from the cache except the currently active model. Are you sure?"
+msgstr "这将删除缓存中除当前活动模型外的所有已下载模型。确定吗？"
+
+msgid "This will start the download process and it might take a while to complete."
+msgstr "这将开始下载过程，可能需要一段时间才能完成。"
+
+msgid "Time"
+msgstr "时间"
+
+msgid "Toggle with Main Cruise"
+msgstr "随主巡航切换"
+
+msgid "Torque Control Tune Version"
+msgstr "扭矩控制调校版本"
+
+msgid "Total Delay:"
+msgstr "总延迟："
+
+msgid "Trips"
+msgstr "行程"
+
+msgid "Unable to restore the settings, try again later."
+msgstr "无法还原设置，请稍后重试。"
+
+msgid "Unified Engagement Mode (UEM)"
+msgstr "统一接合模式 (UEM)"
+
+msgid "Unrecognized Vehicle"
+msgstr "未识别的车辆"
+
+msgid "Use Lane Turn Desires"
+msgstr "使用车道转弯期望"
+
+msgid "Use map data to estimate the appropriate speed to drive through turns ahead."
+msgstr "使用地图数据估算通过前方转弯的合适速度。"
+
+msgid "Use vision path predictions to estimate the appropriate speed to drive through turns ahead."
+msgstr "使用视觉路径预测估算通过前方转弯的合适速度。"
+
+msgid "Vehicle"
+msgstr "车辆"
+
+msgid "View the error log for sunnypilot crashes."
+msgstr "查看 sunnypilot 崩溃的错误日志。"
+
+msgid "Vision Model"
+msgstr "视觉模型"
+
+msgid "Visuals"
+msgstr "视觉效果"
+
+msgid "Wake Up Behavior"
+msgstr "唤醒行为"
+
+msgid "Warning"
+msgstr "警告"
+
+msgid "When enabled, automatic software updates will be off.<br><b>This requires a reboot to take effect.</b>"
+msgstr "启用后，自动软件更新将关闭。<br><b>需要重启才能生效。</b>"
+
+msgid "When enabled, the speedometer on the onroad screen is not displayed."
+msgstr "启用后，驾驶屏幕上的速度表将不显示。"
+
+msgid "When enabled, visual turn indicators are drawn on the HUD."
+msgstr "启用后，HUD 上会绘制视觉转向指示器。"
+
+msgid "Would you like to delete this log?"
+msgstr "要删除此日志吗？"
+
+msgid "Yes"
+msgstr "是"
+
+msgid "Yes, delete all maps"
+msgstr "是，删除所有地图"
+
+msgid "Your vehicle will use the Default longitudinal tuning."
+msgstr "您的车辆将使用默认纵向调校。"
+
+msgid "Your vehicle will use the Dynamic longitudinal tuning."
+msgstr "您的车辆将使用动态纵向调校。"
+
+msgid "Your vehicle will use the Predictive longitudinal tuning."
+msgstr "您的车辆将使用预测纵向调校。"
+
+msgid "copyparty Service"
+msgstr "copyparty 服务"
+
+
+msgid "from cache"
+msgstr "来自缓存"
+
+msgid "ready"
+msgstr "就绪"
+
+msgid "sunnylink"
+msgstr "sunnylink"
+
+msgid "sunnypilot Longitudinal Control is the default longitudinal control for this platform."
+msgstr "sunnypilot 纵向控制为此平台的默认纵向控制。"
+
+msgid "sunnypilot Longitudinal Control must be available and enabled for your vehicle to use this feature."
+msgstr "您的车辆需要 sunnypilot 纵向控制可用且已启用以使用此功能。"
+
+msgid "sunnypilot learns to drive by watching humans, like you, drive.\n\n"
+msgstr "sunnypilot 通过观察人类驾驶来学习，就像你一样。\n\n"
+
+msgid "sunnypilot will not take over control of gas and brakes. Factory Toyota longitudinal control will be used."
+msgstr "sunnypilot 将不会接管油门和刹车控制。将使用原厂 Toyota 纵向控制。"
+
+msgid "Select the version of Torque Control Tune to use."
+msgstr "选择要使用的扭矩控制调校版本。"
+
+msgid "Enables self-tune for Torque lateral control for platforms that do not use Torque lateral control by default."
+msgstr "为默认不使用扭矩横向控制的平台启用力矩自调校。"
+
+msgid "Less strict settings when using Self-Tune. This allows torqued to be more forgiving when learning values."
+msgstr "自调校时使用更宽松的设置，使扭矩在学习参数时更加宽容。"
+
+msgid "Enables custom tuning for Torque lateral control. Modifying Lateral Acceleration Factor and Friction below will override the offline values indicated in the YAML files within \"opendbc/car/torque_data\". The values will also be used live when \"Manual Real-Time Tuning\" toggle is enabled."
+msgstr "启用扭矩横向控制的自定义调校。修改下方的横向加速度系数和摩擦力将覆盖 \"opendbc/car/torque_data\" YAML 文件中指示的离线值。当启用\"手动实时调校\"开关时，这些值也将实时生效。"
+
+msgid "Enforces the torque lateral controller to use the fixed values instead of the learned values from Self-Tune. Enabling this toggle overrides Self-Tune values."
+msgstr "强制扭矩横向控制器使用固定值而非自调校学习到的值。启用此开关将覆盖自调校值。"
+
+msgid "Offline Only"
+msgstr "仅离线"
