@@ -124,7 +124,7 @@ def font_fallback(font: rl.Font) -> rl.Font:
     return gui_app._all_fonts[lang]
   return font
 
-_menu_font: rl.Font | None = None
+_menu_font = None
 
 
 class MousePos(NamedTuple):
