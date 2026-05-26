@@ -734,9 +734,13 @@ class GuiApplication(GuiApplicationExt):
     rl.gui_set_font(default)
 
   def _load_lang_font(self, lang_code: str):
-    """Load a single language atlas if not already in memory."""
+    """Load a single language atlas, unloading the previous one."""
     if lang_code in self._all_fonts:
       return
+    # Unload previous language
+    for prev_lang, prev_font in list(self._all_fonts.items()):
+      rl.unload_font(prev_font)
+      del self._all_fonts[prev_lang]
     fnt_name = f"{lang_code}.fnt"
     with as_file(FONT_DIR) as fspath:
       fnt_path = fspath / fnt_name
