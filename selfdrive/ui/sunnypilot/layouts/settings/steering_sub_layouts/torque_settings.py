@@ -12,7 +12,7 @@ import pyray as rl
 
 from openpilot.common.basedir import BASEDIR
 from openpilot.selfdrive.ui.ui_state import ui_state
-from openpilot.system.ui.lib.application import gui_app, FontWeight
+from openpilot.system.ui.lib.application import gui_app
 from openpilot.system.ui.lib.multilang import tr
 from openpilot.system.ui.sunnypilot.lib.utils import NoElideButtonAction
 from openpilot.system.ui.sunnypilot.widgets.list_view import ListItemSP, toggle_item_sp, option_item_sp
@@ -185,7 +185,6 @@ class TorqueSettingsLayout(Widget):
       tr("Select Torque Control Tune Version"),
       folders,
       current_ref=current_label,
-      option_font_weight=FontWeight.UNIFONT,
       on_exit=handle_selection,
     )
     gui_app.push_widget(self._torque_version_dialog)
