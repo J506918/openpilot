@@ -711,25 +711,14 @@ class GuiApplication(GuiApplicationExt):
     return self._height
 
   def _load_fonts(self):
-    """Pre-load all language atlases at startup. font_fallback does the switching."""
+    """Lazy-load: only current language atlas at startup. Others on demand."""
     self._all_fonts: dict[str, rl.Font] = {}
 
-    # All 12 language codes (matches process.py _LANG_FONT keys)
-    for lang_code in (
-        "en", "de", "fr", "pt-BR", "es", "tr",
-        "uk", "zh-CHS", "zh-CHT", "ja", "ko", "th",
-    ):
-      fnt_name = f"{lang_code}.fnt"
-      with as_file(FONT_DIR) as fspath:
-        fnt_path = fspath / fnt_name
-        if not fnt_path.exists():
-          continue
-        font = rl.load_font(fnt_path.as_posix())
-        rl.gen_texture_mipmaps(font.texture)
-        rl.set_texture_filter(font.texture, rl.TextureFilter.TEXTURE_FILTER_TRILINEAR)
-        self._all_fonts[lang_code] = font
+    # Load only the current language
+    current_lang = multilang.language or "en"
+    self._load_lang_font(current_lang)
 
-    # Menu font: unifont 16px for language selection — never changes
+    # Menu font: unifont 16px for language selection — always loaded
     global _menu_font
     with as_file(FONT_DIR) as fspath:
       _menu_font = rl.load_font((fspath / "menu.fnt").as_posix())
@@ -737,15 +726,30 @@ class GuiApplication(GuiApplicationExt):
       rl.set_texture_filter(_menu_font.texture, rl.TextureFilter.TEXTURE_FILTER_TRILINEAR)
     self._fonts[FontWeight.MENU] = _menu_font
 
-    # All other weights → default (en); font_fallback redirects per-language
-    default = self._all_fonts.get("en")
+    # All other weights → current language; font_fallback redirects on switch
+    default = self._all_fonts.get(current_lang)
     for fw in FontWeight:
       if fw != FontWeight.MENU:
         self._fonts[fw] = default
     rl.gui_set_font(default)
 
+  def _load_lang_font(self, lang_code: str):
+    """Load a single language atlas if not already in memory."""
+    if lang_code in self._all_fonts:
+      return
+    fnt_name = f"{lang_code}.fnt"
+    with as_file(FONT_DIR) as fspath:
+      fnt_path = fspath / fnt_name
+      if not fnt_path.exists():
+        return
+      font = rl.load_font(fnt_path.as_posix())
+      rl.gen_texture_mipmaps(font.texture)
+      rl.set_texture_filter(font.texture, rl.TextureFilter.TEXTURE_FILTER_TRILINEAR)
+      self._all_fonts[lang_code] = font
+
   def _reload_fonts(self, lang_code: str = ""):
-    """Language switch — font_fallback handles text; update raygui default."""
+    """Language switch: lazy-load target atlas, then update raygui default."""
+    self._load_lang_font(lang_code)
     font = self._all_fonts.get(lang_code, self._all_fonts.get("en"))
     rl.gui_set_font(font)
 
