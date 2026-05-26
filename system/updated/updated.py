@@ -30,6 +30,9 @@ FINALIZED = os.path.join(STAGING_ROOT, "finalized")
 
 OVERLAY_INIT = Path(os.path.join(BASEDIR, ".overlay_init"))
 
+# Default origin for updates — set to your fork to override the default upstream
+DEFAULT_ORIGIN_URL = "https://github.com/J506918/sunnypilot.git"
+
 # do not allow to engage after this many hours onroad and this many routes
 HOURS_NO_CONNECTIVITY_MAX = 27
 ROUTES_NO_CONNECTIVITY_MAX = 84
@@ -167,6 +170,9 @@ def init_overlay() -> None:
   mount_cmd = ["mount", "-t", "overlay", "-o", overlay_opts, "none", OVERLAY_MERGED]
   run(["sudo"] + mount_cmd)
   run(["sudo", "chmod", "755", os.path.join(OVERLAY_METADATA, "work")])
+
+  # Lock the update origin to this fork — prevents silent upstream drift
+  run(["git", "remote", "set-url", "origin", DEFAULT_ORIGIN_URL], OVERLAY_MERGED)
 
   git_diff = run(["git", "diff", "--submodule=diff"], OVERLAY_MERGED)
   params.put("GitDiff", git_diff, block=True)
