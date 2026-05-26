@@ -320,7 +320,7 @@ msgstr "完成设置"
 
 #: openpilot/selfdrive/ui/layouts/settings/settings.py
 msgid "Firehose"
-msgstr "数据洪流"
+msgstr "Firehose"
 
 #: openpilot/selfdrive/ui/layouts/settings/firehose.py
 msgid "Firehose Mode"
