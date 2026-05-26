@@ -741,6 +741,8 @@ class GuiApplication(GuiApplicationExt):
     for prev_lang, prev_font in list(self._all_fonts.items()):
       rl.unload_font(prev_font)
       del self._all_fonts[prev_lang]
+    cloudlog.info(f"Lazy font load: loading '{lang_code}'")
+    import time; time.sleep(1.5)
     fnt_name = f"{lang_code}.fnt"
     with as_file(FONT_DIR) as fspath:
       fnt_path = fspath / fnt_name
