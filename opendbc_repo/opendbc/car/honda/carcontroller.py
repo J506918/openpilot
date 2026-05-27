@@ -116,6 +116,11 @@ class CarController(CarControllerBase, MadsCarController, GasInterceptorCarContr
     self.brake = 0.0
     self.last_torque = 0.0
 
+    # TJA disengage ramp-down: Bosch CAN-FD EPS needs a grace period
+    # when handing back steering control to avoid locking up power assist
+    self._tja_disengage_counter = 0
+    self._was_lat_active = False
+
   def update(self, CC, CC_SP, CS, now_nanos):
     MadsCarController.update(self, self.CP, CC, CC_SP)
     actuators = CC.actuators
@@ -134,6 +139,24 @@ class CarController(CarControllerBase, MadsCarController, GasInterceptorCarContr
     limited_torque = rate_limit(actuators.torque, self.last_torque, -self.params.STEER_DELTA_DOWN * DT_CTRL,
                                 self.params.STEER_DELTA_UP * DT_CTRL)
     self.last_torque = limited_torque
+
+    # TJA disengage ramp-down: Bosch CAN-FD EPS needs torque=0 + STEER_DOWN_TO_ZERO=True
+    # for several frames before releasing STEER_TORQUE_REQUEST, to avoid EPS lock-up.
+    tja_disengaging = False
+    if self.tja_control:
+      if CC.latActive and not self._was_lat_active:
+        # Engaging: cancel any pending disengage
+        self._tja_disengage_counter = 0
+      elif not CC.latActive and self._was_lat_active:
+        # Disengaging: start ramp-down (200ms grace period)
+        self._tja_disengage_counter = 20
+        self.last_torque = 0.0  # immediately zero the torque state
+      self._was_lat_active = CC.latActive
+
+    if self._tja_disengage_counter > 0:
+      tja_disengaging = True
+      limited_torque = 0.0
+      self._tja_disengage_counter -= 1
 
     # *** apply brake hysteresis ***
     pre_limit_brake, self.braking, self.brake_steady = actuator_hysteresis(brake, self.braking, self.brake_steady,
@@ -160,7 +183,7 @@ class CarController(CarControllerBase, MadsCarController, GasInterceptorCarContr
         can_sends.append(make_tester_present_msg(0x18DAB0F1, 1, suppress_response=True))
 
     # Send steering command.
-    can_sends.append(hondacan.create_steering_control(self.packer, self.CAN, apply_torque, CC.latActive, self.tja_control))
+    can_sends.append(hondacan.create_steering_control(self.packer, self.CAN, apply_torque, CC.latActive, self.tja_control, tja_disengaging))
 
     # wind brake from air resistance decel at high speed
     wind_brake = np.interp(CS.out.vEgo, [0.0, 2.3, 35.0], [0.001, 0.002, 0.15])

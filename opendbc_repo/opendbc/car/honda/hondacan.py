@@ -121,14 +121,18 @@ def create_acc_commands(packer, CAN, enabled, active, accel, gas, stopping_count
   return commands
 
 
-def create_steering_control(packer, CAN, apply_torque, lkas_active, tja_control):
+def create_steering_control(packer, CAN, apply_torque, lkas_active, tja_control, tja_disengaging=False):
+  # During TJA disengage ramp-down: keep STEER_TORQUE_REQUEST=True with torque=0
+  # and STEER_DOWN_TO_ZERO=True, so Bosch CAN-FD EPS hands back smoothly
+  request_active = lkas_active or tja_disengaging
+
   values = {
-    "STEER_TORQUE": apply_torque if lkas_active else 0,
-    "STEER_TORQUE_REQUEST": lkas_active,
+    "STEER_TORQUE": apply_torque if request_active else 0,
+    "STEER_TORQUE_REQUEST": request_active,
   }
 
   if tja_control:
-    values["STEER_DOWN_TO_ZERO"] = lkas_active
+    values["STEER_DOWN_TO_ZERO"] = request_active
 
   return packer.make_can_msg("STEERING_CONTROL", CAN.lkas, values)
 
