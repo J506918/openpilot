@@ -8,20 +8,21 @@ from openpilot.system.ui.lib.wrap_text import wrap_text
 from openpilot.selfdrive.ui.mici.layouts.settings.firehose import FirehoseLayoutBase
 
 TITLE = tr_noop("Firehose Mode")
-DESCRIPTION = tr_noop(
-  "sunnypilot learns to drive by watching humans, like you, drive.\n\n"
-  + "Firehose Mode allows you to maximize your training data uploads to improve "
-  + "openpilot's driving models. More data means bigger models, which means better Experimental Mode."
-)
-INSTRUCTIONS = tr_noop(
-  "For maximum effectiveness, bring your device inside and connect to a good USB-C adapter and Wi-Fi weekly.\n\n"
-  + "Firehose Mode can also work while you're driving if connected to a hotspot or unlimited SIM card.\n\n\n"
-  + "Frequently Asked Questions\n\n"
-  + "Does it matter how or where I drive? Nope, just drive as you normally would.\n\n"
-  + "Do all of my segments get pulled in Firehose Mode? No, we selectively pull a subset of your segments.\n\n"
-  + "What's a good USB-C adapter? Any fast phone or laptop charger should be fine.\n\n"
-  + "Does it matter which software I run? Yes, only upstream openpilot (and particular forks) are able to be used for training."
-)
+
+DESCRIPTION_PARTS = [
+  tr_noop("sunnypilot learns to drive by watching humans, like you, drive."),
+  tr_noop("Firehose Mode allows you to maximize your training data uploads to improve openpilot's driving models. More data means bigger models, which means better Experimental Mode."),
+]
+
+INSTRUCTION_PARTS = [
+  tr_noop("For maximum effectiveness, bring your device inside and connect to a good USB-C adapter and Wi-Fi weekly."),
+  tr_noop("Firehose Mode can also work while you're driving if connected to a hotspot or unlimited SIM card."),
+  tr_noop("Frequently Asked Questions"),
+  tr_noop("Does it matter how or where I drive? Nope, just drive as you normally would."),
+  tr_noop("Do all of my segments get pulled in Firehose Mode? No, we selectively pull a subset of your segments."),
+  tr_noop("What's a good USB-C adapter? Any fast phone or laptop charger should be fine."),
+  tr_noop("Does it matter which software I run? Yes, only upstream openpilot (and particular forks) are able to be used for training."),
+]
 
 
 class FirehoseLayout(FirehoseLayoutBase):
@@ -52,8 +53,11 @@ class FirehoseLayout(FirehoseLayoutBase):
     rl.draw_text_ex(title_font, title_text, rl.Vector2(title_x, y), 100, 0, rl.WHITE)
     y += 200
 
-    # Description
-    y = self._draw_wrapped_text(x, y, w, tr(DESCRIPTION), gui_app.font(FontWeight.NORMAL), 45, rl.WHITE)
+    # Description — render each part separately with spacing
+    for i, part in enumerate(DESCRIPTION_PARTS):
+      if i > 0:
+        y += 60  # paragraph spacing
+      y = self._draw_wrapped_text(x, y, w, tr(part), gui_app.font(FontWeight.NORMAL), 45, rl.WHITE)
     y += 40 + 20
 
     # Separator
@@ -77,8 +81,11 @@ class FirehoseLayout(FirehoseLayoutBase):
     rl.draw_rectangle(x, y, w, 2, self.GRAY)
     y += 30 + 20
 
-    # Instructions
-    y = self._draw_wrapped_text(x, y, w, tr(INSTRUCTIONS), gui_app.font(FontWeight.NORMAL), 40, self.LIGHT_GRAY)
+    # Instructions — render each part separately with spacing
+    for i, part in enumerate(INSTRUCTION_PARTS):
+      if i > 0:
+        y += 30  # line spacing
+      y = self._draw_wrapped_text(x, y, w, tr(part), gui_app.font(FontWeight.NORMAL), 40, self.LIGHT_GRAY)
 
     # bottom margin + remove effect of scroll offset
     return int(round(y - self._scroll_panel.offset + 40))

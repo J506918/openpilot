@@ -1190,8 +1190,8 @@ msgstr "固定：添加固定偏移 [限速 + 偏移]"
 msgid "For applicable vehicles, always display the true vehicle current speed from wheel speed sensors."
 msgstr "对于适用车辆，始终显示来自轮速传感器的真实车速。"
 
-msgid "For maximum effectiveness, bring your device inside and connect to a good USB-C adapter and Wi-Fi weekly.\n\n"
-msgstr "为获得最佳效果，请每周将设备带入室内并连接 USB-C 适配器和 Wi-Fi。\n\n"
+msgid "For maximum effectiveness, bring your device inside and connect to a good USB-C adapter and Wi-Fi weekly."
+msgstr "为获得最佳效果，请每周将设备带入室内并连接 USB-C 适配器和 Wi-Fi。"
 
 msgid "For secure backup, restore, and remote configuration"
 msgstr "用于安全备份、还原和远程配置"
@@ -1703,8 +1703,8 @@ msgstr "sunnypilot 纵向控制为此平台的默认纵向控制。"
 msgid "sunnypilot Longitudinal Control must be available and enabled for your vehicle to use this feature."
 msgstr "您的车辆需要 sunnypilot 纵向控制可用且已启用以使用此功能。"
 
-msgid "sunnypilot learns to drive by watching humans, like you, drive.\n\n"
-msgstr "sunnypilot 通过观察人类驾驶来学习，就像你一样。\n\n"
+msgid "sunnypilot learns to drive by watching humans, like you, drive."
+msgstr "sunnypilot 通过观察人类驾驶来学习，就像你一样。"
 
 msgid "sunnypilot will not take over control of gas and brakes. Factory Toyota longitudinal control will be used."
 msgstr "sunnypilot 将不会接管油门和刹车控制。将使用原厂 Toyota 纵向控制。"
@@ -1726,3 +1726,24 @@ msgstr "强制扭矩横向控制器使用固定值而非自调校学习到的值
 
 msgid "Offline Only"
 msgstr "仅离线"
+
+msgid "Firehose Mode allows you to maximize your training data uploads to improve openpilot's driving models. More data means bigger models, which means better Experimental Mode."
+msgstr "Firehose 模式可最大化您的训练数据上传量，以改进 openpilot 的驾驶模型。更多数据意味着更大的模型，更好的实验模式。"
+
+msgid "Firehose Mode can also work while you're driving if connected to a hotspot or unlimited SIM card."
+msgstr "如果连接到热点或无限流量 SIM 卡，Firehose 模式也可以在驾驶时工作。"
+
+msgid "Frequently Asked Questions"
+msgstr "常见问题"
+
+msgid "Does it matter how or where I drive? Nope, just drive as you normally would."
+msgstr "驾驶方式或地点有影响吗？没有，像平常一样驾驶即可。"
+
+msgid "Do all of my segments get pulled in Firehose Mode? No, we selectively pull a subset of your segments."
+msgstr "Firehose 模式会拉取我所有的路段吗？不会，我们只会选择性拉取部分路段。"
+
+msgid "What's a good USB-C adapter? Any fast phone or laptop charger should be fine."
+msgstr "什么样的 USB-C 适配器比较好？任何快充手机或笔记本充电器都可以。"
+
+msgid "Does it matter which software I run? Yes, only upstream openpilot (and particular forks) are able to be used for training."
+msgstr "运行哪个软件有影响吗？是的，只有上游 openpilot（及特定分支）可用于训练。"
