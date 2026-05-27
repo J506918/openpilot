@@ -39,6 +39,17 @@ class SoftwareLayoutSP(SoftwareLayout):
     )
     self._scroller.add_widget(self.disable_updates_toggle)
 
+    self.disable_auto_update_toggle = toggle_item_sp(
+      lambda: tr("Disable Auto Update"),
+      description=lambda: tr("Prevent automatic background updates"),
+      initial_state=ui_state.params.get_bool("DisableAutoUpdate"),
+      callback=self._on_disable_auto_update_toggled,
+    )
+    self._scroller.add_widget(self.disable_auto_update_toggle)
+
+  def _on_disable_auto_update_toggled(self, enabled):
+    ui_state.params.put_bool("DisableAutoUpdate", enabled)
+
   def _handle_reboot(self, result):
     if result == DialogResult.CONFIRM:
       ui_state.params.put_bool("DisableUpdates", self.disable_updates_toggle.action_item.get_state())
