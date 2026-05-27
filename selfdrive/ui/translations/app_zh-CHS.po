@@ -1726,3 +1726,9 @@ msgstr "强制扭矩横向控制器使用固定值而非自调校学习到的值
 
 msgid "Offline Only"
 msgstr "仅离线"
+
+msgid "Disable Auto Update"
+msgstr "禁止自动更新"
+
+msgid "Prevent automatic background updates"
+msgstr "阻止后台自动更新"
