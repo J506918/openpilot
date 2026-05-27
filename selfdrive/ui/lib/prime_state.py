@@ -103,7 +103,11 @@ class PrimeState:
 
   def is_paired(self) -> bool:
     with self._lock:
-      return self.prime_type > PrimeType.UNPAIRED
+      if self.prime_type > PrimeType.UNPAIRED:
+        return True
+    # Fallback: if user manually set a valid DongleId, treat as paired
+    dongle_id = self._params.get("DongleId")
+    return dongle_id is not None and dongle_id != UNREGISTERED_DONGLE_ID
 
   def __del__(self):
     self.stop()
