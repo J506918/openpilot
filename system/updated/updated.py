@@ -474,6 +474,8 @@ def main() -> None:
           cloudlog.info("skipping fetch, connection metered")
         elif wait_helper.user_request == UserRequest.CHECK:
           cloudlog.info("skipping fetch, only checking")
+        elif params.get_bool("DisableAutoUpdate") and wait_helper.user_request == UserRequest.NONE:
+          cloudlog.info("skipping fetch, auto-update disabled")
         else:
           updater.fetch_update()
           write_time_to_param(params, "UpdaterLastFetchTime")

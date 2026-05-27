@@ -7,12 +7,13 @@ from openpilot.system.ui.lib.application import gui_app
 from openpilot.system.ui.lib.multilang import tr, trn
 from openpilot.system.ui.widgets import Widget, DialogResult
 from openpilot.system.ui.widgets.confirm_dialog import ConfirmDialog
-from openpilot.system.ui.widgets.list_view import button_item, text_item, ListItem
+from openpilot.system.ui.widgets.list_view import button_item, text_item, toggle_item, ListItem
 from openpilot.system.ui.widgets.option_dialog import MultiOptionDialog
 from openpilot.system.ui.widgets.scroller_tici import Scroller
 
 if gui_app.sunnypilot_ui():
   from openpilot.system.ui.sunnypilot.widgets.list_view import button_item_sp as button_item
+  from openpilot.system.ui.sunnypilot.widgets.list_view import toggle_item_sp as toggle_item
 
 # TODO: remove this. updater fails to respond on startup if time is not correct
 UPDATED_TIMEOUT = 10  # seconds to wait for updated to respond
@@ -72,9 +73,18 @@ class SoftwareLayout(Widget):
     self._branch_btn.action_item.set_value(ui_state.params.get("UpdaterTargetBranch") or "")
     self._branch_dialog: MultiOptionDialog | None = None
 
+    self._auto_update_toggle = toggle_item(
+      lambda: tr("Disable Auto Update"),
+      description=lambda: tr("Prevent automatic background updates"),
+      initial_state=ui_state.params.get_bool("DisableAutoUpdate"),
+      callback=self._on_toggle_auto_update,
+      enabled=ui_state.is_offroad,
+    )
+
     self._scroller = Scroller([
       self._onroad_label,
       self._version_item,
+      self._auto_update_toggle,
       self._download_btn,
       self._install_btn,
       self._branch_btn,
@@ -179,6 +189,9 @@ class SoftwareLayout(Widget):
     # Trigger reboot to install update
     self._install_btn.action_item.set_enabled(False)
     ui_state.params.put_bool("DoReboot", True, block=True)
+
+  def _on_toggle_auto_update(self, state: bool):
+    ui_state.params.put_bool("DisableAutoUpdate", state)
 
   def _on_select_branch(self):
     # Get available branches and order
