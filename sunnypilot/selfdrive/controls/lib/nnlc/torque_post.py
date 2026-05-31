@@ -63,89 +63,40 @@ class DirectionalInertia:
   def process(self, desired_torque, lateral_error, steering_pressed, active):
     """
     Returns torque with directional inertia applied.
+    No deadband gating — torque passes through with smoothing only.
+    Direction lock prevents micro-oscillation (left-right-left jitter).
     """
     if not active or steering_pressed:
       self.reset()
       return 0.0
 
-    abs_err = abs(lateral_error)
-    err_sign = 1 if lateral_error > 0 else (-1 if lateral_error < 0 else 0)
+    torque = desired_torque
 
-    # ── Decision: start, continue, or end correction ──
-    if not self._correcting:
-      # Currently in deadband. Check if we should start correcting.
-      if abs_err > self.deadband_enter:
-        # Start a new correction
-        self._correcting = True
-        self._correction_dir = -err_sign  # opposite of error direction
-        self._correction_ramp = 0.0
-        self._target_torque = desired_torque
-        self._torque_at_start = self._output
-        self._frames_in_correction = 0
-      else:
-        # Stay in deadband — HOLD current torque (freeze!)
-        # Gradual decay toward zero, but very slowly
-        self._frames_in_deadband += 1
-        decay = max(0.0, 1.0 - self._frames_in_deadband / 200.0)  # 2s to zero
-        self._output *= decay
-        # If output is very small, just zero it
-        if abs(self._output) < 0.05:
-          self._output = 0.0
-        return self._output
-
-    # ── Currently correcting ──
-    self._frames_in_correction += 1
-    self._frames_in_deadband = 0
-
-    # Check if correction should end
-    should_end = (
-      abs_err < self.deadband_exit or  # error is small enough
-      self._frames_in_correction > 150  # max 1.5s correction (safety)
-    )
-
-    # Check if desired_torque has reversed direction mid-correction
-    # If so, ignore the reversal — we commit to the direction we started
+    # ── Direction lock: prevent micro-oscillations ──
+    # If output is currently moving one way and desired wants the opposite,
+    # resist the reversal to prevent jitter. Intentional reversals (lane changes)
+    # overcome this within ~300ms.
+    abs_torque = abs(desired_torque)
     desired_dir = 1 if desired_torque > 0.02 else (-1 if desired_torque < -0.02 else 0)
 
-    if should_end:
-      # End correction — smooth return to zero
+    if desired_dir != 0:
+      if self._correcting and desired_dir != self._correction_dir:
+        # Desired direction flipped mid-correction — resist reversal
+        torque = self._output * max(0.0, 1.0 - 3.0 / 100.0)  # ~300ms decay
+      else:
+        self._correcting = True
+        self._correction_dir = desired_dir
+    else:
       self._correcting = False
       self._correction_dir = 0
-      self._correction_ramp = 0.0
-      # Don't snap to zero — let EMA handle the decay
-      torque = desired_torque * 0.3  # gentle final touch
-    elif desired_dir != 0 and desired_dir != self._correction_dir:
-      # Desired torque wants to reverse direction mid-correction
-      # → IGNORE the reversal. Hold current torque or reduce magnitude.
-      # Only reduce magnitude, never reverse sign
-      if self._output * desired_torque < 0:
-        # Signs differ — desired wants opposite direction
-        # Gradually reduce current output but don't reverse
-        reduction = max(0.0, 1.0 - 5.0 / 100.0)  # rapid decay when fighting
-        torque = self._output * reduction
-      else:
-        torque = desired_torque
-    else:
-      # Normal correction — ramp toward target
-      self._correction_ramp = min(1.0, self._correction_ramp + 0.04)  # ~400ms ramp
-      # Blend: from start torque toward target
-      raw = self._torque_at_start * (1.0 - self._correction_ramp) + desired_torque * self._correction_ramp
-      # Ensure direction consistency
-      if self._correction_dir == 1:
-        torque = max(0.0, raw)  # right correction: never go negative
-      elif self._correction_dir == -1:
-        torque = min(0.0, raw)  # left correction: never go positive
-      else:
-        torque = raw
 
-    # ── Rate limit ──
-    rate = self.max_per_frame_exit if should_end else self.max_per_frame
+    # ── Rate limit (2.5 Nm/s max change rate) ──
     delta = torque - self._output
-    if abs(delta) > rate:
-      delta = np.sign(delta) * rate
+    if abs(delta) > self.max_per_frame:
+      delta = np.sign(delta) * self.max_per_frame
       torque = self._output + delta
 
-    # ── EMA smooth ──
+    # ── EMA smooth (alpha=0.25, responsive but not jerky) ──
     self._output = self._output * (1.0 - self.ema_alpha) + torque * self.ema_alpha
 
     return self._output
