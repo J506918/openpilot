@@ -1,0 +1,49 @@
+# Page: dashbox
+# Edit this file. Run compile_settings_ui.py to emit settings_ui.json.
+id: dashbox
+label: DashBox
+icon: dashbox
+order: 0
+remote_configurable: true
+description: DashBox cloud connectivity and remote control
+sections:
+- id: connection
+  title: Connection
+  description: DashBox server connection and pairing
+  items:
+  - key: DashboxEnabled
+    widget: toggle
+    title: Enable DashBox
+    description: Connect to DashBox cloud for remote control, drive sharing, and device management. All features are free.
+  - key: DashboxDongleId
+    widget: info
+    title: Device ID
+    description: Your device's unique identifier on DashBox.
+    enablement:
+    - type: param
+      key: DashboxDongleId
+      exists: true
+- id: pairing
+  title: Pairing
+  description: Pair this device with your DashBox account
+  items:
+  - key: DashboxPairingCode
+    widget: info
+    title: Pairing Code
+    description: Enter this code in the DashBox app to pair your device. Code changes after each reboot if not paired.
+    enablement:
+    - type: param
+      key: DashboxPairingCode
+      exists: true
+- id: features
+  title: Features
+  description: DashBox feature toggles
+  items:
+  - key: DashboxUploadsEnabled
+    widget: toggle
+    title: Enable Drive Uploads
+    description: Upload drive recordings to DashBox cloud for sharing and review.
+  - key: OnroadUploads
+    widget: toggle
+    title: Onroad Uploads
+    description: Upload data while driving (uses mobile data).

@@ -109,7 +109,7 @@ def get_properties() -> tuple[str, str, str]:
   hardware_serial: str = params.get("HardwareSerial") or ""
   git_username: str = params.get("GithubUsername") or ""
   dongle_id: str = params.get("DongleId") or f"{UNREGISTERED_DONGLE_ID}-{hardware_serial}"
-  sunnylink_dongle_id: str = params.get("SunnylinkDongleId") or UNREGISTERED_SUNNYLINK_DONGLE_ID
+  sunnylink_dongle_id: str = params.get("DongleId") or UNREGISTERED_SUNNYLINK_DONGLE_ID
 
   return dongle_id, git_username, sunnylink_dongle_id
 

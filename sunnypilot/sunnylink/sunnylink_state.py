@@ -106,7 +106,7 @@ class SunnylinkState:
     self._roles: list[Role] = []
     self._users: list[User] = []
     self.sponsor_tier: SponsorTier = SponsorTier.FREE
-    self.sunnylink_dongle_id = self._params.get("SunnylinkDongleId")
+    self.sunnylink_dongle_id = self._params.get("DongleId")
     self._api = SunnylinkApi(self.sunnylink_dongle_id)
 
     self._panel_open = False

@@ -22,7 +22,7 @@ class SunnylinkPairingDialog(PairingDialog):
   def __init__(self, sponsor_pairing: bool = False):
     PairingDialog.__init__(self)
     self._sponsor_pairing = sponsor_pairing
-    label_text = tr("pair with sunnylink") if sponsor_pairing else tr("become a sunnypilot sponsor")
+    label_text = tr("pair with DashBox") if sponsor_pairing else tr("become a sunnypilot sponsor")
     self._pair_label = UnifiedLabel(label_text, font_size=48, font_weight=FontWeight.BOLD,
                                     text_color=rl.Color(255, 255, 255, int(255 * 0.9)), line_height=0.8)
 
@@ -31,7 +31,7 @@ class SunnylinkPairingDialog(PairingDialog):
 
     if self._sponsor_pairing:
       try:
-        sl_dongle_id = self._params.get("SunnylinkDongleId") or UNREGISTERED_SUNNYLINK_DONGLE_ID
+        sl_dongle_id = self._params.get("DongleId") or UNREGISTERED_SUNNYLINK_DONGLE_ID
         token = SunnylinkApi(sl_dongle_id).get_token()
         inner_string = f"1|{sl_dongle_id}|{token}"
         payload_bytes = base64.b64encode(inner_string.encode('utf-8')).decode('utf-8')

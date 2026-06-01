@@ -13,6 +13,12 @@ NetworkType = log.DeviceState.NetworkType
 
 def main():
   """The main method is expected to be called by the manager when the device boots up."""
+  params = Params()
+  dongle_id = params.get("DongleId")
+  if dongle_id and dongle_id.startswith("dev_"):
+    cloudlog.info(f"DashBox already registered: {dongle_id}, skipping old sunnylink registration")
+    return
+
   try:
     rk = Ratekeeper(.5)
     sm = messaging.SubMaster(['deviceState'], poll='deviceState')

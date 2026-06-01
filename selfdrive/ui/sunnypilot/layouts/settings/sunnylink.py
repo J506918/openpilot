@@ -1,3 +1,4 @@
+from openpilot.common.params import Params
 """
 Copyright (c) 2021-, Haibin Wen, sunnypilot, and a number of other contributors.
 
@@ -13,7 +14,8 @@ from openpilot.system.ui.lib.application import gui_app, FontWeight
 from openpilot.system.ui.lib.multilang import tr
 from openpilot.system.ui.sunnypilot.widgets.list_view import button_item_sp
 from openpilot.system.ui.sunnypilot.widgets.list_view import toggle_item_sp
-from openpilot.system.ui.sunnypilot.widgets.sunnylink_pairing_dialog import SunnylinkPairingDialog
+from openpilot.system.ui.sunnypilot.widgets.dashbox_pairing_dialog import DashboxPairingDialog
+from sunnypilot.dashbox import storage
 from openpilot.system.ui.widgets import Widget, DialogResult
 from openpilot.system.ui.widgets.button import ButtonStyle, Button
 from openpilot.system.ui.widgets.confirm_dialog import alert_dialog, ConfirmDialog
@@ -28,7 +30,7 @@ class SunnylinkHeader(Widget):
     super().__init__()
 
     self._title = UnifiedLabel(
-      text="🚀 sunnylink 🚀",
+      text="🚀 DashBox 🚀",
       font_size=90,
       font_weight=FontWeight.AUDIOWIDE,
       text_color=rl.WHITE,
@@ -141,86 +143,86 @@ class SunnylinkLayout(Widget):
   def __init__(self):
     super().__init__()
 
-    self._sunnylink_pairing_dialog: SunnylinkPairingDialog | None = None
+    self._dashbox_pairing_dialog: DashboxPairingDialog | None = None
     self._restore_in_progress = False
     self._backup_in_progress = False
-    self._sunnylink_enabled = ui_state.params.get("SunnylinkEnabled")
+    self._dashbox_enabled = ui_state.params.get("SunnylinkEnabled")
 
     items = self._initialize_items()
     self._scroller = Scroller(items, line_separator=False, spacing=0)
 
   def _initialize_items(self):
-    self._sunnylink_toggle = toggle_item_sp(
-      title=tr("Enable sunnylink"),
-      description=tr("This is the master switch, it will allow you to cutoff any sunnylink requests should you want to do that."),
+    self._dashbox_toggle = toggle_item_sp(
+      title=tr("Enable DashBox"),
+      description=tr("This is the master switch, it will allow you to cutoff any DashBox requests should you want to do that."),
       param="SunnylinkEnabled",
-      callback=self._sunnylink_toggle_callback
+      callback=self._dashbox_toggle_callback
     )
 
-    self._sunnylink_description = SunnylinkDescriptionItem()
-    self._sunnylink_description.set_visible(False)
+    self._dashbox_description = SunnylinkDescriptionItem()
+    self._dashbox_description.set_visible(False)
 
     self._sponsor_btn = button_item_sp(
       title=tr("Sponsor Status"),
       button_text=tr("SPONSOR"),
       description=tr(
-        "Become a sponsor of sunnypilot to get early access to sunnylink features when they become available."),
+        "Become a sponsor of sunnypilot to get early access to DashBox features when they become available."),
       callback=lambda: self._handle_pair_btn(False)
     )
     self._pair_btn = button_item_sp(
       title=tr("Pair GitHub Account"),
       button_text=tr("Not Paired"),
       description=tr(
-        "Pair your GitHub account to grant your device sponsor benefits, including API access on sunnylink."),
+        "Pair your GitHub account to grant your device sponsor benefits, including API access on DashBox."),
       callback=lambda: self._handle_pair_btn(True)
     )
-    self._sunnylink_uploader_toggle = toggle_item_sp(
-      title=tr("Enable sunnylink uploader (infrastructure test)"),
-      description=tr("Enable sunnylink uploader to allow sunnypilot to upload your driving data to sunnypilot servers. ") +
+    self._dashbox_uploader_toggle = toggle_item_sp(
+      title=tr("Enable DashBox uploader (infrastructure test)"),
+      description=tr("Enable DashBox uploader to allow sunnypilot to upload your driving data to sunnypilot servers. ") +
                   tr("(Only for highest tiers, and does NOT bring ANY benefit to you yet. We are just testing data volume.)"),
       param="EnableSunnylinkUploader"
     )
-    self._sunnylink_backup_restore_buttons = dual_button_item(
+    self._dashbox_backup_restore_buttons = dual_button_item(
       description="",
       left_text=tr("Backup Settings"),
       right_text=tr("Restore Settings"),
       left_callback=self._handle_backup_btn,
       right_callback=self._handle_restore_btn
     )
-    self._backup_btn: Button = self._sunnylink_backup_restore_buttons.action_item.left_button  # store for easy individual access
-    self._restore_btn: Button = self._sunnylink_backup_restore_buttons.action_item.right_button
+    self._backup_btn: Button = self._dashbox_backup_restore_buttons.action_item.left_button  # store for easy individual access
+    self._restore_btn: Button = self._dashbox_backup_restore_buttons.action_item.right_button
     self._backup_btn.set_button_style(ButtonStyle.NORMAL)
     self._restore_btn.set_button_style(ButtonStyle.PRIMARY)
 
     items = [
       SunnylinkHeader(),
       LineSeparator(),
-      self._sunnylink_toggle,
-      self._sunnylink_description,
+      self._dashbox_toggle,
+      self._dashbox_description,
       LineSeparator(),
       self._sponsor_btn,
       LineSeparator(),
       self._pair_btn,
       LineSeparator(),
-      self._sunnylink_uploader_toggle,
+      self._dashbox_uploader_toggle,
       LineSeparator(),
-      self._sunnylink_backup_restore_buttons
+      self._dashbox_backup_restore_buttons
     ]
     return items
 
   @staticmethod
   def _get_sunnylink_dongle_id() -> str:
-    return ui_state.params.get("SunnylinkDongleId") or tr("N/A")
+    return Params().get("DongleId") or tr("N/A")
 
   def _handle_pair_btn(self, sponsor_pairing: bool = False):
-    sunnylink_dongle_id = self._get_sunnylink_dongle_id()
-    if sunnylink_dongle_id == UNREGISTERED_SUNNYLINK_DONGLE_ID:
-      gui_app.push_widget(alert_dialog(message=tr("sunnylink Dongle ID not found. ") +
-                                                     tr("This may be due to weak internet connection or sunnylink registration issue. ") +
+    dashbox_dongle_id = self._get_sunnylink_dongle_id()
+    if dashbox_dongle_id == UNREGISTERED_SUNNYLINK_DONGLE_ID:
+      gui_app.push_widget(alert_dialog(message=tr("DashBox Dongle ID not found. ") +
+                                                     tr("This may be due to weak internet connection or DashBox registration issue. ") +
                                                      tr("Please reboot and try again.")))
-    elif not self._sunnylink_pairing_dialog:
-      self._sunnylink_pairing_dialog = SunnylinkPairingDialog(sponsor_pairing)
-      gui_app.push_widget(self._sunnylink_pairing_dialog)
+    elif not self._dashbox_pairing_dialog:
+      self._dashbox_pairing_dialog = DashboxPairingDialog()
+      gui_app.push_widget(self._dashbox_pairing_dialog)
 
   def _handle_backup_btn(self):
     backup_dialog = ConfirmDialog(text=tr("Are you sure you want to backup your current sunnypilot settings?"), confirm_text="Backup",
@@ -246,12 +248,12 @@ class SunnylinkLayout(Widget):
       ui_state.params.put("BackupManager_RestoreVersion", "latest")
 
   def handle_backup_restore_progress(self):
-    sunnylink_backup_manager = ui_state.sm["backupManagerSP"]
+    dashbox_backup_manager = ui_state.sm["backupManagerSP"]
 
-    backup_status = sunnylink_backup_manager.backupStatus
-    restore_status = sunnylink_backup_manager.restoreStatus
-    backup_progress = sunnylink_backup_manager.backupProgress
-    restore_progress = sunnylink_backup_manager.restoreProgress
+    backup_status = dashbox_backup_manager.backupStatus
+    restore_status = dashbox_backup_manager.restoreStatus
+    backup_progress = dashbox_backup_manager.backupProgress
+    restore_progress = dashbox_backup_manager.restoreProgress
 
     if self._backup_in_progress:
       self._restore_btn.set_enabled(False)
@@ -297,13 +299,13 @@ class SunnylinkLayout(Widget):
         gui_app.push_widget(dialog)
 
     else:
-      can_enable = self._sunnylink_enabled and not ui_state.is_onroad()
+      can_enable = self._dashbox_enabled and not ui_state.is_onroad()
       self._backup_btn.set_enabled(can_enable)
       self._backup_btn.set_text(tr("Backup Settings"))
       self._restore_btn.set_enabled(can_enable)
       self._restore_btn.set_text(tr("Restore Settings"))
 
-  def _sunnylink_toggle_callback(self, state: bool):
+  def _dashbox_toggle_callback(self, state: bool):
     sl_consent: bool = ui_state.params.get("CompletedSunnylinkConsentVersion") == sunnylink_consent_version
     sl_enabled: bool = ui_state.params.get_bool("SunnylinkEnabled")
 
@@ -322,35 +324,35 @@ class SunnylinkLayout(Widget):
   def _update_description(self, state: bool):
     if state:
       description = tr(
-        "Welcome back!! We're excited to see you've enabled sunnylink again!")
+        "Welcome back!! We're excited to see you've enabled DashBox again!")
       color = rl.Color(0, 255, 0, 255)  # Green
     else:
-      description = ("😢 " + tr("Not going to lie, it's sad to see you disabled sunnylink") +
+      description = ("😢 " + tr("Not going to lie, it's sad to see you disabled DashBox") +
                      tr(", but we'll be here when you're ready to come back."))
       color = rl.Color(255, 165, 0, 255)  # Orange
-    self._sunnylink_description.set_text(description)
-    self._sunnylink_description.set_color(color)
-    self._sunnylink_description.set_visible(True)
-    self._sunnylink_toggle.show_description(False)
+    self._dashbox_description.set_text(description)
+    self._dashbox_description.set_color(color)
+    self._dashbox_description.set_visible(True)
+    self._dashbox_toggle.show_description(False)
 
   def _update_state(self):
     super()._update_state()
-    self._sunnylink_enabled = ui_state.params.get_bool("SunnylinkEnabled")
-    self._sunnylink_toggle.set_right_value(tr("Dongle ID") + ": " + self._get_sunnylink_dongle_id())
-    self._sunnylink_toggle.action_item.set_enabled(not ui_state.is_onroad())
-    self._sunnylink_toggle.action_item.set_state(self._sunnylink_enabled)
-    self._sunnylink_uploader_toggle.action_item.set_enabled(self._sunnylink_enabled)
+    self._dashbox_enabled = ui_state.params.get_bool("SunnylinkEnabled")
+    self._dashbox_toggle.set_right_value(tr("Dongle ID") + ": " + self._get_sunnylink_dongle_id())
+    self._dashbox_toggle.action_item.set_enabled(not ui_state.is_onroad())
+    self._dashbox_toggle.action_item.set_state(self._dashbox_enabled)
+    self._dashbox_uploader_toggle.action_item.set_enabled(self._dashbox_enabled)
     self.handle_backup_restore_progress()
 
     sponsor_btn_text = tr("THANKS ♥") if ui_state.sunnylink_state.is_sponsor() else tr("SPONSOR")
     tier_name = ui_state.sunnylink_state.get_sponsor_tier().name.capitalize() or tr("Not Sponsor")
     self._sponsor_btn.action_item.set_text(sponsor_btn_text)
     self._sponsor_btn.action_item.set_value(tier_name, ui_state.sunnylink_state.get_sponsor_tier_color())
-    self._sponsor_btn.action_item.set_enabled(self._sunnylink_enabled)
+    self._sponsor_btn.action_item.set_enabled(self._dashbox_enabled)
 
     pair_btn_text = tr("Paired") if ui_state.sunnylink_state.is_paired() else tr("Not Paired")
     self._pair_btn.action_item.set_text(pair_btn_text)
-    self._pair_btn.action_item.set_enabled(self._sunnylink_enabled)
+    self._pair_btn.action_item.set_enabled(self._dashbox_enabled)
 
   def _render(self, rect):
     self._scroller.render(rect)
@@ -359,7 +361,7 @@ class SunnylinkLayout(Widget):
     super().show_event()
     ui_state.sunnylink_state.set_settings_open(True)
     self._scroller.show_event()
-    self._sunnylink_description.set_visible(False)
+    self._dashbox_description.set_visible(False)
 
   def hide_event(self):
     super().hide_event()

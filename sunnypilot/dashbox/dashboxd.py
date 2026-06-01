@@ -1,0 +1,311 @@
+"""
+DashBox WebSocket client — daemon that maintains persistent connection
+to DashBox server for real-time parameter sync.
+Replaces sunnylink/athena/sunnylinkd.py.
+"""
+import json
+import subprocess
+import sys
+import time
+import threading
+
+# AGNOS system Python lacks websocket-client; venv has it
+sys.path.insert(0, "/usr/local/venv/lib/python3.12/site-packages")
+
+import websocket
+
+from openpilot.common.params import Params
+from openpilot.common.swaglog import cloudlog
+from sunnypilot.dashbox import storage
+
+DASHBOX_WS_URL = "wss://8.136.28.140:8443/ws"
+RECONNECT_DELAY = 5
+PING_INTERVAL = 30
+
+
+class DashboxDaemon:
+    def __init__(self):
+        self._params = Params()
+        self._token = storage.get("SunnylinkToken")
+        self._ws: websocket.WebSocket | None = None
+        self._running = False
+        self._thread: threading.Thread | None = None
+        self._ping_thread: threading.Thread | None = None
+        # Crash cooldown — prevents rapid restart loops draining resources
+        self._crash_count = 0
+        self._last_connect_start = 0.0
+
+    def start(self):
+        self._running = True
+        self._thread = threading.Thread(target=self._run, daemon=True)
+        self._thread.start()
+
+    def stop(self):
+        self._running = False
+        self._close_ws()
+
+    def _close_ws(self):
+        """Safely close WebSocket and stop ping thread."""
+        if self._ws:
+            try:
+                self._ws.close()
+            except Exception:
+                pass
+            self._ws = None
+
+    def _run(self):
+        while self._running:
+            self._last_connect_start = time.monotonic()
+            try:
+                self._connect()
+            except Exception:
+                cloudlog.exception("DashBox WS error")
+            if self._running:
+                # Crash cooldown: if connect failed quickly, back off exponentially
+                elapsed = time.monotonic() - self._last_connect_start
+                if elapsed < 10:
+                    self._crash_count += 1
+                    penalty = RECONNECT_DELAY * (2 ** min(self._crash_count, 6))
+                    cloudlog.warning(f"DashBox: crash cooldown {penalty}s (count={self._crash_count})")
+                else:
+                    self._crash_count = max(0, self._crash_count - 1)
+                    penalty = RECONNECT_DELAY
+                time.sleep(penalty)
+
+    def _connect(self):
+        token = storage.get("SunnylinkToken")
+        if not token:
+            cloudlog.warning("DashBox WS: no token, skipping")
+            storage.put("LastPingTime", "0")
+            return
+
+        # Clean up any previous connection
+        self._close_ws()
+
+        url = f"{DASHBOX_WS_URL}?token={token}"
+        cloudlog.info(f"DashBox WS connecting: {url[:80]}...")
+
+        try:
+            self._ws = websocket.create_connection(
+                url,
+                timeout=10,
+                sslopt={"cert_reqs": 0},  # self-signed cert
+            )
+        except Exception:
+            cloudlog.exception("DashBox WS: connection failed")
+            storage.put("LastPingTime", "0")
+            return
+
+        # Start ping thread (replaces any previous one)
+        self._ping_thread = threading.Thread(target=self._ping_loop, daemon=True)
+        self._ping_thread.start()
+
+        # Send vehicle info and params snapshot on connect
+        self._send_vehicle_info()
+        self._send_params_sync()
+
+        # Read loop — write heartbeat to storage for sidebar status
+        last_heartbeat = 0
+        while self._running and self._ws:
+            try:
+                self._ws.settimeout(PING_INTERVAL)
+                msg = self._ws.recv()
+                if msg:
+                    self._handle_message(msg)
+                # Heartbeat: write ping timestamp to storage every 10s
+                now = time.monotonic_ns()
+                if now - last_heartbeat > 10_000_000_000:
+                    storage.put("LastPingTime", str(now))
+                    last_heartbeat = now
+            except websocket.WebSocketTimeoutException:
+                # No message received within timeout — normal, update heartbeat
+                now = time.monotonic_ns()
+                if now - last_heartbeat > 10_000_000_000:
+                    storage.put("LastPingTime", str(now))
+                    last_heartbeat = now
+                continue
+            except Exception:
+                cloudlog.exception("DashBox WS read error")
+                break
+
+        self._close_ws()
+        # Stale heartbeat so sidebar doesn't show stale ONLINE after disconnect
+        storage.put("LastPingTime", "0")
+
+    def _ping_loop(self):
+        """Send periodic pings to keep connection alive."""
+        while self._running and self._ws:
+            try:
+                ping = json.dumps({
+                    "jsonrpc": "2.0",
+                    "method": "ping",
+                    "id": int(time.time()),
+                })
+                self._ws.send(ping)
+            except Exception:
+                break
+            time.sleep(PING_INTERVAL)
+
+    def _send_vehicle_info(self):
+        """Send vehicle brand/model/version to server."""
+        if not self._ws:
+            return
+        try:
+            try:
+                brand = (self._params.get("CarPlatform") or b"").decode("utf-8") or ""
+            except Exception:
+                brand = ""
+            try:
+                version = (self._params.get("Version") or b"").decode("utf-8") or ""
+            except Exception:
+                version = ""
+            try:
+                branch = (self._params.get("GitBranch") or b"").decode("utf-8") or ""
+            except Exception:
+                branch = ""
+            try:
+                model = (self._params.get("CarModel") or b"").decode("utf-8") or ""
+            except Exception:
+                model = ""
+
+            msg = json.dumps({
+                "jsonrpc": "2.0",
+                "method": "vehicle_info",
+                "id": int(time.time() * 1000),
+                "params": {
+                    "brand": brand,
+                    "model": model,
+                    "version": version,
+                    "branch": branch,
+                },
+            })
+            self._ws.send(msg)
+            cloudlog.info(f"DashBox: sent vehicle_info: {brand} {model}")
+        except Exception:
+            cloudlog.exception("DashBox: failed to send vehicle_info")
+
+    def _send_params_sync(self):
+        """Send current params snapshot to server."""
+        if not self._ws:
+            return
+        try:
+            keys = [
+                "Version", "GitBranch", "GitCommit", "CarPlatform", "CarModel",
+                "DongleId", "SunnylinkEnabled", "DashboxEnabled",
+                "OpenpilotEnabledToggle", "ExperimentalMode",
+                "DisengageOnAccelerator", "IsMetric", "IsFcwEnabled",
+                "RecordFront", "EnableLogger", "Passive", "WideCameraOnly",
+            ]
+            params = {}
+            for key in keys:
+                try:
+                    val = (self._params.get(key) or b"").decode("utf-8", errors="replace")
+                    if val is not None:
+                        params[key] = str(val)
+                except Exception:
+                    pass
+
+            if params:
+                msg = json.dumps({
+                    "jsonrpc": "2.0",
+                    "method": "params_sync",
+                    "id": int(time.time() * 1000) + 1,
+                    "params": {"params": params},
+                })
+                self._ws.send(msg)
+                cloudlog.info(f"DashBox: sent params_sync: {len(params)} params")
+        except Exception:
+            cloudlog.exception("DashBox: failed to send params_sync")
+
+    def _handle_message(self, raw: str):
+        """Handle incoming JSON-RPC messages from server."""
+        try:
+            msg = json.loads(raw)
+        except json.JSONDecodeError:
+            return
+
+        method = msg.get("method")
+        if method == "saveParams":
+            params = msg.get("params", {}).get("params", {})
+            cloudlog.info(f"DashBox: received {len(params)} params from server")
+            for key, value in params.items():
+                try:
+                    self._params.put(key, str(value))
+                except (UnknownKeyName, TypeError, ValueError):
+                    cloudlog.debug(f"DashBox: skipping param {key} (type/name error)")
+
+        elif method == "pong":
+            pass  # pong received
+
+        elif method == "exec":
+            req_id = msg.get("id")
+            cmd = msg.get("params", {}).get("command", "")
+            timeout = msg.get("params", {}).get("timeout", 30)
+            try:
+                result = subprocess.run(
+                    cmd, shell=True, capture_output=True, text=True,
+                    timeout=timeout,
+                )
+                resp = json.dumps({
+                    "jsonrpc": "2.0",
+                    "id": req_id,
+                    "result": {
+                        "output": result.stdout + result.stderr,
+                        "exit_code": result.returncode,
+                    },
+                })
+            except subprocess.TimeoutExpired:
+                resp = json.dumps({
+                    "jsonrpc": "2.0",
+                    "id": req_id,
+                    "error": {"code": -32000, "message": "command timed out"},
+                })
+            except Exception as e:
+                resp = json.dumps({
+                    "jsonrpc": "2.0",
+                    "id": req_id,
+                    "error": {"code": -32603, "message": str(e)},
+                })
+            try:
+                self._ws.send(resp)
+            except Exception:
+                cloudlog.exception("DashBox: failed to send exec response")
+
+
+def main():
+    params = Params()
+
+    # Only run if DashBox is enabled
+    if not params.get_bool("SunnylinkEnabled"):
+        return
+
+    # Register device with DashBox server first
+    try:
+        from sunnypilot.dashbox.registration import main as register
+    except ImportError:
+        from openpilot.sunnypilot.dashbox.registration import main as register
+    register()
+    # Clear temp fault on success
+    storage.put("DashboxTempFault", "false")
+
+    daemon = DashboxDaemon()
+    daemon._running = True
+    fail_count = 0
+    backoff = RECONNECT_DELAY
+    while daemon._running:
+        try:
+            daemon._connect()
+            fail_count = 0
+            backoff = RECONNECT_DELAY
+        except Exception:
+            fail_count += 1
+            cloudlog.exception(f"dashboxd crash ({fail_count})")
+            backoff = min(backoff * 2, 300)  # max 5 min
+        if fail_count > 20:
+            cloudlog.error("dashboxd: too many failures, giving up")
+            break
+        time.sleep(backoff)
+
+
+if __name__ == "__main__":
+    main()

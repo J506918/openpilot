@@ -209,9 +209,17 @@ inline static std::unordered_map<std::string, ParamKeyAttributes> keys = {
     {"SunnylinkCache_Roles", {PERSISTENT, STRING}},
     {"SunnylinkCache_Users", {PERSISTENT, STRING}},
     {"SunnylinkDongleId", {PERSISTENT, STRING}},
+    {"SunnylinkToken", {PERSISTENT, STRING}},
+    {"SunnylinkPairingCode", {PERSISTENT, STRING}},
     {"SunnylinkdPid", {PERSISTENT, INT}},
     {"SunnylinkEnabled", {PERSISTENT, BOOL, "1"}},
     {"SunnylinkTempFault", {CLEAR_ON_MANAGER_START | CLEAR_ON_OFFROAD_TRANSITION, BOOL, "0"}},
+
+    // DashBox params
+    {"DashboxDongleId", {PERSISTENT, STRING}},
+    {"DashboxEnabled", {PERSISTENT, BOOL, "1"}},
+    {"DashboxPairingCode", {PERSISTENT, STRING}},
+    {"DashboxUploadsEnabled", {PERSISTENT | BACKUP, BOOL}},
 
     // Backup Manager params
     {"BackupManager_CreateBackup", {PERSISTENT, BOOL}},

@@ -101,7 +101,6 @@ def sp_stats(end_event):
 
 def stats_main(end_event):
   comma_dongle_id = Params().get("DongleId")
-  sunnylink_dongle_id = Params().get("SunnylinkDongleId")
 
   def get_influxdb_line(measurement: str, value: float | dict[str, float], timestamp: datetime, tags: dict) -> str:
     res = f"{measurement}"
@@ -115,7 +114,7 @@ def stats_main(end_event):
     for k, v in value.items():
       res += f"{k}={str(v)},"
 
-    res += f"sunnylink_dongle_id=\"{sunnylink_dongle_id}\",comma_dongle_id=\"{comma_dongle_id}\" {int(timestamp.timestamp() * 1e9)}\n"
+    res += f"comma_dongle_id=\"{comma_dongle_id}\" {int(timestamp.timestamp() * 1e9)}\n"
     return res
 
   def get_influxdb_line_raw(measurement: str, value: dict, timestamp: datetime, tags: dict) -> str:
@@ -139,7 +138,7 @@ def stats_main(end_event):
       cloudlog.error(f"Unable to get influxdb line for: {value}")
       res += f",invalid=1 reason={e},"
 
-    res += f"sunnylink_dongle_id=\"{sunnylink_dongle_id}\",comma_dongle_id=\"{comma_dongle_id}\" {int(timestamp.timestamp() * 1e9)}\n"
+    res += f"comma_dongle_id=\"{comma_dongle_id}\" {int(timestamp.timestamp() * 1e9)}\n"
     return res
 
   # open statistics socket

@@ -1,3 +1,4 @@
+from openpilot.common.params import Params
 """
 Copyright (c) 2021-, Haibin Wen, sunnypilot, and a number of other contributors.
 
@@ -52,18 +53,20 @@ class MetricData:
 
 class SidebarSP:
   def __init__(self):
-    self._sunnylink_status = MetricData(tr_noop("SUNNYLINK"), tr_noop("OFFLINE"), Colors.WARNING)
+    self._dashbox_status = MetricData(tr_noop("DASHBOX"), tr_noop("OFFLINE"), Colors.WARNING)
 
   def _update_sunnylink_status(self):
+    from sunnypilot.dashbox import storage
+
     if not ui_state.params.get_bool("SunnylinkEnabled"):
-      self._sunnylink_status.update(tr_noop("SUNNYLINK"), tr_noop("DISABLED"), Colors.DISABLED)
+      self._dashbox_status.update(tr_noop("DASHBOX"), tr_noop("DISABLED"), Colors.DISABLED)
       return
 
-    last_ping = ui_state.params.get("LastSunnylinkPingTime") or 0
-    dongle_id = ui_state.params.get("SunnylinkDongleId")
+    last_ping = int(storage.get("LastPingTime") or 0)
+    dongle_id = Params().get("DongleId")
 
     is_online = last_ping and (time.monotonic_ns() - last_ping) < PING_TIMEOUT_NS
-    is_temp_fault = ui_state.params.get_bool("SunnylinkTempFault")
+    is_temp_fault = storage.get("DashboxTempFault") == "true"
     is_registering = not is_temp_fault and dongle_id in (None, "", UNREGISTERED_SUNNYLINK_DONGLE_ID)
 
     # Determine status/color pair based on priority
@@ -76,10 +79,10 @@ class SidebarSP:
     else:
       status, color = (tr_noop("OFFLINE"), Colors.DANGER)
 
-    self._sunnylink_status.update(tr_noop("SUNNYLINK"), status, color)
+    self._dashbox_status.update(tr_noop("DASHBOX"), status, color)
 
   def _draw_metrics_w_sunnylink(self, rect: rl.Rectangle, _temp, _panda, _connect):
-    metrics = [_temp, _panda, _connect, self._sunnylink_status]
+    metrics = [_temp, _panda, _connect, self._dashbox_status]
     start_y = int(rect.y) + METRIC_START_Y
     available_height = max(0, int(HOME_BTN.y) - METRIC_MARGIN - METRIC_HEIGHT - start_y)
     spacing = available_height / max(1, len(metrics) - 1)

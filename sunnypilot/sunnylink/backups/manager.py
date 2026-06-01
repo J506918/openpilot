@@ -34,7 +34,7 @@ class BackupManagerSP:
 
   def __init__(self):
     self.params = Params()
-    self.device_id = self.params.get("SunnylinkDongleId")
+    self.device_id = self.params.get("DongleId")
     self.api = SunnylinkApi(self.device_id)
     self.pm = messaging.PubMaster(["backupManagerSP"])
 

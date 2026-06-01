@@ -247,7 +247,7 @@ def main(exit_event: threading.Event | None = None) -> None:
   clear_locks(Paths.log_root())
 
   params = Params()
-  dongle_id = params.get("SunnylinkDongleId")
+  dongle_id = params.get("DongleId")
 
   if dongle_id is None:
     cloudlog.info("uploader missing dongle_id")

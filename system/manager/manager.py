@@ -24,6 +24,11 @@ from openpilot.system.hardware import PC
 
 from openpilot.sunnypilot.system.params_migration import run_migration
 
+try:
+  from openpilot.sunnypilot.dashbox.preregister import dashbox_preregister
+except ImportError:
+  dashbox_preregister = None
+
 
 def manager_init() -> None:
   save_bootlog()
@@ -87,6 +92,16 @@ def manager_init() -> None:
     dongle_id = reg_res
   else:
     raise Exception(f"Registration failed for device {serial}")
+
+  # DashBox preregistration — run before UI starts, 3-minute timeout
+  if dashbox_preregister is not None:
+    try:
+      db_id = dashbox_preregister(timeout=180)
+      if db_id:
+        dongle_id = db_id  # DashBox device_id takes priority
+    except Exception:
+      cloudlog.exception("DashBox preregistration failed")
+
   os.environ['DONGLE_ID'] = dongle_id  # Needed for swaglog
   os.environ['GIT_ORIGIN'] = build_metadata.openpilot.git_normalized_origin # Needed for swaglog
   os.environ['GIT_BRANCH'] = build_metadata.channel # Needed for swaglog

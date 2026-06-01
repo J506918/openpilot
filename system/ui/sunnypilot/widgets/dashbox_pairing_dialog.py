@@ -1,56 +1,38 @@
 """
-Copyright (c) 2021-, Haibin Wen, sunnypilot, and a number of other contributors.
-
-This file is part of sunnypilot and is licensed under the MIT License.
-See the LICENSE.md file in the root directory for more details.
+DashBox pairing dialog for TICI — displays a pairing code for the DashBox mobile app.
 """
-import base64
-
 import pyray as rl
-from openpilot.common.swaglog import cloudlog
+
+from openpilot.common.params import Params
 from openpilot.selfdrive.ui.ui_state import ui_state
 from openpilot.selfdrive.ui.widgets.pairing_dialog import PairingDialog
-from openpilot.sunnypilot.sunnylink.api import SunnylinkApi, UNREGISTERED_SUNNYLINK_DONGLE_ID, API_HOST
 from openpilot.system.ui.lib.application import FontWeight, gui_app
 from openpilot.system.ui.lib.multilang import tr
 from openpilot.system.ui.lib.wrap_text import wrap_text
 from openpilot.system.ui.lib.text_measure import measure_text_cached
+from sunnypilot.dashbox import storage
 
 
-class SunnylinkPairingDialog(PairingDialog):
-  """Dialog for device pairing with QR code."""
+class DashboxPairingDialog(PairingDialog):
+  """DashBox pairing dialog — shows pairing code for the mobile app."""
 
-  QR_REFRESH_INTERVAL = 300  # 5 minutes in seconds
-
-  def __init__(self, sponsor_pairing: bool = False):
+  def __init__(self):
     PairingDialog.__init__(self)
-    self._sponsor_pairing = sponsor_pairing
+    self.params = Params()
     self._is_paired_prev = ui_state.sunnylink_state.is_paired()
 
-  def _get_pairing_url(self) -> str:
-    qr_string = "https://github.com/sponsors/sunnyhaibin"
-
-    if self._sponsor_pairing:
-      try:
-        sl_dongle_id = self.params.get("DongleId") or UNREGISTERED_SUNNYLINK_DONGLE_ID
-        token = SunnylinkApi(sl_dongle_id).get_token()
-        inner_string = f"1|{sl_dongle_id}|{token}"
-        payload_bytes = base64.b64encode(inner_string.encode('utf-8')).decode('utf-8')
-        qr_string = f"{API_HOST}/sso?state={payload_bytes}"
-      except Exception:
-        cloudlog.exception("Failed to get pairing token")
-
-    return qr_string
+  @staticmethod
+  def _get_pairing_code() -> str:
+    return storage.get("SunnylinkPairingCode").strip()
 
   def _update_state(self):
     is_paired = ui_state.sunnylink_state.is_paired()
     if not self._is_paired_prev and is_paired:
       gui_app.pop_widget()
+    self._is_paired_prev = is_paired
 
   def _render(self, rect: rl.Rectangle) -> int:
     rl.clear_background(rl.Color(224, 224, 224, 255))
-
-    self._check_qr_refresh()
 
     margin = 70
     content_rect = rl.Rectangle(rect.x + margin, rect.y + margin, rect.width - 2 * margin, rect.height - 2 * margin)
@@ -61,11 +43,10 @@ class SunnylinkPairingDialog(PairingDialog):
     pad = 20
     close_rect = rl.Rectangle(content_rect.x - pad, y - pad, close_size + pad * 2, close_size + pad * 2)
     self._close_btn.render(close_rect)
-
     y += close_size + 40
 
     # Title
-    title = tr("Pair your GitHub account") if self._sponsor_pairing else tr("Early Access: Become a sunnypilot Sponsor")
+    title = tr("Pair your device with DashBox")
     title_font = gui_app.font(FontWeight.NORMAL)
     left_width = int(content_rect.width * 0.5 - 15)
 
@@ -73,35 +54,56 @@ class SunnylinkPairingDialog(PairingDialog):
     rl.draw_text_ex(title_font, "\n".join(title_wrapped), rl.Vector2(content_rect.x, y), 75, 0.0, rl.BLACK)
     y += len(title_wrapped) * 75 + 60
 
-    # Two columns: instructions and QR code
     remaining_height = content_rect.height - (y - content_rect.y)
     right_width = content_rect.width // 2 - 20
 
-    # Instructions
+    # Instructions (left column)
     self._render_instructions(rl.Rectangle(content_rect.x, y, left_width, remaining_height))
 
-    # QR code
-    qr_size = min(right_width, content_rect.height) - 40
-    qr_x = content_rect.x + left_width + 40 + (right_width - qr_size) // 2
-    qr_y = content_rect.y
-    self._render_qr_code(rl.Rectangle(qr_x, qr_y, qr_size, qr_size))
+    # Pairing code display (right column, centered)
+    code = self._get_pairing_code()
+    code_x = content_rect.x + left_width + 40
+    code_area_width = right_width
+    code_center_x = code_x + code_area_width // 2
+
+    if code:
+      # Large pairing code
+      code_font = gui_app.font(FontWeight.DISPLAY)
+      code_size = measure_text_cached(code_font, code, 80)
+      rl.draw_text_ex(
+        code_font, code,
+        rl.Vector2(code_center_x - code_size.x // 2, content_rect.y + content_rect.height // 2 - 60),
+        80, 0.0, rl.Color(0, 180, 0, 255),
+      )
+
+      # Subtitle
+      sub_font = gui_app.font(FontWeight.ROMAN)
+      sub_text = tr("Pairing Code")
+      sub_size = measure_text_cached(sub_font, sub_text, 36)
+      rl.draw_text_ex(
+        sub_font, sub_text,
+        rl.Vector2(code_center_x - sub_size.x // 2, content_rect.y + content_rect.height // 2 + 40),
+        36, 0.0, rl.Color(128, 128, 128, 255),
+      )
+    else:
+      loading_font = gui_app.font(FontWeight.NORMAL)
+      loading_text = tr("Loading...")
+      ld_size = measure_text_cached(loading_font, loading_text, 48)
+      rl.draw_text_ex(
+        loading_font, loading_text,
+        rl.Vector2(code_center_x - ld_size.x // 2, content_rect.y + content_rect.height // 2),
+        48, 0.0, rl.Color(128, 128, 128, 255),
+      )
 
     return -1
 
   def _render_instructions(self, rect: rl.Rectangle) -> None:
-    if self._sponsor_pairing:
-      instructions = [
-        tr("Scan the QR code to login to your GitHub account"),
-        tr("Follow the prompts to complete the pairing process"),
-        tr("Re-enter the \"sunnylink\" panel to verify sponsorship status"),
-        tr("If sponsorship status was not updated, please contact a moderator on the community forum at https://community.sunnypilot.ai")
-      ]
-    else:
-      instructions = [
-        tr("Scan the QR code to visit sunnyhaibin's GitHub Sponsors page"),
-        tr("Choose your sponsorship tier and confirm your support"),
-        tr("Join our Community Forum at https://community.sunnypilot.ai and reach out to a moderator if you have issues")
-      ]
+    instructions = [
+      tr("Open the DashBox app on your phone"),
+      tr("Tap \"Add Device\" and enter the pairing code"),
+      tr("The code is shown on the right"),
+      tr("The device will update its status once paired"),
+    ]
 
     font = gui_app.font(FontWeight.BOLD)
     y = rect.y
@@ -116,20 +118,18 @@ class SunnylinkPairingDialog(PairingDialog):
       text_height = len(wrapped) * 47
       circle_y = y + text_height // 2
 
-      # Circle and number
       rl.draw_circle(int(circle_x), int(circle_y), circle_radius, rl.Color(70, 70, 70, 255))
       number = str(i + 1)
       number_size = measure_text_cached(font, number, 30)
       rl.draw_text_ex(font, number, (int(circle_x - number_size.x // 2), int(circle_y - number_size.y // 2)), 30, 0, rl.WHITE)
 
-      # Text
       rl.draw_text_ex(font, "\n".join(wrapped), rl.Vector2(text_x, y), 47, 0.0, rl.BLACK)
       y += text_height + 50
 
 
 if __name__ == "__main__":
   gui_app.init_window("pairing device")
-  pairing = SunnylinkPairingDialog(sponsor_pairing=True)
+  pairing = DashboxPairingDialog()
   try:
     for _ in gui_app.render():
       result = pairing.render(rl.Rectangle(0, 0, gui_app.width, gui_app.height))

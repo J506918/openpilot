@@ -32,9 +32,9 @@ class SettingsLayoutSP(OP.SettingsLayout):
                                                 BIG_ICON_SIZE)
     self.icon_offroad_slider = gui_app.texture("icons_mici/settings/device/lkas.png", BIG_ICON_SIZE, BIG_ICON_SIZE)
 
-    sunnylink_panel = SunnylinkLayoutMici(back_callback=gui_app.pop_widget)
-    sunnylink_btn = SettingsBigButton(tr("sunnylink"), "", gui_app.texture("icons_mici/settings/developer/ssh.png", 55, 55))
-    sunnylink_btn.set_click_callback(lambda: gui_app.push_widget(sunnylink_panel))
+    dashbox_panel = SunnylinkLayoutMici(back_callback=gui_app.pop_widget)
+    dashbox_btn = SettingsBigButton(tr("DashBox"), "", gui_app.texture("icons_mici/settings/developer/ssh.png", 55, 55))
+    dashbox_btn.set_click_callback(lambda: gui_app.push_widget(dashbox_panel))
 
     models_panel = ModelsLayoutMici(back_callback=gui_app.pop_widget)
     models_btn = SettingsBigButton(tr("models"), "", gui_app.texture("../../sunnypilot/selfdrive/assets/offroad/icon_models.png", ICON_SIZE, ICON_SIZE))
@@ -56,7 +56,7 @@ class SettingsLayoutSP(OP.SettingsLayout):
 
     items = self._scroller._items.copy()
 
-    items.insert(1, sunnylink_btn)
+    items.insert(1, dashbox_btn)
     items.insert(2, models_btn)
 
     # front slots (only one ever visible at a time): exit-always-offroad, then enable-onroad

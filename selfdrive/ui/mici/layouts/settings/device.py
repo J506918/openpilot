@@ -20,6 +20,7 @@ from openpilot.selfdrive.ui.ui_state import device, ui_state
 from openpilot.system.ui.widgets.label import UnifiedLabel
 from openpilot.system.ui.widgets.html_render import HtmlModal, HtmlRenderer
 from openpilot.system.athena.registration import UNREGISTERED_DONGLE_ID
+from sunnypilot.dashbox import storage
 
 
 class ReviewTermsPage(TermsPage, NavScroller):
@@ -101,7 +102,7 @@ class DeviceInfoLayoutMici(Widget):
     subheader_color = rl.Color(255, 255, 255, int(255 * 0.9 * 0.65))
     max_width = int(self._rect.width - 20)
     self._dongle_id_label = UnifiedLabel("device ID", 48, max_width=max_width, font_weight=FontWeight.DISPLAY, wrap_text=False)
-    self._dongle_id_text_label = UnifiedLabel(params.get("DongleId") or 'N/A', 32, max_width=max_width, text_color=subheader_color,
+    self._dongle_id_text_label = UnifiedLabel(Params().get("DongleId") or 'N/A', 32, max_width=max_width, text_color=subheader_color,
                                               font_weight=FontWeight.ROMAN, wrap_text=False)
 
     self._serial_number_label = UnifiedLabel("serial", 48, max_width=max_width, font_weight=FontWeight.DISPLAY, wrap_text=False)
@@ -157,7 +158,7 @@ class PairBigButton(BigButton):
     dlg: BigDialog | PairingDialog
     if not system_time_valid():
       dlg = BigDialog("", tr("Please connect to Wi-Fi to complete initial pairing."))
-    elif UNREGISTERED_DONGLE_ID == (ui_state.params.get("DongleId") or UNREGISTERED_DONGLE_ID):
+    elif UNREGISTERED_DONGLE_ID == (Params().get("DongleId") or UNREGISTERED_DONGLE_ID):
       dlg = BigDialog("", tr("Device must be registered with the comma.ai backend to pair."))
     else:
       dlg = PairingDialog()
