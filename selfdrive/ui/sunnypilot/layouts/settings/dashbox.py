@@ -130,9 +130,11 @@ class DashBoxLayout(Widget):
     did = self._dongle_id()
     if did == tr("N/A") or did == UNREGISTERED_DONGLE_ID:
       return  # no device ID yet
-    if not self._pairing_dialog:
-      self._pairing_dialog = DashboxPairingDialog()
-      gui_app.push_widget(self._pairing_dialog)
+    # If dialog already showing, skip; if dismissed, allow re-open
+    if self._pairing_dialog and not self._pairing_dialog.is_dismissing:
+      return
+    self._pairing_dialog = DashboxPairingDialog()
+    gui_app.push_widget(self._pairing_dialog)
 
   def _refresh(self):
     self._device_id_btn.action_item.set_text(self._dongle_id())

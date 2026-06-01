@@ -1747,3 +1747,61 @@ msgstr "什么样的 USB-C 适配器比较好？任何快充手机或笔记本�
 
 msgid "Does it matter which software I run? Yes, only upstream openpilot (and particular forks) are able to be used for training."
 msgstr "运行哪个软件有影响吗？是的，只有上游 openpilot（及特定分支）可用于训练。"
+
+#: sunnypilot/dashbox sidebar + settings
+msgid "DASHBOX"
+msgstr "DashBox"
+
+msgid "Connection"
+msgstr "连接"
+
+msgid "DashBox server connection status."
+msgstr "DashBox 服务器连接状态。"
+
+msgid "Device ID"
+msgstr "设备 ID"
+
+msgid "Device management & remote access"
+msgstr "设备管理与远程访问"
+
+msgid "Enable DashBox"
+msgstr "启用 DashBox"
+
+msgid "Generate QR code to pair with DashBox mobile app."
+msgstr "生成配对码以绑定 DashBox 手机 App。"
+
+msgid "Loading..."
+msgstr "加载中..."
+
+msgid "Master switch for DashBox remote access and management."
+msgstr "DashBox 远程访问与管理总开关。"
+
+msgid "Open the DashBox app on your phone"
+msgstr "在手机上打开 DashBox App"
+
+msgid "Pair"
+msgstr "配对"
+
+msgid "Pairing Code"
+msgstr "配对码"
+
+msgid "Pair with DashBox"
+msgstr "与 DashBox 配对"
+
+msgid "Pair your device with DashBox"
+msgstr "将设备与 DashBox 配对"
+
+msgid "The code is shown on the right"
+msgstr "配对码显示在右侧"
+
+msgid "The device will update its status once paired"
+msgstr "配对成功后设备将更新状态"
+
+msgid "Tap \"Add Device\" and enter the pairing code"
+msgstr "点击\"添加设备\"并输入配对码"
+
+msgid "Unique identifier for this device."
+msgstr "此设备的唯一标识符。"
+
+msgid "Enter this code in the DashBox app:"
+msgstr "在 DashBox App 中输入此码："
