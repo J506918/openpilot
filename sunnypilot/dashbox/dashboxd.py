@@ -213,10 +213,28 @@ class DashboxDaemon:
         if not self._ws:
             return
         try:
+            # Prefer CarPlatformBundle JSON for richer info
             try:
-                brand = (self._params.get("CarPlatform") or b"").decode("utf-8") or ""
+                bundle_raw = self._params.get("CarPlatformBundle")
+                if bundle_raw:
+                    bundle = json.loads(bundle_raw.decode("utf-8"))
+                    brand = bundle.get("make", "") or bundle.get("brand", "")
+                    model = bundle.get("model", "")
+                else:
+                    brand = model = ""
             except Exception:
-                brand = ""
+                brand = model = ""
+            # Fall back to individual params if bundle was empty
+            if not brand:
+                try:
+                    brand = (self._params.get("CarPlatform") or b"").decode("utf-8") or ""
+                except Exception:
+                    brand = ""
+            if not model:
+                try:
+                    model = (self._params.get("CarModel") or b"").decode("utf-8") or ""
+                except Exception:
+                    model = ""
             try:
                 version = (self._params.get("Version") or b"").decode("utf-8") or ""
             except Exception:
@@ -225,10 +243,6 @@ class DashboxDaemon:
                 branch = (self._params.get("GitBranch") or b"").decode("utf-8") or ""
             except Exception:
                 branch = ""
-            try:
-                model = (self._params.get("CarModel") or b"").decode("utf-8") or ""
-            except Exception:
-                model = ""
             network_type = self._detect_network_type()
 
             msg = json.dumps({
