@@ -227,6 +227,7 @@ class DashboxDaemon:
 
         method = msg.get("method")
         if method == "saveParams":
+            req_id = msg.get("id")
             params = msg.get("params", {}).get("params", {})
             cloudlog.info(f"DashBox: received {len(params)} params from server")
             for key, value in params.items():
@@ -234,6 +235,16 @@ class DashboxDaemon:
                     self._params.put(key, str(value))
                 except (UnknownKeyName, TypeError, ValueError):
                     cloudlog.debug(f"DashBox: skipping param {key} (type/name error)")
+            # Send response so server RPC doesn't time out
+            if req_id is not None and self._ws:
+                try:
+                    self._ws.send(json.dumps({
+                        "jsonrpc": "2.0",
+                        "id": req_id,
+                        "result": {"status": "ok"},
+                    }))
+                except Exception:
+                    pass
 
         elif method == "getParams":
             req_id = msg.get("id")
