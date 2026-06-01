@@ -107,25 +107,17 @@ class DashboxDaemon:
         self._send_vehicle_info()
         self._send_params_sync()
 
-        # Read loop — write heartbeat to storage for sidebar status
-        last_heartbeat = 0
+        # Read loop — only update heartbeat when server actually responds
         while self._running and self._ws:
             try:
                 self._ws.settimeout(PING_INTERVAL)
                 msg = self._ws.recv()
                 if msg:
                     self._handle_message(msg)
-                # Heartbeat: write ping timestamp to storage every 10s
-                now = time.monotonic_ns()
-                if now - last_heartbeat > 10_000_000_000:
-                    storage.put("LastPingTime", str(now))
-                    last_heartbeat = now
+                    # Server responded — connection verified alive
+                    storage.put("LastPingTime", str(time.monotonic_ns()))
             except websocket.WebSocketTimeoutException:
-                # No message received within timeout — normal, update heartbeat
-                now = time.monotonic_ns()
-                if now - last_heartbeat > 10_000_000_000:
-                    storage.put("LastPingTime", str(now))
-                    last_heartbeat = now
+                # No message from server — let LastPingTime go stale naturally
                 continue
             except Exception:
                 cloudlog.exception("DashBox WS read error")
