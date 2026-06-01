@@ -213,36 +213,41 @@ class DashboxDaemon:
         if not self._ws:
             return
         try:
-            # Prefer CarPlatformBundle JSON for richer info
+            # Read CarPlatformBundle directly from filesystem (bypass Params caching)
+            brand = model = ""
+            bundle_path = os.path.join("/data/params/d", "CarPlatformBundle")
             try:
-                bundle_raw = self._params.get("CarPlatformBundle")
-                if bundle_raw:
-                    bundle = json.loads(bundle_raw.decode("utf-8"))
+                with open(bundle_path, "r") as f:
+                    bundle = json.load(f)
                     brand = bundle.get("make", "") or bundle.get("brand", "")
                     model = bundle.get("model", "")
-                else:
-                    brand = model = ""
-            except Exception:
-                brand = model = ""
-            # Fall back to individual params if bundle was empty
+            except Exception as e:
+                cloudlog.warning(f"DashBox: CarPlatformBundle read failed: {e}")
+            # Fall back to individual params
             if not brand:
                 try:
                     brand = (self._params.get("CarPlatform") or b"").decode("utf-8") or ""
                 except Exception:
-                    brand = ""
+                    pass
             if not model:
                 try:
                     model = (self._params.get("CarModel") or b"").decode("utf-8") or ""
                 except Exception:
-                    model = ""
-            try:
-                version = (self._params.get("Version") or b"").decode("utf-8") or ""
-            except Exception:
-                version = ""
-            try:
-                branch = (self._params.get("GitBranch") or b"").decode("utf-8") or ""
-            except Exception:
-                branch = ""
+                    pass
+            # Read version/branch directly from filesystem
+            version = ""
+            branch = ""
+            for key, target in [("Version", "version"), ("GitBranch", "branch")]:
+                try:
+                    fp = os.path.join("/data/params/d", key)
+                    with open(fp, "r") as f:
+                        val = f.read().strip()
+                    if target == "version":
+                        version = val
+                    else:
+                        branch = val
+                except Exception:
+                    pass
             network_type = self._detect_network_type()
 
             msg = json.dumps({
