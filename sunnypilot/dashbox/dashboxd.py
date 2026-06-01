@@ -4,6 +4,7 @@ to DashBox server for real-time parameter sync.
 Replaces sunnylink/athena/sunnylinkd.py.
 """
 import json
+import os
 import subprocess
 import sys
 import time
@@ -233,6 +234,36 @@ class DashboxDaemon:
                     self._params.put(key, str(value))
                 except (UnknownKeyName, TypeError, ValueError):
                     cloudlog.debug(f"DashBox: skipping param {key} (type/name error)")
+
+        elif method == "getParams":
+            req_id = msg.get("id")
+            try:
+                all_params = {}
+                params_dir = "/data/params/d"
+                if os.path.exists(params_dir):
+                    for f in os.listdir(params_dir):
+                        try:
+                            fp = os.path.join(params_dir, f)
+                            if os.path.isfile(fp):
+                                with open(fp) as fh:
+                                    all_params[f] = fh.read().strip()
+                        except Exception:
+                            pass
+                resp = json.dumps({
+                    "jsonrpc": "2.0",
+                    "id": req_id,
+                    "result": {"params": all_params},
+                })
+            except Exception as e:
+                resp = json.dumps({
+                    "jsonrpc": "2.0",
+                    "id": req_id,
+                    "error": {"code": -32603, "message": str(e)},
+                })
+            try:
+                self._ws.send(resp)
+            except Exception:
+                cloudlog.exception("DashBox: failed to send getParams response")
 
         elif method == "pong":
             pass  # pong received
