@@ -23,6 +23,17 @@ class ToggleSP(Toggle):
     if self.param_key:
       initial_state = self.params.get_bool(self.param_key)
     Toggle.__init__(self, initial_state, callback)
+    # Register for real-time App → UI refresh
+    if self.param_key:
+      from openpilot.system.ui.sunnypilot.dashbox_ui_notify import register
+      register(self.param_key, self)
+
+  def refresh_from_params(self):
+    """Called by dashbox_ui_notify when App changes this param."""
+    if self.param_key:
+      real = self.params.get_bool(self.param_key)
+      if real != self._state:
+        self.set_state(real)
 
   def set_rect(self, rect: rl.Rectangle):
     self._rect = rl.Rectangle(rect.x, rect.y, style.TOGGLE_WIDTH, style.TOGGLE_HEIGHT)

@@ -308,8 +308,9 @@ class DashboxDaemon:
             req_id = msg.get("id")
             params = msg.get("params", {}).get("params", {})
             cloudlog.info(f"DashBox: received {len(params)} params from server")
-            # Atomic write to params filesystem — avoids race with paramsd
+            # Atomic write to params filesystem + notify UI for real-time refresh
             params_dir = "/data/params/d"
+            changed_keys = []
             for key, value in params.items():
                 try:
                     fp = os.path.join(params_dir, key)
@@ -317,8 +318,18 @@ class DashboxDaemon:
                     with open(tmp, "w") as f:
                         f.write(str(value))
                     os.rename(tmp, fp)  # atomic on same filesystem
+                    changed_keys.append(key)
                 except Exception:
                     cloudlog.debug(f"DashBox: failed to write param {key}")
+            # Notify sunnypilot UI via Unix socket so widgets refresh
+            if changed_keys:
+                try:
+                    import socket as _sock
+                    _s = _sock.socket(_sock.AF_UNIX, _sock.SOCK_DGRAM)
+                    _s.sendto("\n".join(changed_keys).encode(), "/tmp/dashbox_ui.sock")
+                    _s.close()
+                except Exception:
+                    pass
             # Send response so server RPC doesn't time out
             if req_id is not None and self._ws:
                 try:

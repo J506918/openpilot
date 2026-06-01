@@ -58,11 +58,19 @@ class UIStateSP:
     self.torque_override_enabled: bool = False
     self._sp_initialized: bool = False
 
+    # DashBox real-time UI refresh via Unix socket
+    from openpilot.system.ui.sunnypilot.dashbox_ui_notify import init as _notify_init
+    _notify_init()
+
   def update(self) -> None:
     if self.dashbox_enabled:
       self.sunnylink_state.start()
     else:
       self.sunnylink_state.stop()
+
+    # Process pending DashBox widget refresh notifications
+    from openpilot.system.ui.sunnypilot.dashbox_ui_notify import process_pending
+    process_pending()
 
   def onroad_brightness_handle_alerts(self, _ui_state, alert):
     if _ui_state.sm.recv_frame["carState"] < _ui_state.started_frame:

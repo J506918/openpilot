@@ -47,6 +47,10 @@ class OptionControlSP(ItemAction):
       value = self.params.get(self.param_key, return_default=True)
       self.current_value = int(float(value) * 100.0) if self.use_float_scaling else int(value)
 
+    # Register for real-time App → UI refresh
+    from openpilot.system.ui.sunnypilot.dashbox_ui_notify import register
+    register(self.param_key, self)
+
     # Initialize font and button styles
     self._font = gui_app.font(FontWeight.MEDIUM)
 
@@ -73,6 +77,28 @@ class OptionControlSP(ItemAction):
       self.params.put(self.param_key, value)
     if self.on_value_changed:
       self.on_value_changed(value)
+
+  def refresh_from_params(self):
+    """Called by dashbox_ui_notify when App changes this param."""
+    val = self.params.get(self.param_key, return_default=True)
+    if self.value_map:
+      for key in self.value_map:
+        if self.value_map[key] == val:
+          new_val = int(key)
+          if new_val != self.current_value:
+            self.current_value = new_val
+          break
+    elif self.use_float_scaling:
+      real = int(float(val) * 100.0)
+      if real != self.current_value:
+        self.current_value = real
+    else:
+      try:
+        real = int(val)
+        if real != self.current_value:
+          self.current_value = real
+      except ValueError:
+        pass
 
   def get_displayed_value(self) -> str:
     """Get the displayed value, handling value mapping if present"""
