@@ -141,8 +141,35 @@ class DashboxDaemon:
                 break
             time.sleep(PING_INTERVAL)
 
+    @staticmethod
+    def _detect_network_type() -> str:
+        """Detect whether device is on WiFi or cellular by inspecting default route."""
+        try:
+            result = subprocess.run(
+                ["ip", "route", "get", "8.8.8.8"],
+                capture_output=True, text=True, timeout=3,
+            )
+            out = result.stdout.lower()
+            if "wlan" in out:
+                return "wifi"
+            if "rmnet" in out or "wwan" in out:
+                return "cellular"
+        except Exception:
+            pass
+        # Fallback: check wlan0 for an IPv4 address
+        try:
+            result = subprocess.run(
+                ["ip", "addr", "show", "wlan0"],
+                capture_output=True, text=True, timeout=3,
+            )
+            if "inet " in result.stdout:
+                return "wifi"
+        except Exception:
+            pass
+        return "unknown"
+
     def _send_vehicle_info(self):
-        """Send vehicle brand/model/version to server."""
+        """Send vehicle brand/model/version and network type to server."""
         if not self._ws:
             return
         try:
@@ -162,6 +189,7 @@ class DashboxDaemon:
                 model = (self._params.get("CarModel") or b"").decode("utf-8") or ""
             except Exception:
                 model = ""
+            network_type = self._detect_network_type()
 
             msg = json.dumps({
                 "jsonrpc": "2.0",
@@ -172,6 +200,7 @@ class DashboxDaemon:
                     "model": model,
                     "version": version,
                     "branch": branch,
+                    "network_type": network_type,
                 },
             })
             self._ws.send(msg)
@@ -329,22 +358,10 @@ def main():
     storage.put("DashboxTempFault", "false")
 
     daemon = DashboxDaemon()
-    daemon._running = True
-    fail_count = 0
-    backoff = RECONNECT_DELAY
-    while daemon._running:
-        try:
-            daemon._connect()
-            fail_count = 0
-            backoff = RECONNECT_DELAY
-        except Exception:
-            fail_count += 1
-            cloudlog.exception(f"dashboxd crash ({fail_count})")
-            backoff = min(backoff * 2, 300)  # max 5 min
-        if fail_count > 20:
-            cloudlog.error("dashboxd: too many failures, giving up")
-            break
-        time.sleep(backoff)
+    daemon.start()
+    # _thread is set by start() before returning; join blocks until stop()
+    if daemon._thread:
+        daemon._thread.join()
 
 
 if __name__ == "__main__":
