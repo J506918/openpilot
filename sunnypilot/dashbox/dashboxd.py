@@ -275,6 +275,8 @@ class DashboxDaemon:
                     }))
                 except Exception:
                     pass
+            # Sync updated params back so server can push to App
+            self._send_params_sync()
 
         elif method == "getParams":
             req_id = msg.get("id")
