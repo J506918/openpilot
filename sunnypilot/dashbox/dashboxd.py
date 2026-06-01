@@ -64,14 +64,15 @@ class DashboxDaemon:
             except Exception:
                 cloudlog.exception("DashBox WS error")
             if self._running:
-                # Crash cooldown: if connect failed quickly, back off exponentially
+                # Crash cooldown: if connect failed quickly, back off exponentially.
+                # Network switches are NOT crashes — reset count on successful connection.
                 elapsed = time.monotonic() - self._last_connect_start
-                if elapsed < 10:
+                if elapsed < 15:  # quick fail: crash or network not ready
                     self._crash_count += 1
-                    penalty = RECONNECT_DELAY * (2 ** min(self._crash_count, 6))
+                    penalty = RECONNECT_DELAY * (2 ** min(self._crash_count, 4))  # max 5×16=80s
                     cloudlog.warning(f"DashBox: crash cooldown {penalty}s (count={self._crash_count})")
                 else:
-                    self._crash_count = max(0, self._crash_count - 1)
+                    self._crash_count = 0  # successful connection, reset
                     penalty = RECONNECT_DELAY
                 time.sleep(penalty)
 
