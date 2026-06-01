@@ -137,20 +137,31 @@ class DashBoxLayout(Widget):
         return
     except AttributeError:
       pass
-    # Fetch fresh pairing code from server in background
-    threading.Thread(target=self._fetch_fresh_code, daemon=True).start()
+    # Only fetch fresh code if stored code is expired or missing (> 14 min)
+    self._maybe_refresh_code()
     self._pairing_dialog = DashboxPairingDialog()
     gui_app.push_widget(self._pairing_dialog)
 
   @staticmethod
-  def _fetch_fresh_code():
-    """Request a new pairing code from DashBox server."""
+  def _maybe_refresh_code():
+    """Request a new pairing code if stored code is expired."""
+    code = storage.get("SunnylinkPairingCode").strip()
+    code_time_str = storage.get("SunnylinkPairingCodeTime") or "0"
+    try:
+      code_time = float(code_time_str)
+      age = time.monotonic() - code_time
+    except (ValueError, TypeError):
+      age = float("inf")
+    if code and age < 840:  # 14 minutes
+      return  # still valid, reuse
+    # Expired or missing — fetch from server
     try:
       from sunnypilot.dashbox.api import DashboxApi
       dongle_id = Params().get("DongleId")
       if dongle_id:
         api = DashboxApi(dongle_id)
         api._fetch_pairing_code(dongle_id)
+        storage.put("SunnylinkPairingCodeTime", str(time.monotonic()))
     except Exception:
       pass
 

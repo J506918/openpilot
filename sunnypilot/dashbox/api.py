@@ -110,6 +110,7 @@ class DashboxApi:
                     Params().put("DongleId", device_id)
                     if pairing_code:
                         storage.put("SunnylinkPairingCode", pairing_code)
+                        storage.put("SunnylinkPairingCodeTime", str(time.monotonic()))
                         cloudlog.info(f"DashBox pairing code: {pairing_code}")
                     cloudlog.info(f"DashBox registered: device_id={device_id}")
                     return device_id
@@ -147,6 +148,7 @@ class DashboxApi:
                 code = data.get("pairing_code", "")
                 if code:
                     storage.put("SunnylinkPairingCode", code)
+                    storage.put("SunnylinkPairingCodeTime", str(time.monotonic()))
                     cloudlog.info(f"DashBox pairing code: {code}")
             else:
                 cloudlog.warning(f"DashBox pairing code fetch failed: {resp.status_code}")
