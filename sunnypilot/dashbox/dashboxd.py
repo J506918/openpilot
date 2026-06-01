@@ -20,7 +20,7 @@ from openpilot.common.swaglog import cloudlog
 from sunnypilot.dashbox import storage
 
 DASHBOX_WS_URL = "wss://8.136.28.140:8443/ws"
-RECONNECT_DELAY = 5
+RECONNECT_DELAY = 2
 PING_INTERVAL = 30
 
 
@@ -69,7 +69,7 @@ class DashboxDaemon:
                 elapsed = time.monotonic() - self._last_connect_start
                 if elapsed < 15:  # quick fail: crash or network not ready
                     self._crash_count += 1
-                    penalty = RECONNECT_DELAY * (2 ** min(self._crash_count, 4))  # max 5×16=80s
+                    penalty = RECONNECT_DELAY * (2 ** min(self._crash_count, 4))  # max 2×16=32s
                     cloudlog.warning(f"DashBox: crash cooldown {penalty}s (count={self._crash_count})")
                 else:
                     self._crash_count = 0  # successful connection, reset
