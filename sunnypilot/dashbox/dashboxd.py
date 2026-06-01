@@ -5,6 +5,8 @@ Replaces sunnylink/athena/sunnylinkd.py.
 """
 import json
 import os
+import select
+import socket
 import subprocess
 import sys
 import time
@@ -22,6 +24,7 @@ from sunnypilot.dashbox import storage
 DASHBOX_WS_URL = "wss://8.136.28.140:8443/ws"
 RECONNECT_DELAY = 2
 PING_INTERVAL = 30
+NOTIFY_SOCK = "/tmp/dashbox_notify.sock"
 
 
 class DashboxDaemon:
@@ -29,6 +32,7 @@ class DashboxDaemon:
         self._params = Params()
         self._token = storage.get("SunnylinkToken")
         self._ws: websocket.WebSocket | None = None
+        self._notify_sock: socket.socket | None = None
         self._running = False
         self._thread: threading.Thread | None = None
         self._ping_thread: threading.Thread | None = None
@@ -48,13 +52,23 @@ class DashboxDaemon:
         self._close_ws()
 
     def _close_ws(self):
-        """Safely close WebSocket and stop ping thread."""
+        """Safely close WebSocket, notify socket, and stop ping thread."""
         if self._ws:
             try:
                 self._ws.close()
             except Exception:
                 pass
             self._ws = None
+        if self._notify_sock:
+            try:
+                self._notify_sock.close()
+            except Exception:
+                pass
+            self._notify_sock = None
+            try:
+                os.unlink(NOTIFY_SOCK)
+            except OSError:
+                pass
 
     def _run(self):
         while self._running:
@@ -108,17 +122,42 @@ class DashboxDaemon:
         self._send_vehicle_info()
         self._send_params_sync()
 
-        # Read loop — only update heartbeat when server actually responds
+        # Read loop — select on both WebSocket and local notify socket
+        try:
+            os.unlink(NOTIFY_SOCK)
+        except OSError:
+            pass
+        self._notify_sock = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
+        self._notify_sock.bind(NOTIFY_SOCK)
+        self._notify_sock.setblocking(False)
+
         while self._running and self._ws:
             try:
-                self._ws.settimeout(PING_INTERVAL)
-                msg = self._ws.recv()
-                if msg:
-                    self._handle_message(msg)
-                    # Server responded — connection verified alive
-                    storage.put("LastPingTime", str(time.monotonic_ns()))
+                ws_fd = self._ws.sock.fileno()
+                r, _, _ = select.select([ws_fd, self._notify_sock], [], [], PING_INTERVAL)
+
+                if ws_fd in r:
+                    msg = self._ws.recv()
+                    if msg:
+                        self._handle_message(msg)
+                        storage.put("LastPingTime", str(time.monotonic_ns()))
+
+                if self._notify_sock in r:
+                    # Read all pending param change notifications
+                    updates = {}
+                    try:
+                        while True:
+                            data = self._notify_sock.recv(4096)
+                            for line in data.decode().strip().split("\n"):
+                                if "=" in line:
+                                    k, v = line.split("=", 1)
+                                    updates[k] = v
+                    except BlockingIOError:
+                        pass
+                    if updates:
+                        self._send_params_push(updates)
+
             except websocket.WebSocketTimeoutException:
-                # No message from server — let LastPingTime go stale naturally
                 continue
             except Exception:
                 cloudlog.exception("DashBox WS read error")
@@ -241,6 +280,21 @@ class DashboxDaemon:
                 cloudlog.info(f"DashBox: sent params_sync: {len(params)} params")
         except Exception:
             cloudlog.exception("DashBox: failed to send params_sync")
+
+    def _send_params_push(self, updates: dict):
+        """Push changed params to server without touching disk."""
+        if not self._ws:
+            return
+        try:
+            msg = json.dumps({
+                "jsonrpc": "2.0",
+                "method": "params_sync",
+                "params": {"params": updates},
+            })
+            self._ws.send(msg)
+            cloudlog.info(f"DashBox: push params: {list(updates.keys())}")
+        except Exception:
+            cloudlog.exception("DashBox: failed to push params")
 
     def _handle_message(self, raw: str):
         """Handle incoming JSON-RPC messages from server."""
