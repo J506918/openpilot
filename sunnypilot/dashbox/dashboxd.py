@@ -69,8 +69,7 @@ class DashboxDaemon:
                 elapsed = time.monotonic() - self._last_connect_start
                 if elapsed < 15:  # quick fail: crash or network not ready
                     self._crash_count += 1
-                    penalty = RECONNECT_DELAY * (2 ** min(self._crash_count, 3))  # 2→4→8→16s, capped at 15s
-                    penalty = min(penalty, 15)
+                    penalty = RECONNECT_DELAY * (2 ** min(self._crash_count, 4))  # max 2×16=32s
                     cloudlog.warning(f"DashBox: crash cooldown {penalty}s (count={self._crash_count})")
                 else:
                     self._crash_count = 0  # successful connection, reset
