@@ -3,6 +3,7 @@ from openpilot.common.params import Params
 DashBox settings page — standalone layout with own branding and flow.
 """
 import time
+import threading
 import pyray as rl
 from openpilot.selfdrive.ui.ui_state import ui_state
 from openpilot.system.ui.lib.application import gui_app, FontWeight
@@ -130,11 +131,28 @@ class DashBoxLayout(Widget):
     did = self._dongle_id()
     if did == tr("N/A") or did == UNREGISTERED_DONGLE_ID:
       return  # no device ID yet
-    # If dialog already showing, skip; if dismissed, allow re-open
-    if self._pairing_dialog and not self._pairing_dialog.is_dismissing:
-      return
+    # MICI: check is_dismissing; TICI: AttributeError → always allow
+    try:
+      if self._pairing_dialog and not self._pairing_dialog.is_dismissing:
+        return
+    except AttributeError:
+      pass
+    # Fetch fresh pairing code from server in background
+    threading.Thread(target=self._fetch_fresh_code, daemon=True).start()
     self._pairing_dialog = DashboxPairingDialog()
     gui_app.push_widget(self._pairing_dialog)
+
+  @staticmethod
+  def _fetch_fresh_code():
+    """Request a new pairing code from DashBox server."""
+    try:
+      from sunnypilot.dashbox.api import DashboxApi
+      dongle_id = Params().get("DongleId")
+      if dongle_id:
+        api = DashboxApi(dongle_id)
+        api._fetch_pairing_code(dongle_id)
+    except Exception:
+      pass
 
   def _refresh(self):
     self._device_id_btn.action_item.set_text(self._dongle_id())
