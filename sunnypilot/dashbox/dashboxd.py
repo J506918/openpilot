@@ -254,13 +254,15 @@ class DashboxDaemon:
             req_id = msg.get("id")
             params = msg.get("params", {}).get("params", {})
             cloudlog.info(f"DashBox: received {len(params)} params from server")
-            # Write directly to params filesystem — avoids hanging on dead paramsd
+            # Atomic write to params filesystem — avoids race with paramsd
             params_dir = "/data/params/d"
             for key, value in params.items():
                 try:
                     fp = os.path.join(params_dir, key)
-                    with open(fp, "w") as f:
+                    tmp = fp + ".tmp"
+                    with open(tmp, "w") as f:
                         f.write(str(value))
+                    os.rename(tmp, fp)  # atomic on same filesystem
                 except Exception:
                     cloudlog.debug(f"DashBox: failed to write param {key}")
             # Send response so server RPC doesn't time out
@@ -281,11 +283,19 @@ class DashboxDaemon:
                 params_dir = "/data/params/d"
                 if os.path.exists(params_dir):
                     for f in os.listdir(params_dir):
+                        # Skip temp files left by atomic writes or paramsd
+                        if f.endswith(".tmp") or f.endswith(".lock"):
+                            continue
                         try:
                             fp = os.path.join(params_dir, f)
                             if os.path.isfile(fp):
-                                with open(fp) as fh:
-                                    all_params[f] = fh.read().strip()
+                                with open(fp, "rb") as fh:
+                                    # Read as bytes, decode safely — params may contain binary
+                                    raw = fh.read()
+                                    try:
+                                        all_params[f] = raw.decode("utf-8")
+                                    except UnicodeDecodeError:
+                                        all_params[f] = raw.decode("utf-8", errors="replace")
                         except Exception:
                             pass
                 resp = json.dumps({
