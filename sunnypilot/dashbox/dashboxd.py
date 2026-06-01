@@ -230,11 +230,15 @@ class DashboxDaemon:
             req_id = msg.get("id")
             params = msg.get("params", {}).get("params", {})
             cloudlog.info(f"DashBox: received {len(params)} params from server")
+            # Write directly to params filesystem — avoids hanging on dead paramsd
+            params_dir = "/data/params/d"
             for key, value in params.items():
                 try:
-                    self._params.put(key, str(value))
-                except (UnknownKeyName, TypeError, ValueError):
-                    cloudlog.debug(f"DashBox: skipping param {key} (type/name error)")
+                    fp = os.path.join(params_dir, key)
+                    with open(fp, "w") as f:
+                        f.write(str(value))
+                except Exception:
+                    cloudlog.debug(f"DashBox: failed to write param {key}")
             # Send response so server RPC doesn't time out
             if req_id is not None and self._ws:
                 try:
