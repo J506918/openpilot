@@ -35,6 +35,8 @@ class DashboxDaemon:
         # Crash cooldown — prevents rapid restart loops draining resources
         self._crash_count = 0
         self._last_connect_start = 0.0
+        # Clear heartbeat on init — prevents stale ONLINE after reboot
+        storage.put("LastPingTime", "0")
 
     def start(self):
         self._running = True
