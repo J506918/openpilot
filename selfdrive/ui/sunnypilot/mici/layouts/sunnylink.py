@@ -118,6 +118,9 @@ class SunnylinkLayoutMici(NavScroller):
     else:
       self._dashbox_pair_button.set_text(tr("pair"))
 
+    online_text = tr("Online") if ui_state.sunnylink_state.dashbox_online else tr("Offline")
+    self._dashbox_pair_button.set_value(online_text)
+
   def show_event(self):
     super().show_event()
     ui_state.update_params()

@@ -54,6 +54,12 @@ class DashboxDaemon:
             cloudlog.warning(f"DashBox WS: auth failed ({e.status_code}), clearing dongle_id")
             self._params.put("DongleId", "")
             return
+        except Exception:
+            cloudlog.exception("DashBox WS: connection failed")
+            return
+
+        self._params.put("DashboxOnline", "1")
+        cloudlog.info("DashBox WS: connected")
 
         while self._running:
             try:
@@ -65,6 +71,9 @@ class DashboxDaemon:
             except Exception:
                 cloudlog.exception("DashBox WS read error")
                 break
+
+        self._params.put("DashboxOnline", "0")
+        cloudlog.info("DashBox WS: disconnected")
 
     def _reregister(self):
         """Register with server. Returns True on success, False on failure."""

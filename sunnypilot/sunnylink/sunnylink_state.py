@@ -213,6 +213,10 @@ class SunnylinkState:
     network_type = self._sm["deviceState"].networkType
     return bool(network_type != 0)
 
+  @property
+  def dashbox_online(self) -> bool:
+    return self._params.get("DashboxOnline") == "1"
+
   def get_sponsor_tier_color(self) -> rl.Color:
     tier = self.get_sponsor_tier()
 
