@@ -20,6 +20,10 @@ class DashboxPairingDialog(PairingDialog):
     PairingDialog.__init__(self)
     self._params = Params()
     self._is_paired_prev = False
+    self._requested = False
+
+    # Signal dashboxd to request a pairing code from server
+    self._params.put("DashboxRequestPairing", "1")
 
     self._title_label = UnifiedLabel(
       tr("Pair with DashBox"),

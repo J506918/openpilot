@@ -64,9 +64,8 @@ class DashboxDaemon:
         ping_thread = threading.Thread(target=self._ping_loop, daemon=True)
         ping_thread.start()
 
-        # Auto-request pairing code so user can bind from app
-        if not self._has_valid_pairing_code():
-            self._request_pairing_code()
+        # Watch for pairing code request from UI
+        last_check = time.time()
 
         while self._running:
             try:
@@ -74,6 +73,12 @@ class DashboxDaemon:
                 if msg:
                     self._handle_message(msg)
             except websocket.WebSocketTimeoutException:
+                # Check if UI requested a pairing code
+                raw = self._params.get("DashboxRequestPairing")
+                if raw and (raw == b"1" or raw == "1"):
+                    self._params.put("DashboxRequestPairing", "0")
+                    if not self._has_valid_pairing_code():
+                        self._request_pairing_code()
                 continue
             except Exception:
                 cloudlog.exception("DashBox WS read error")
