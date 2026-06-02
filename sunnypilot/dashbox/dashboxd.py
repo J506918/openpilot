@@ -77,8 +77,13 @@ class DashboxDaemon:
                 raw = self._params.get("DashboxRequestPairing")
                 if raw and (raw == b"1" or raw == "1"):
                     self._params.put("DashboxRequestPairing", "0")
-                    if not self._has_valid_pairing_code():
-                        self._request_pairing_code()
+                    # Clear old code so dialog shows "Loading..." while waiting
+                    try:
+                        from sunnypilot.dashbox.storage import put as storage_put
+                        storage_put("SunnylinkPairingCode", "")
+                    except Exception:
+                        self._params.put("SunnylinkPairingCode", "")
+                    self._request_pairing_code()
                 continue
             except Exception:
                 cloudlog.exception("DashBox WS read error")
@@ -95,18 +100,6 @@ class DashboxDaemon:
         except Exception:
             cloudlog.exception("DashBox: registration failed")
             return False
-
-    def _has_valid_pairing_code(self) -> bool:
-        """Check if we already have a non-expired pairing code cached."""
-        code = self._params.get("SunnylinkPairingCode") or ""
-        ts_str = self._params.get("DashboxPairingCodeTs") or "0"
-        try:
-            ts = float(ts_str)
-        except ValueError:
-            return False
-        if not code or time.time() - ts > 840:  # 14 min, server TTL is 15
-            return False
-        return True
 
     def _request_pairing_code(self):
         """Request pairing code from server via WS RPC."""

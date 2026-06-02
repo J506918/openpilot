@@ -22,7 +22,8 @@ class DashboxPairingDialog(PairingDialog):
     self._is_paired_prev = False
     self._requested = False
 
-    # Signal dashboxd to request a pairing code from server
+    # Clear old code and signal dashboxd to request a fresh one from server
+    storage.put("SunnylinkPairingCode", "")
     self._params.put("DashboxRequestPairing", "1")
 
     self._title_label = UnifiedLabel(
