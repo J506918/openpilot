@@ -58,7 +58,7 @@ class DashboxDaemon:
             )
         except websocket.WebSocketBadStatusException as e:
             cloudlog.warning(f"DashBox WS: auth failed ({e.status_code}), clearing dongle_id")
-            self._params.delete("DongleId")
+            self._params.put("DongleId", "")
             return
 
         ping_thread = threading.Thread(target=self._ping_loop, daemon=True)
