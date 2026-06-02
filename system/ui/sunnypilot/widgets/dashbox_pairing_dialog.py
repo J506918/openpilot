@@ -1,7 +1,11 @@
 """
-DashBox pairing dialog for TICI — displays a pairing code for the DashBox mobile app.
+DashBox pairing dialog for TICI — calls server directly, no local caching.
 """
+import json
+import threading
 import pyray as rl
+import urllib.request
+import ssl
 
 from openpilot.common.params import Params
 from openpilot.selfdrive.ui.ui_state import ui_state
@@ -10,20 +14,60 @@ from openpilot.system.ui.lib.application import FontWeight, gui_app
 from openpilot.system.ui.lib.multilang import tr
 from openpilot.system.ui.lib.wrap_text import wrap_text
 from openpilot.system.ui.lib.text_measure import measure_text_cached
-from sunnypilot.dashbox import storage
+
+DASHBOX_URL = "https://8.136.28.140:8443/api/v1/devices/pair"
 
 
 class DashboxPairingDialog(PairingDialog):
-  """DashBox pairing dialog — shows pairing code for the mobile app."""
+  """DashBox pairing dialog — requests pairing code from server via HTTP."""
 
   def __init__(self):
     PairingDialog.__init__(self)
     self.params = Params()
     self._is_paired_prev = ui_state.sunnylink_state.is_paired()
+    self._code = ""
+    self._error = ""
+
+    # Request pairing code in background — no storage, no dashboxd
+    threading.Thread(target=self._request_code, daemon=True).start()
+
+  def _request_code(self):
+    try:
+      serial = self._read_serial()
+      dongle_id = self._read_dongle_id()
+      body = json.dumps({"serial": serial, "dongle_id": dongle_id}).encode()
+
+      ctx = ssl.create_default_context()
+      ctx.check_hostname = False
+      ctx.verify_mode = ssl.CERT_NONE
+
+      req = urllib.request.Request(DASHBOX_URL, data=body, headers={"Content-Type": "application/json"})
+      resp = urllib.request.urlopen(req, context=ctx, timeout=10)
+      data = json.loads(resp.read())
+      self._code = data.get("pairing_code", "")
+    except Exception as e:
+      self._error = str(e)
 
   @staticmethod
-  def _get_pairing_code() -> str:
-    return storage.get("SunnylinkPairingCode").strip()
+  def _read_serial() -> str:
+    try:
+      with open("/data/params/d/HardwareSerial", "r") as f:
+        return f.read().strip()
+    except Exception:
+      return ""
+
+  @staticmethod
+  def _read_dongle_id() -> str:
+    try:
+      from sunnypilot.dashbox import storage
+      return storage.get("DongleId").strip()
+    except Exception:
+      return ""
+
+  def _get_pairing_code(self) -> str:
+    if self._error:
+      return ""
+    return self._code
 
   def _update_state(self):
     is_paired = ui_state.sunnylink_state.is_paired()
