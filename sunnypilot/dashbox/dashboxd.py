@@ -6,6 +6,7 @@ registration on reconnect. Only WS auth failure triggers re-registration.
 """
 
 import json
+import os
 import time
 
 import websocket
@@ -58,7 +59,7 @@ class DashboxDaemon:
             cloudlog.exception("DashBox WS: connection failed")
             return
 
-        self._params.put("DashboxOnline", "1")
+        self._write_file("/data/params/d/DashboxOnline", "1")
         cloudlog.info("DashBox WS: connected")
 
         while self._running:
@@ -72,7 +73,7 @@ class DashboxDaemon:
                 cloudlog.exception("DashBox WS read error")
                 break
 
-        self._params.put("DashboxOnline", "0")
+        self._write_file("/data/params/d/DashboxOnline", "0")
         cloudlog.info("DashBox WS: disconnected")
 
     def _reregister(self):
@@ -86,6 +87,16 @@ class DashboxDaemon:
         except Exception:
             cloudlog.exception("DashBox: registration failed")
             return False
+
+    @staticmethod
+    def _write_file(path: str, value: str):
+        try:
+            tmp = path + ".tmp"
+            with open(tmp, "w") as f:
+                f.write(value)
+            os.rename(tmp, path)
+        except Exception:
+            pass
 
     @staticmethod
     def _read_serial() -> str:
