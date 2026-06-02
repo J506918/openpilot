@@ -109,7 +109,7 @@ class DeviceLayoutSP(DeviceLayout):
     )
 
     items = [
-      text_item(lambda: tr("Dongle ID"), self._params.get("DongleId") or (lambda: tr("N/A"))),
+      text_item(lambda: tr("Dongle ID"), lambda: self._params.get("DongleId") or tr("N/A")),
       LineSeparator(),
       text_item(lambda: tr("Serial"), self._params.get("HardwareSerial") or (lambda: tr("N/A"))),
       LineSeparator(),
