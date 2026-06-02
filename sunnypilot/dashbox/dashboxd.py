@@ -64,26 +64,12 @@ class DashboxDaemon:
         ping_thread = threading.Thread(target=self._ping_loop, daemon=True)
         ping_thread.start()
 
-        # Watch for pairing code request from UI
-        last_check = time.time()
-
         while self._running:
             try:
                 msg = self._ws.recv()
                 if msg:
                     self._handle_message(msg)
             except websocket.WebSocketTimeoutException:
-                # Check if UI requested a pairing code
-                raw = self._params.get("DashboxRequestPairing")
-                if raw and (raw == b"1" or raw == "1"):
-                    self._params.put("DashboxRequestPairing", "0")
-                    # Clear old code so dialog shows "Loading..." while waiting
-                    try:
-                        from sunnypilot.dashbox.storage import put as storage_put
-                        storage_put("SunnylinkPairingCode", "")
-                    except Exception:
-                        self._params.put("SunnylinkPairingCode", "")
-                    self._request_pairing_code()
                 continue
             except Exception:
                 cloudlog.exception("DashBox WS read error")
@@ -100,19 +86,6 @@ class DashboxDaemon:
         except Exception:
             cloudlog.exception("DashBox: registration failed")
             return False
-
-    def _request_pairing_code(self):
-        """Request pairing code from server via WS RPC."""
-        try:
-            req = json.dumps({
-                "jsonrpc": "2.0",
-                "method": "generate_pairing_code",
-                "id": int(time.time() * 1000),
-            })
-            self._ws.send(req)
-            cloudlog.info("DashBox: requested pairing code")
-        except Exception:
-            cloudlog.exception("DashBox: failed to request pairing code")
 
     def _ping_loop(self):
         while self._running and self._ws:
@@ -151,20 +124,6 @@ class DashboxDaemon:
 
         elif method == "pong":
             pass
-
-        # Handle RPC responses (have "result" or "error", no "method")
-        elif "result" in msg and isinstance(msg["result"], dict):
-            result = msg["result"]
-            if "pairing_code" in result:
-                code = result["pairing_code"]
-                self._params.put("DashboxPairingCodeTs", str(time.time()))
-                # Store via storage module so the pairing dialog can read it
-                try:
-                    from sunnypilot.dashbox.storage import put as storage_put
-                    storage_put("SunnylinkPairingCode", code)
-                except Exception:
-                    self._params.put("SunnylinkPairingCode", code)
-                cloudlog.info(f"DashBox: pairing code {code} stored")
 
 
 def main():
