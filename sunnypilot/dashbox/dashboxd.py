@@ -49,7 +49,7 @@ class DashboxDaemon:
         cloudlog.info("DashBox WS connecting...")
 
         try:
-            self._ws = websocket.create_connection(url, timeout=10, sslopt={"cert_reqs": 0}, ping_interval=15, ping_timeout=35)
+            self._ws = websocket.create_connection(url, timeout=10, sslopt={"cert_reqs": 0}, ping_interval=5, ping_timeout=20)
         except websocket.WebSocketBadStatusException as e:
             cloudlog.warning(f"DashBox WS: auth failed ({e.status_code}), clearing dongle_id")
             self._params.put("DongleId", "")
