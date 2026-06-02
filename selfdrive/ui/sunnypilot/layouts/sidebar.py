@@ -65,7 +65,12 @@ class SidebarSP:
     last_ping = int(storage.get("LastPingTime") or 0)
     dongle_id = Params().get("DongleId")
 
-    is_online = last_ping and (time.monotonic_ns() - last_ping) < PING_TIMEOUT_NS
+    try:
+      with open("/data/params/d/DashboxOnline", "r") as f:
+        dashbox_online = f.read().strip() == "1"
+    except Exception:
+      dashbox_online = False
+    is_online = dashbox_online
     is_temp_fault = storage.get("DashboxTempFault") == "true"
     is_registering = not is_temp_fault and dongle_id in (None, "", UNREGISTERED_SUNNYLINK_DONGLE_ID)
 

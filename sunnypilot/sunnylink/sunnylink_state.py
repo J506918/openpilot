@@ -215,7 +215,11 @@ class SunnylinkState:
 
   @property
   def dashbox_online(self) -> bool:
-    return self._params.get("DashboxOnline") == "1"
+    try:
+      with open("/data/params/d/DashboxOnline", "r") as f:
+        return f.read().strip() == "1"
+    except Exception:
+      return False
 
   def get_sponsor_tier_color(self) -> rl.Color:
     tier = self.get_sponsor_tier()
