@@ -1,7 +1,8 @@
 """
-DashBox WebSocket client — daemon that maintains persistent connection
-to DashBox server for real-time parameter sync.
-Replaces sunnylink/athena/sunnylinkd.py.
+DashBox WebSocket client — persistent connection to DashBox server.
+Auth: serial + dongle_id, no token.
+After server returns dongle_id (OK), device stores it and skips
+registration on reconnect. Only WS auth failure triggers re-registration.
 """
 
 import json
@@ -22,39 +23,32 @@ PING_INTERVAL = 30
 class DashboxDaemon:
     def __init__(self):
         self._params = Params()
-        self._token = self._params.get("DashboxToken")
         self._ws: websocket.WebSocket | None = None
         self._running = False
-        self._thread: threading.Thread | None = None
 
-    def start(self):
+    def run(self):
         self._running = True
-        self._thread = threading.Thread(target=self._run, daemon=True)
-        self._thread.start()
+        while self._running:
+            dongle_id = self._params.get("DongleId") or ""
+            if not dongle_id:
+                if not self._reregister():
+                    time.sleep(RECONNECT_DELAY)
+                    continue
+            self._connect()
+            if self._running:
+                time.sleep(RECONNECT_DELAY)
 
     def stop(self):
         self._running = False
         if self._ws:
             self._ws.close()
 
-    def _run(self):
-        while self._running:
-            try:
-                self._connect()
-            except Exception:
-                cloudlog.exception("DashBox WS error")
-            if self._running:
-                time.sleep(RECONNECT_DELAY)
-
     def _connect(self):
-        token = self._params.get("DashboxToken")
-        if not token:
-            cloudlog.warning("DashBox WS: no token, triggering re-registration")
-            self._clear_and_reregister()
-            return
+        serial = self._read_serial()
+        dongle_id = self._params.get("DongleId") or ""
 
-        url = f"{DASHBOX_WS_URL}?token={token}"
-        cloudlog.info(f"DashBox WS connecting...")
+        url = f"{DASHBOX_WS_URL}?serial={serial}&dongle_id={dongle_id}"
+        cloudlog.info("DashBox WS connecting...")
 
         try:
             self._ws = websocket.create_connection(
@@ -63,8 +57,8 @@ class DashboxDaemon:
                 sslopt={"cert_reqs": 0},
             )
         except websocket.WebSocketBadStatusException as e:
-            cloudlog.warning(f"DashBox WS: auth failed ({e.status_code}), re-registering")
-            self._clear_and_reregister()
+            cloudlog.warning(f"DashBox WS: auth failed ({e.status_code}), clearing dongle_id")
+            self._params.delete("DongleId")
             return
 
         ping_thread = threading.Thread(target=self._ping_loop, daemon=True)
@@ -81,18 +75,17 @@ class DashboxDaemon:
                 cloudlog.exception("DashBox WS read error")
                 break
 
-    def _clear_and_reregister(self):
-        """Clear stored credentials and trigger fresh registration."""
-        cloudlog.info("DashBox: clearing stored credentials for re-registration")
-        self._params.delete("DashboxDongleId")
-        self._params.delete("DashboxToken")
-        # Import here to avoid circular dependency
+    def _reregister(self):
+        """Register with server. Returns True on success, False on failure."""
+        cloudlog.info("DashBox: no dongle_id, registering...")
         try:
-            from dashbox.api import register_dashbox
+            from sunnypilot.dashbox.api import register_dashbox
             new_id = register_dashbox()
-            cloudlog.info(f"DashBox: re-registered as {new_id}")
+            cloudlog.info(f"DashBox: registered as {new_id}")
+            return True
         except Exception:
-            cloudlog.exception("DashBox: re-registration failed")
+            cloudlog.exception("DashBox: registration failed")
+            return False
 
     def _ping_loop(self):
         while self._running and self._ws:
@@ -106,6 +99,14 @@ class DashboxDaemon:
             except Exception:
                 break
             time.sleep(PING_INTERVAL)
+
+    @staticmethod
+    def _read_serial() -> str:
+        try:
+            with open("/data/params/d/HardwareSerial", "r") as f:
+                return f.read().strip()
+        except Exception:
+            return "unknown"
 
     def _handle_message(self, raw: str):
         """Handle incoming JSON-RPC messages from server."""
@@ -126,9 +127,14 @@ class DashboxDaemon:
 
 
 def main():
+    params = Params()
+
+    if not params.get_bool("SunnylinkEnabled"):
+        return
+
     set_core_affinity([0, 1, 2, 3])
     daemon = DashboxDaemon()
-    daemon._connect()
+    daemon.run()
 
 
 if __name__ == "__main__":
