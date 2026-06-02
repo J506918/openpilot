@@ -82,8 +82,8 @@ class DashboxPairingDialog(NavWidget):
   @staticmethod
   def _read_dongle_id() -> str:
     try:
-      from sunnypilot.dashbox import storage
-      return storage.get("DongleId").strip()
+      with open("/data/params/d/DongleId", "r") as f:
+        return f.read().strip()
     except Exception:
       return ""
 
