@@ -7,7 +7,6 @@ registration on reconnect. Only WS auth failure triggers re-registration.
 
 import json
 import time
-import threading
 
 import websocket
 
@@ -17,7 +16,6 @@ from openpilot.common.realtime import set_core_affinity
 
 DASHBOX_WS_URL = "wss://8.136.28.140:8443/ws"
 RECONNECT_DELAY = 5
-PING_INTERVAL = 30
 
 
 class DashboxDaemon:
@@ -51,18 +49,11 @@ class DashboxDaemon:
         cloudlog.info("DashBox WS connecting...")
 
         try:
-            self._ws = websocket.create_connection(
-                url,
-                timeout=10,
-                sslopt={"cert_reqs": 0},
-            )
+            self._ws = websocket.create_connection(url, timeout=10, sslopt={"cert_reqs": 0}, ping_interval=15, ping_timeout=35)
         except websocket.WebSocketBadStatusException as e:
             cloudlog.warning(f"DashBox WS: auth failed ({e.status_code}), clearing dongle_id")
             self._params.put("DongleId", "")
             return
-
-        ping_thread = threading.Thread(target=self._ping_loop, daemon=True)
-        ping_thread.start()
 
         while self._running:
             try:
@@ -86,19 +77,6 @@ class DashboxDaemon:
         except Exception:
             cloudlog.exception("DashBox: registration failed")
             return False
-
-    def _ping_loop(self):
-        while self._running and self._ws:
-            try:
-                ping = json.dumps({
-                    "jsonrpc": "2.0",
-                    "method": "ping",
-                    "id": int(time.time()),
-                })
-                self._ws.send(ping)
-            except Exception:
-                break
-            time.sleep(PING_INTERVAL)
 
     @staticmethod
     def _read_serial() -> str:
