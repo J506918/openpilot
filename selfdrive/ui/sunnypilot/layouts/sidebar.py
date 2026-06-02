@@ -74,9 +74,9 @@ class SidebarSP:
     is_temp_fault = storage.get("DashboxTempFault") == "true"
     is_registering = not is_temp_fault and dongle_id in (None, "", UNREGISTERED_SUNNYLINK_DONGLE_ID)
 
-    # Determine status/color pair based on priority
-    if last_ping:
-      status, color = (tr_noop("ONLINE"), Colors.GOOD) if is_online else (tr_noop("ERROR"), Colors.DANGER)
+    # Determine status/color pair — file read wins
+    if is_online:
+      status, color = (tr_noop("ONLINE"), Colors.GOOD)
     elif is_temp_fault:
       status, color = (tr_noop("FAULT"), Colors.WARNING)
     elif is_registering:
