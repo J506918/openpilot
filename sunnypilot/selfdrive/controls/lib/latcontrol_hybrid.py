@@ -151,41 +151,56 @@ class HybridLateralControl(LatControl):
 
   def _compute_predictive_feedforward(self, CS, desired_lateral_accel):
     """
-    Compute predictive feedforward using model lookahead (NNLC-style).
-    
-    Looks ahead in the trajectory to anticipate lateral acceleration changes.
+    Compute predictive feedforward using model lookahead position (NNLC-style).
+
+    Uses model_v2.position.y → curvature → lateral acceleration.
+    position.y is geometric — independent of controller assumptions,
+    unlike acceleration.y which contains V0 PID training bias.
     """
     if not self.model_valid or self.model_v2 is None:
       return 0.0
-    
+
     try:
-      # Find the lookahead index in the model
-      lookahead_idx = int(np.clip(LOOKAHEAD_TIME / 0.1, 0, len(self.model_v2.acceleration.y) - 1))
-      
-      # Get predicted lateral acceleration at lookahead time
-      predicted_lat_accel = self.model_v2.acceleration.y[lookahead_idx]
-      
-      # Compute the change in lateral acceleration (jerk)
+      n = len(self.model_v2.position.y)
+      # T_IDXS from ModelConstants: quadratic time indices for each model frame
+      t_idxs = ModelConstants.T_IDXS
+      # Find index closest to LOOKAHEAD_TIME
+      lookahead_idx = int(np.clip(
+        np.searchsorted(t_idxs, LOOKAHEAD_TIME, side='left'), 2, n - 2))
+
+      # Use 3-point central difference for curvature: κ ≈ d²y/dx²
+      # dx between frames: vEgo * (t[i+1] - t[i-1]) / 2
+      dt = (t_idxs[lookahead_idx + 1] - t_idxs[lookahead_idx - 1]) / 2
+      dx = CS.vEgo * dt
+      if dx < 1e-6:
+        return 0.0
+
+      y_prev = self.model_v2.position.y[lookahead_idx - 1]
+      y_curr = self.model_v2.position.y[lookahead_idx]
+      y_next = self.model_v2.position.y[lookahead_idx + 1]
+
+      curvature = (y_prev - 2 * y_curr + y_next) / (dx * dx)
+
+      # Convert curvature to physical lateral acceleration: a_y = κ · v²
+      predicted_lat_accel = curvature * CS.vEgo ** 2
+
       lat_accel_delta = predicted_lat_accel - desired_lateral_accel
-      
-      # Use this to create predictive feedforward
-      # Higher predicted accel = need more steering now
       predictive_ff = lat_accel_delta * 0.3  # Tuning factor
-      
+
       return predictive_ff
     except (IndexError, AttributeError, TypeError):
       return 0.0
 
   def _compute_stock_feedforward(self, CS, desired_lateral_accel, roll_compensation, 
-                                 lateral_accel_deadzone, error):
+                                 lateral_accel_deadzone, error, desired_lateral_jerk):
     """
     Compute stock-style feedforward (simple and stable).
     """
     # Gravity-adjusted future lateral accel
     ff = desired_lateral_accel - roll_compensation
     
-    # Friction compensation
-    ff += get_friction(error + JERK_GAIN * 0.0, lateral_accel_deadzone, 
+    # Friction compensation with jerk feedforward term
+    ff += get_friction(error + JERK_GAIN * desired_lateral_jerk, lateral_accel_deadzone, 
                       FRICTION_THRESHOLD, self.torque_params)
     
     return ff
@@ -237,15 +252,15 @@ class HybridLateralControl(LatControl):
     
     # ─── Feedforward Computation ───────────────────────────────────────────
     stock_ff = self._compute_stock_feedforward(CS, desired_lateral_accel, roll_compensation,
-                                              lateral_accel_deadzone, error)
-    
+                                              lateral_accel_deadzone, error, desired_lateral_jerk)
+
     predictive_ff = self._compute_predictive_feedforward(CS, desired_lateral_accel)
-    
+
     # Blend the two feedforward strategies
     ff = stock_ff * (1.0 - self.blend_factor) + predictive_ff * self.blend_factor
-    
+
     # ─── PID Control ───────────────────────────────────────────────────────
-    freeze_integrator = steer_limited_by_safety or CS.steeringPressed or CS.vEgo < 5
+    freeze_integrator = steer_limited_by_safety or CS.steeringPressed or CS.vEgo < 2.0
     output_lataccel = self.pid.update(pid_log.error, speed=CS.vEgo, 
                                       feedforward=ff, freeze_integrator=freeze_integrator)
     output_torque = self.torque_from_lateral_accel(output_lataccel, self.torque_params)

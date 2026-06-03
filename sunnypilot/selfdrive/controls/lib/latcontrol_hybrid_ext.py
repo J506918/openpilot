@@ -8,6 +8,7 @@ Extension for Hybrid Lateral Control - integrates with controlsd
 """
 
 from openpilot.common.params import Params
+from openpilot.common.swaglog import cloudlog
 
 
 class HybridLateralControlExt:
@@ -31,21 +32,25 @@ class HybridLateralControlExt:
     try:
       self.blend_aggressiveness = int(self.params.get("HybridBlendAggressiveness", return_default=True))
     except (ValueError, TypeError):
+      cloudlog.warning("HybridLateral: invalid HybridBlendAggressiveness, using default 50")
       self.blend_aggressiveness = 50
     
     try:
       self.curve_sensitivity = int(self.params.get("HybridCurveSensitivity", return_default=True))
     except (ValueError, TypeError):
+      cloudlog.warning("HybridLateral: invalid HybridCurveSensitivity, using default 50")
       self.curve_sensitivity = 50
     
     try:
       self.lookahead_distance = int(self.params.get("HybridLookaheadDistance", return_default=True))
     except (ValueError, TypeError):
+      cloudlog.warning("HybridLateral: invalid HybridLookaheadDistance, using default 8")
       self.lookahead_distance = 8
     
     try:
       self.stability_factor = int(self.params.get("HybridStabilityFactor", return_default=True))
     except (ValueError, TypeError):
+      cloudlog.warning("HybridLateral: invalid HybridStabilityFactor, using default 100")
       self.stability_factor = 100
 
   def update(self):
