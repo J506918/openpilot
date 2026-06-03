@@ -17,6 +17,8 @@ from openpilot.sunnypilot.livedelay.helpers import get_lat_delay
 from openpilot.sunnypilot.modeld_v2.modeld_base import ModelStateBase
 from openpilot.sunnypilot.selfdrive.controls.lib.blinker_pause_lateral import BlinkerPauseLateral
 from openpilot.sunnypilot.selfdrive.controls.lib.latcontrol_torque_v0 import LatControlTorque as LatControlTorqueV0
+from openpilot.sunnypilot.selfdrive.controls.lib.latcontrol_hybrid import HybridLateralControl
+from openpilot.sunnypilot.selfdrive.controls.lib.latcontrol_hybrid_ext import HybridLateralControlExt
 
 
 class ControlsExt(ModelStateBase):
@@ -35,6 +37,11 @@ class ControlsExt(ModelStateBase):
     self.pm_services_ext = ['carControlSP']
 
   def initialize_lateral_control(self, lac, CI, dt):
+    # Check for Hybrid Lateral Control first
+    hybrid_enabled = self.params.get_bool("HybridLateralControl")
+    if hybrid_enabled and self.CP.lateralTuning.which() == 'torque':
+      return HybridLateralControl(self.CP, self.CP_SP, CI, dt)
+    
     enforce_torque_control = self.params.get_bool("EnforceTorqueControl")
     torque_versions = self.params.get("TorqueControlTune")
     if not enforce_torque_control:
