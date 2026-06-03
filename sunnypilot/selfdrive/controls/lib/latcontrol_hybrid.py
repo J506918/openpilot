@@ -71,8 +71,13 @@ class HybridLateralControl(LatControl):
   3. Adaptive blending between the two strategies
   """
   
-  def __init__(self, CP, CP_SP, CI, dt):
+  def __init__(self, CP, CP_SP, CI, dt, ext=None):
     super().__init__(CP, CP_SP, CI, dt)
+    
+    # Act as own extension for controlsd's extension.update_model_v2() call
+    self.extension = self
+    
+    self.hybrid_ext = ext
     
     self.torque_params = CP.lateralTuning.torque.as_builder()
     self.torque_from_lateral_accel = CI.torque_from_lateral_accel()
@@ -116,6 +121,9 @@ class HybridLateralControl(LatControl):
     self.pid.set_limits(self.lateral_accel_from_torque(self.steer_max, self.torque_params),
                         self.lateral_accel_from_torque(-self.steer_max, self.torque_params))
 
+  def update_lateral_lag(self, lag):
+    pass  # lat_delay is passed directly in update(), no extension-level lag needed
+
   def update_model_v2(self, model_v2):
     """Update model predictions for lookahead."""
     self.model_v2 = model_v2
@@ -144,6 +152,12 @@ class HybridLateralControl(LatControl):
     # Combine blending factors: use the maximum to be more aggressive in curves
     blend = max(speed_blend * 0.4, curvature_blend * 0.8, lat_accel_blend * 0.6)
     
+    # Apply user-configurable scales
+    if self.hybrid_ext:
+      curve_scale = self.hybrid_ext.get_curve_sensitivity_scale()
+      blend *= curve_scale
+      blend *= self.hybrid_ext.get_blend_factor_scale()
+    
     # Smooth transitions with filter
     blend = self.blend_filter.update(blend)
     
@@ -162,11 +176,13 @@ class HybridLateralControl(LatControl):
 
     try:
       n = len(self.model_v2.position.y)
+      # Use user-configurable lookahead time if ext is available
+      lookahead_time = self.hybrid_ext.get_lookahead_time() if self.hybrid_ext else LOOKAHEAD_TIME
       # T_IDXS from ModelConstants: quadratic time indices for each model frame
       t_idxs = ModelConstants.T_IDXS
-      # Find index closest to LOOKAHEAD_TIME
+      # Find index closest to lookahead_time
       lookahead_idx = int(np.clip(
-        np.searchsorted(t_idxs, LOOKAHEAD_TIME, side='left'), 2, n - 2))
+        np.searchsorted(t_idxs, lookahead_time, side='left'), 2, n - 2))
 
       # Use 3-point central difference for curvature: κ ≈ d²y/dx²
       # dx between frames: vEgo * (t[i+1] - t[i-1]) / 2
@@ -248,6 +264,8 @@ class HybridLateralControl(LatControl):
     desired_lateral_jerk = self.jerk_filter.update(raw_lateral_jerk)
     
     # ─── Adaptive Blending ─────────────────────────────────────────────────
+    if self.hybrid_ext:
+      self.hybrid_ext.update()
     self.blend_factor = self._compute_blend_factor(CS, desired_curvature, desired_lateral_accel)
     
     # ─── Feedforward Computation ───────────────────────────────────────────
@@ -255,6 +273,10 @@ class HybridLateralControl(LatControl):
                                               lateral_accel_deadzone, error, desired_lateral_jerk)
 
     predictive_ff = self._compute_predictive_feedforward(CS, desired_lateral_accel)
+
+    # Apply stability factor to stock feedforward (higher stability = stronger stock)
+    if self.hybrid_ext:
+      stock_ff *= self.hybrid_ext.get_stability_factor()
 
     # Blend the two feedforward strategies
     ff = stock_ff * (1.0 - self.blend_factor) + predictive_ff * self.blend_factor

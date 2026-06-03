@@ -40,7 +40,8 @@ class ControlsExt(ModelStateBase):
     # Check for Hybrid Lateral Control first
     hybrid_enabled = self.params.get_bool("HybridLateralControl")
     if hybrid_enabled and self.CP.lateralTuning.which() == 'torque':
-      return HybridLateralControl(self.CP, self.CP_SP, CI, dt)
+      hybrid_ext = HybridLateralControlExt()
+      return HybridLateralControl(self.CP, self.CP_SP, CI, dt, hybrid_ext)
     
     enforce_torque_control = self.params.get_bool("EnforceTorqueControl")
     torque_versions = self.params.get("TorqueControlTune")
