@@ -129,13 +129,15 @@ class DashboxDaemon:
         while self._running and self._ws:
             try:
                 ws_fd = self._ws.sock.fileno()
-                r, _, _ = select.select([ws_fd, self._notify_sock], [], [], 30)
+                r, _, _ = select.select([ws_fd, self._notify_sock], [], [], 5)
+
+                # Connection alive — refresh heartbeat (countdown reset)
+                storage.put("LastPingTime", str(time.monotonic_ns()))
 
                 if ws_fd in r:
                     msg = self._ws.recv()
                     if msg:
                         self._handle_message(msg)
-                        storage.put("LastPingTime", str(time.monotonic_ns()))
 
                 if self._notify_sock in r:
                     updates = {}
