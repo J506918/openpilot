@@ -216,9 +216,8 @@ class SunnylinkState:
   @property
   def dashbox_online(self) -> bool:
     try:
-      from sunnypilot.dashbox import storage
-      deadline = int(storage.get("HeartbeatTimer") or 0)
-      return deadline > 0 and int(time.monotonic()) < deadline
+      with open("/data/params/d/DashboxOnline", "r") as f:
+        return f.read().strip() == "1"
     except Exception:
       return False
 

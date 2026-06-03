@@ -2,14 +2,12 @@ from openpilot.common.params import Params
 """
 DashBox settings page — standalone layout with own branding and flow.
 """
-import time
 import pyray as rl
 from openpilot.selfdrive.ui.ui_state import ui_state
 from openpilot.system.ui.lib.application import gui_app, FontWeight
 from openpilot.system.ui.lib.multilang import tr
 from openpilot.system.ui.sunnypilot.widgets.list_view import button_item_sp, toggle_item_sp
 from openpilot.system.ui.sunnypilot.widgets.dashbox_pairing_dialog import DashboxPairingDialog
-from sunnypilot.dashbox import storage
 from openpilot.system.ui.widgets import Widget
 from openpilot.system.ui.widgets.label import UnifiedLabel
 from openpilot.system.ui.widgets.scroller_tici import Scroller, LineSeparator
@@ -156,8 +154,11 @@ class DashBoxLayout(Widget):
 
     # Connection status from heartbeat
     if self._enabled:
-      last_ping = int(storage.get("HeartbeatTimer") or 0)
-      is_online = last_ping > 0 and int(time.monotonic()) < last_ping
+      try:
+        with open("/data/params/d/DashboxOnline", "r") as f:
+          is_online = f.read().strip() == "1"
+      except Exception:
+        is_online = False
       self._status_label.action_item.set_text(tr("ONLINE") if is_online else tr("OFFLINE"))
     else:
       self._status_label.action_item.set_text(tr("DISABLED"))

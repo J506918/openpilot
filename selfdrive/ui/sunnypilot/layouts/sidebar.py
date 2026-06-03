@@ -6,7 +6,6 @@ This file is part of sunnypilot and is licensed under the MIT License.
 See the LICENSE.md file in the root directory for more details.
 """
 import pyray as rl
-import time
 from dataclasses import dataclass
 from openpilot.selfdrive.ui.ui_state import ui_state
 from openpilot.sunnypilot.sunnylink.api import UNREGISTERED_SUNNYLINK_DONGLE_ID
@@ -62,16 +61,21 @@ class SidebarSP:
       self._dashbox_status.update(tr_noop("DASHBOX"), tr_noop("DISABLED"), Colors.DISABLED)
       return
 
-    last_ping = int(storage.get("HeartbeatTimer") or 0)
     dongle_id = Params().get("DongleId")
 
-    is_online = last_ping > 0 and int(time.monotonic()) < last_ping
+    # Read DashboxOnline flag directly
+    try:
+      with open("/data/params/d/DashboxOnline", "r") as f:
+        is_online = f.read().strip() == "1"
+    except Exception:
+      is_online = False
+
     is_temp_fault = storage.get("DashboxTempFault") == "true"
     is_registering = not is_temp_fault and dongle_id in (None, "", UNREGISTERED_SUNNYLINK_DONGLE_ID)
 
     # Determine status/color pair based on priority
-    if last_ping:
-      status, color = (tr_noop("ONLINE"), Colors.GOOD) if is_online else (tr_noop("ERROR"), Colors.DANGER)
+    if is_online:
+      status, color = (tr_noop("ONLINE"), Colors.GOOD)
     elif is_temp_fault:
       status, color = (tr_noop("FAULT"), Colors.WARNING)
     elif is_registering:

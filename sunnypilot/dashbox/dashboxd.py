@@ -14,7 +14,6 @@ import websocket
 from openpilot.common.params import Params
 from openpilot.common.swaglog import cloudlog
 from openpilot.common.realtime import set_core_affinity
-from sunnypilot.dashbox import storage
 
 DASHBOX_WS_URL = "wss://8.136.28.140:8443/ws"
 RECONNECT_DELAY = 2
@@ -30,8 +29,8 @@ class DashboxDaemon:
         self._running = False
         self._crash_count = 0
         self._last_connect_start = 0.0
-        # Clear heartbeat on init — prevents stale ONLINE after reboot
-        storage.put("HeartbeatTimer", "0")
+        # Clear online flag on init — prevents stale ONLINE after crash/reboot
+        self._write_file("/data/params/d/DashboxOnline", "0")
 
     def run(self):
         self._running = True
@@ -90,7 +89,6 @@ class DashboxDaemon:
             )
         except Exception:
             cloudlog.exception("DashBox WS: connection failed")
-            storage.put("HeartbeatTimer", "0")
             return
 
         # Server may send fix_dongle_id if ID is missing or mismatched
@@ -104,7 +102,6 @@ class DashboxDaemon:
                 self._params.put("DongleId", new_id)
                 self._ws.close()
                 self._ws = None
-                storage.put("HeartbeatTimer", "0")
                 return
         except Exception:
             pass  # No fix message, normal connection
@@ -130,9 +127,6 @@ class DashboxDaemon:
             try:
                 ws_fd = self._ws.sock.fileno()
                 r, _, _ = select.select([ws_fd, self._notify_sock], [], [], 5)
-
-                # Connection alive — reset deadline to 20s from now
-                storage.put("HeartbeatTimer", str(int(time.monotonic()) + 20))
 
                 if ws_fd in r:
                     msg = self._ws.recv()
@@ -161,8 +155,6 @@ class DashboxDaemon:
 
         self._write_file("/data/params/d/DashboxOnline", "0")
         self._close_ws()
-        # Stale heartbeat so sidebar doesn't show stale ONLINE after disconnect
-        storage.put("HeartbeatTimer", "0")
         cloudlog.info("DashBox WS: disconnected")
 
     # ── helpers ─────────────────────────────────────────────────
