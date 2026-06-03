@@ -122,9 +122,6 @@ class DashboxDaemon:
         self._notify_sock.bind(NOTIFY_SOCK)
         self._notify_sock.setblocking(False)
 
-        # Set short recv timeout so heartbeat check runs frequently
-        self._ws.settimeout(1)
-
         # Select loop: WebSocket + notify socket
         while self._running and self._ws:
             try:
