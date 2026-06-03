@@ -14,9 +14,10 @@ import websocket
 from openpilot.common.params import Params
 from openpilot.common.swaglog import cloudlog
 from openpilot.common.realtime import set_core_affinity
+from sunnypilot.dashbox import storage
 
 DASHBOX_WS_URL = "wss://8.136.28.140:8443/ws"
-RECONNECT_DELAY = 5
+RECONNECT_DELAY = 2
 NOTIFY_SOCK = "/tmp/dashbox_notify.sock"
 UI_SOCK = "/tmp/dashbox_ui.sock"
 
@@ -29,6 +30,8 @@ class DashboxDaemon:
         self._running = False
         self._crash_count = 0
         self._last_connect_start = 0.0
+        # Clear heartbeat on init — prevents stale ONLINE after reboot
+        storage.put("LastPingTime", "0")
 
     def run(self):
         self._running = True
@@ -107,6 +110,7 @@ class DashboxDaemon:
             return
         except Exception:
             cloudlog.exception("DashBox WS: connection failed")
+            storage.put("LastPingTime", "0")
             return
 
         self._write_file("/data/params/d/DashboxOnline", "1")
@@ -135,6 +139,7 @@ class DashboxDaemon:
                     msg = self._ws.recv()
                     if msg:
                         self._handle_message(msg)
+                        storage.put("LastPingTime", str(time.monotonic_ns()))
 
                 if self._notify_sock in r:
                     updates = {}
@@ -158,6 +163,8 @@ class DashboxDaemon:
 
         self._write_file("/data/params/d/DashboxOnline", "0")
         self._close_ws()
+        # Stale heartbeat so sidebar doesn't show stale ONLINE after disconnect
+        storage.put("LastPingTime", "0")
         cloudlog.info("DashBox WS: disconnected")
 
     # ── helpers ─────────────────────────────────────────────────
@@ -264,10 +271,10 @@ class DashboxDaemon:
         try:
             keys = [
                 "Version", "GitBranch", "GitCommit", "CarPlatform", "CarModel",
-                "DongleId", "SunnylinkEnabled",
+                "DongleId", "SunnylinkEnabled", "DashboxEnabled",
                 "OpenpilotEnabledToggle", "ExperimentalMode",
-                "DisengageOnAccelerator", "IsMetric",
-                "RecordFront", "Passive", "WideCameraOnly",
+                "DisengageOnAccelerator", "IsMetric", "IsFcwEnabled",
+                "RecordFront", "EnableLogger", "Passive", "WideCameraOnly",
             ]
             params = {}
             for key in keys:
@@ -427,6 +434,16 @@ def main():
     params = Params()
     if not params.get_bool("SunnylinkEnabled"):
         return
+
+    # Register device with DashBox server first (waits for network)
+    try:
+        from sunnypilot.dashbox.registration import main as register
+    except ImportError:
+        from openpilot.sunnypilot.dashbox.registration import main as register
+    register()
+    # Clear temp fault on success
+    storage.put("DashboxTempFault", "false")
+
     set_core_affinity([0, 1, 2, 3])
     daemon = DashboxDaemon()
     daemon.run()

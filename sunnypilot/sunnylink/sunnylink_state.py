@@ -216,8 +216,9 @@ class SunnylinkState:
   @property
   def dashbox_online(self) -> bool:
     try:
-      with open("/data/params/d/DashboxOnline", "r") as f:
-        return f.read().strip() == "1"
+      from sunnypilot.dashbox import storage
+      last_ping = int(storage.get("LastPingTime") or 0)
+      return bool(last_ping and (time.monotonic_ns() - last_ping) < 80_000_000_000)
     except Exception:
       return False
 

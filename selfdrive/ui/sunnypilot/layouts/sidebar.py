@@ -65,18 +65,13 @@ class SidebarSP:
     last_ping = int(storage.get("LastPingTime") or 0)
     dongle_id = Params().get("DongleId")
 
-    try:
-      with open("/data/params/d/DashboxOnline", "r") as f:
-        dashbox_online = f.read().strip() == "1"
-    except Exception:
-      dashbox_online = False
-    is_online = dashbox_online
+    is_online = last_ping and (time.monotonic_ns() - last_ping) < PING_TIMEOUT_NS
     is_temp_fault = storage.get("DashboxTempFault") == "true"
     is_registering = not is_temp_fault and dongle_id in (None, "", UNREGISTERED_SUNNYLINK_DONGLE_ID)
 
-    # Determine status/color pair — file read wins
-    if is_online:
-      status, color = (tr_noop("ONLINE"), Colors.GOOD)
+    # Determine status/color pair based on priority
+    if last_ping:
+      status, color = (tr_noop("ONLINE"), Colors.GOOD) if is_online else (tr_noop("ERROR"), Colors.DANGER)
     elif is_temp_fault:
       status, color = (tr_noop("FAULT"), Colors.WARNING)
     elif is_registering:
