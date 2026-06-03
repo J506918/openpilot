@@ -37,11 +37,6 @@ class DashboxDaemon:
         self._running = True
         while self._running:
             self._last_connect_start = time.monotonic()
-            dongle_id = self._params.get("DongleId") or ""
-            if not dongle_id:
-                if not self._reregister():
-                    time.sleep(RECONNECT_DELAY)
-                    continue
             try:
                 self._connect()
             except Exception:
@@ -80,17 +75,6 @@ class DashboxDaemon:
             except OSError:
                 pass
 
-    def _reregister(self):
-        cloudlog.info("DashBox: no dongle_id, registering...")
-        try:
-            from sunnypilot.dashbox.api import register_dashbox
-            new_id = register_dashbox()
-            cloudlog.info(f"DashBox: registered as {new_id}")
-            return True
-        except Exception:
-            cloudlog.exception("DashBox: registration failed")
-            return False
-
     def _connect(self):
         self._close_ws()
 
@@ -104,14 +88,26 @@ class DashboxDaemon:
                 url, timeout=10, sslopt={"cert_reqs": 0},
                 ping_interval=5, ping_timeout=20,
             )
-        except websocket.WebSocketBadStatusException as e:
-            cloudlog.warning(f"DashBox WS: auth failed ({e.status_code}), clearing dongle_id")
-            self._params.put("DongleId", "")
-            return
         except Exception:
             cloudlog.exception("DashBox WS: connection failed")
             storage.put("LastPingTime", "0")
             return
+
+        # Server may send fix_dongle_id if ID is missing or mismatched
+        try:
+            self._ws.settimeout(3)
+            first_msg = self._ws.recv()
+            data = json.loads(first_msg)
+            if data.get("method") == "fix_dongle_id":
+                new_id = data["params"]["dongle_id"]
+                cloudlog.info(f"DashBox: server assigned dongle_id={new_id}")
+                self._params.put("DongleId", new_id)
+                self._ws.close()
+                self._ws = None
+                storage.put("LastPingTime", "0")
+                return
+        except Exception:
+            pass  # No fix message, normal connection
 
         self._write_file("/data/params/d/DashboxOnline", "1")
         cloudlog.info("DashBox WS: connected")
@@ -434,16 +430,6 @@ def main():
     params = Params()
     if not params.get_bool("SunnylinkEnabled"):
         return
-
-    # Register device with DashBox server first (waits for network)
-    try:
-        from sunnypilot.dashbox.registration import main as register
-    except ImportError:
-        from openpilot.sunnypilot.dashbox.registration import main as register
-    register()
-    # Clear temp fault on success
-    storage.put("DashboxTempFault", "false")
-
     set_core_affinity([0, 1, 2, 3])
     daemon = DashboxDaemon()
     daemon.run()
