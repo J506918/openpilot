@@ -13,7 +13,7 @@ from openpilot.sunnypilot.sunnylink.api import UNREGISTERED_SUNNYLINK_DONGLE_ID
 from openpilot.system.ui.lib.multilang import tr_noop
 
 
-PING_TIMEOUT_NS = 80_000_000_000  # 80 seconds in nanoseconds
+PING_TIMEOUT_NS = 20_000_000_000  # 20 seconds
 METRIC_HEIGHT = 126
 METRIC_MARGIN = 30
 METRIC_START_Y = 300

@@ -218,7 +218,7 @@ class SunnylinkState:
     try:
       from sunnypilot.dashbox import storage
       last_ping = int(storage.get("LastPingTime") or 0)
-      return bool(last_ping and (time.monotonic_ns() - last_ping) < 80_000_000_000)
+      return bool(last_ping and (time.monotonic_ns() - last_ping) < 20_000_000_000)
     except Exception:
       return False
 
