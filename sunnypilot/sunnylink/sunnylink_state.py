@@ -217,8 +217,8 @@ class SunnylinkState:
   def dashbox_online(self) -> bool:
     try:
       from sunnypilot.dashbox import storage
-      last_ping = int(storage.get("LastPingTime") or 0)
-      return bool(last_ping and (time.monotonic_ns() - last_ping) < 20_000_000_000)
+      deadline = int(storage.get("HeartbeatTimer") or 0)
+      return deadline > 0 and int(time.monotonic()) < deadline
     except Exception:
       return False
 

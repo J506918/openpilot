@@ -31,7 +31,7 @@ class DashboxDaemon:
         self._crash_count = 0
         self._last_connect_start = 0.0
         # Clear heartbeat on init — prevents stale ONLINE after reboot
-        storage.put("LastPingTime", "0")
+        storage.put("HeartbeatTimer", "0")
 
     def run(self):
         self._running = True
@@ -90,7 +90,7 @@ class DashboxDaemon:
             )
         except Exception:
             cloudlog.exception("DashBox WS: connection failed")
-            storage.put("LastPingTime", "0")
+            storage.put("HeartbeatTimer", "0")
             return
 
         # Server may send fix_dongle_id if ID is missing or mismatched
@@ -104,7 +104,7 @@ class DashboxDaemon:
                 self._params.put("DongleId", new_id)
                 self._ws.close()
                 self._ws = None
-                storage.put("LastPingTime", "0")
+                storage.put("HeartbeatTimer", "0")
                 return
         except Exception:
             pass  # No fix message, normal connection
@@ -131,8 +131,8 @@ class DashboxDaemon:
                 ws_fd = self._ws.sock.fileno()
                 r, _, _ = select.select([ws_fd, self._notify_sock], [], [], 5)
 
-                # Connection alive — refresh heartbeat (countdown reset)
-                storage.put("LastPingTime", str(time.monotonic_ns()))
+                # Connection alive — reset deadline to 20s from now
+                storage.put("HeartbeatTimer", str(int(time.monotonic()) + 20))
 
                 if ws_fd in r:
                     msg = self._ws.recv()
@@ -162,7 +162,7 @@ class DashboxDaemon:
         self._write_file("/data/params/d/DashboxOnline", "0")
         self._close_ws()
         # Stale heartbeat so sidebar doesn't show stale ONLINE after disconnect
-        storage.put("LastPingTime", "0")
+        storage.put("HeartbeatTimer", "0")
         cloudlog.info("DashBox WS: disconnected")
 
     # ── helpers ─────────────────────────────────────────────────

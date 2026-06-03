@@ -13,7 +13,7 @@ from openpilot.sunnypilot.sunnylink.api import UNREGISTERED_SUNNYLINK_DONGLE_ID
 from openpilot.system.ui.lib.multilang import tr_noop
 
 
-PING_TIMEOUT_NS = 20_000_000_000  # 20 seconds
+
 METRIC_HEIGHT = 126
 METRIC_MARGIN = 30
 METRIC_START_Y = 300
@@ -62,10 +62,10 @@ class SidebarSP:
       self._dashbox_status.update(tr_noop("DASHBOX"), tr_noop("DISABLED"), Colors.DISABLED)
       return
 
-    last_ping = int(storage.get("LastPingTime") or 0)
+    last_ping = int(storage.get("HeartbeatTimer") or 0)
     dongle_id = Params().get("DongleId")
 
-    is_online = last_ping and (time.monotonic_ns() - last_ping) < PING_TIMEOUT_NS
+    is_online = last_ping > 0 and int(time.monotonic()) < last_ping
     is_temp_fault = storage.get("DashboxTempFault") == "true"
     is_registering = not is_temp_fault and dongle_id in (None, "", UNREGISTERED_SUNNYLINK_DONGLE_ID)
 

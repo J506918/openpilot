@@ -156,8 +156,8 @@ class DashBoxLayout(Widget):
 
     # Connection status from heartbeat
     if self._enabled:
-      last_ping = int(storage.get("LastPingTime") or 0)
-      is_online = last_ping and (time.monotonic_ns() - last_ping) < 20_000_000_000
+      last_ping = int(storage.get("HeartbeatTimer") or 0)
+      is_online = last_ping > 0 and int(time.monotonic()) < last_ping
       self._status_label.action_item.set_text(tr("ONLINE") if is_online else tr("OFFLINE"))
     else:
       self._status_label.action_item.set_text(tr("DISABLED"))
