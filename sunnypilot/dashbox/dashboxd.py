@@ -122,6 +122,10 @@ class DashboxDaemon:
         self._notify_sock.bind(NOTIFY_SOCK)
         self._notify_sock.setblocking(False)
 
+        # Short recv timeout — prevents select loop from blocking on
+        # control frames (ping) before data frames (RPC).
+        self._ws.settimeout(1)
+
         # Select loop: WebSocket + notify socket
         while self._running and self._ws:
             try:
