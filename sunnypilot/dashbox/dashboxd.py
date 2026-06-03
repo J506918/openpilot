@@ -29,6 +29,7 @@ class DashboxDaemon:
         self._running = False
         self._crash_count = 0
         self._last_connect_start = 0.0
+        self._last_ping_time = 0.0
         # Clear online flag on init — prevents stale ONLINE after crash/reboot
         self._write_file("/data/params/d/DashboxOnline", "0")
 
@@ -106,7 +107,6 @@ class DashboxDaemon:
         except Exception:
             pass  # No fix message, normal connection
 
-        self._write_file("/data/params/d/DashboxOnline", "1")
         cloudlog.info("DashBox WS: connected")
 
         # Push state snapshot on connect
@@ -122,16 +122,24 @@ class DashboxDaemon:
         self._notify_sock.bind(NOTIFY_SOCK)
         self._notify_sock.setblocking(False)
 
+        # Set short recv timeout so heartbeat check runs frequently
+        self._ws.settimeout(1)
+
         # Select loop: WebSocket + notify socket
         while self._running and self._ws:
             try:
                 ws_fd = self._ws.sock.fileno()
                 r, _, _ = select.select([ws_fd, self._notify_sock], [], [], 5)
+                now = time.monotonic()
 
                 if ws_fd in r:
-                    msg = self._ws.recv()
-                    if msg:
-                        self._handle_message(msg)
+                    self._last_ping_time = now  # Server sent data or ping – reset heartbeat
+                    try:
+                        msg = self._ws.recv()
+                        if msg:
+                            self._handle_message(msg)
+                    except websocket.WebSocketTimeoutException:
+                        pass
 
                 if self._notify_sock in r:
                     updates = {}
@@ -147,13 +155,20 @@ class DashboxDaemon:
                     if updates:
                         self._send_params_push(updates)
 
+                # Heartbeat: DashboxOnline = 1 if ping within 20s, 0 otherwise
+                online = (now - self._last_ping_time) < 20
+                new_state = "1" if online else "0"
+                current = self._read_dashbox_online()
+                if new_state != current:
+                    self._write_file("/data/params/d/DashboxOnline", new_state)
+                    cloudlog.debug(f"DashBox: heartbeat -> {new_state}")
+
             except websocket.WebSocketTimeoutException:
                 continue
             except Exception:
                 cloudlog.exception("DashBox WS read error")
                 break
 
-        self._write_file("/data/params/d/DashboxOnline", "0")
         self._close_ws()
         cloudlog.info("DashBox WS: disconnected")
 
@@ -168,6 +183,14 @@ class DashboxDaemon:
             os.rename(tmp, path)
         except Exception:
             pass
+
+    @staticmethod
+    def _read_dashbox_online():
+        try:
+            with open("/data/params/d/DashboxOnline", "r") as f:
+                return f.read().strip()
+        except Exception:
+            return "0"
 
     @staticmethod
     def _read_serial():
