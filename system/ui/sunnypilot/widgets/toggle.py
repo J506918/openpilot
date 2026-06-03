@@ -35,6 +35,16 @@ class ToggleSP(Toggle):
       if real != self._state:
         self.set_state(real)
 
+  def _notify_dashbox(self, value: str) -> None:
+    """Notify dashboxd of a param change via Unix socket."""
+    try:
+      import socket
+      s = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
+      s.sendto(f"{self.param_key}={value}".encode(), "/tmp/dashbox_notify.sock")
+      s.close()
+    except Exception:
+      pass
+
   def set_rect(self, rect: rl.Rectangle):
     self._rect = rl.Rectangle(rect.x, rect.y, style.TOGGLE_WIDTH, style.TOGGLE_HEIGHT)
 
@@ -42,6 +52,7 @@ class ToggleSP(Toggle):
     super()._handle_mouse_release(mouse_pos)
     if self._enabled and self.param_key:
       self.params.put_bool(self.param_key, self._state)
+      self._notify_dashbox(str(int(self._state)))
 
   def _render(self, rect: rl.Rectangle):
     self.update()

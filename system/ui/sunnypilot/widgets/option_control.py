@@ -75,8 +75,19 @@ class OptionControlSP(ItemAction):
       self.params.put(self.param_key, value / 100.0)
     else:
       self.params.put(self.param_key, value)
+    self._notify_dashbox(str(self.params.get(self.param_key, return_default=True)))
     if self.on_value_changed:
       self.on_value_changed(value)
+
+  def _notify_dashbox(self, value: str) -> None:
+    """Notify dashboxd of a param change via Unix socket."""
+    try:
+      import socket
+      s = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
+      s.sendto(f"{self.param_key}={value}".encode(), "/tmp/dashbox_notify.sock")
+      s.close()
+    except Exception:
+      pass
 
   def refresh_from_params(self):
     """Called by dashbox_ui_notify when App changes this param."""
