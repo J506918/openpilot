@@ -169,6 +169,7 @@ class DashboxDaemon:
                 cloudlog.exception("DashBox WS read error")
                 break
 
+        self._write_file("/data/params/d/DashboxOnline", "0")
         self._close_ws()
         cloudlog.info("DashBox WS: disconnected")
 
