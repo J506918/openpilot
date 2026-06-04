@@ -43,7 +43,11 @@ class DashboxDaemon:
                 cloudlog.exception("DashBox WS error")
             # Crash cooldown — exponential backoff on quick failures
             elapsed = time.monotonic() - self._last_connect_start
-            if elapsed < 15:
+            if self._crash_count == -1:
+                # register_device: reconnect immediately, no penalty
+                self._crash_count = 0
+                penalty = 0
+            elif elapsed < 15:
                 self._crash_count += 1
                 penalty = RECONNECT_DELAY * (2 ** min(self._crash_count, 4))
                 cloudlog.warning(f"DashBox: crash cooldown {penalty}s (count={self._crash_count})")
@@ -92,20 +96,28 @@ class DashboxDaemon:
             cloudlog.exception("DashBox WS: connection failed")
             return
 
-        # Server may send fix_dongle_id if ID is missing or mismatched
+        # Server may send register_device if ID is missing or mismatched
         try:
             self._ws.settimeout(3)
             first_msg = self._ws.recv()
             data = json.loads(first_msg)
-            if data.get("method") == "fix_dongle_id":
+            if data.get("method") == "register_device":
                 new_id = data["params"]["dongle_id"]
-                cloudlog.info(f"DashBox: server assigned dongle_id={new_id}")
+                cloudlog.info(f"DashBox: register_device → dongle_id={new_id}")
+                # 1. Clear old DongleId
+                self._params.put("DongleId", "")
+                # 2. Write new DongleId
                 self._params.put("DongleId", new_id)
+                # 3. Re-read from file to confirm
+                confirmed = self._params.get("DongleId")
+                cloudlog.info(f"DashBox: registered dongle_id={confirmed}")
                 self._ws.close()
                 self._ws = None
+                # 4. Reconnect immediately — bypass crash cooldown
+                self._crash_count = -1  # signals run() to skip penalty
                 return
         except Exception:
-            pass  # No fix message, normal connection
+            pass  # No register message, normal connection
 
         cloudlog.info("DashBox WS: connected")
 
