@@ -350,7 +350,8 @@ class SunnylinkLayout(Widget):
     self._sponsor_btn.action_item.set_value(tier_name, ui_state.sunnylink_state.get_sponsor_tier_color())
     self._sponsor_btn.action_item.set_enabled(self._dashbox_enabled)
 
-    pair_btn_text = tr("Online") if ui_state.sunnylink_state.dashbox_online else tr("Offline")
+    state_map = {"connecting": "Connecting…", "registering": "Registering…", "online": "Online", "offline": "Offline"}
+    pair_btn_text = tr(state_map.get(ui_state.sunnylink_state.dashbox_state, "Offline"))
     self._pair_btn.action_item.set_text(pair_btn_text)
     self._pair_btn.action_item.set_enabled(self._dashbox_enabled)
 

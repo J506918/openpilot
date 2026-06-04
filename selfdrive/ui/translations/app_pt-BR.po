@@ -871,3 +871,15 @@ msgstr "✓ ASSINADO"
 msgid "🔥 Firehose Mode 🔥"
 msgstr "🔥 Modo Firehose 🔥"
 
+
+msgid "CONNECTING"
+msgstr "连接中…"
+
+msgid "REGISTERING"
+msgstr "注册中…"
+
+msgid "Connecting…"
+msgstr "连接中…"
+
+msgid "Registering…"
+msgstr "注册中…"

@@ -216,10 +216,18 @@ class SunnylinkState:
   @property
   def dashbox_online(self) -> bool:
     try:
-      with open("/data/params/d/DashboxOnline", "r") as f:
-        return f.read().strip() == "1"
+      with open("/data/params/d/DashboxState", "r") as f:
+        return f.read().strip() == "online"
     except Exception:
       return False
+
+  @property
+  def dashbox_state(self) -> str:
+    try:
+      with open("/data/params/d/DashboxState", "r") as f:
+        return f.read().strip()
+    except Exception:
+      return "offline"
 
   def get_sponsor_tier_color(self) -> rl.Color:
     tier = self.get_sponsor_tier()

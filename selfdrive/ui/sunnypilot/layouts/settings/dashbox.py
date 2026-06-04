@@ -155,11 +155,12 @@ class DashBoxLayout(Widget):
     # Connection status from heartbeat
     if self._enabled:
       try:
-        with open("/data/params/d/DashboxOnline", "r") as f:
-          is_online = f.read().strip() == "1"
+        with open("/data/params/d/DashboxState", "r") as f:
+          state = f.read().strip()
       except Exception:
-        is_online = False
-      self._status_label.action_item.set_text(tr("ONLINE") if is_online else tr("OFFLINE"))
+        state = "offline"
+      state_text = {"connecting": "CONNECTING", "registering": "REGISTERING", "online": "ONLINE", "offline": "OFFLINE"}.get(state, "OFFLINE")
+      self._status_label.action_item.set_text(tr(state_text))
     else:
       self._status_label.action_item.set_text(tr("DISABLED"))
 

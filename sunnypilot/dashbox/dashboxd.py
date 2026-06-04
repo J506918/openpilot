@@ -22,6 +22,8 @@ UI_SOCK = "/tmp/dashbox_ui.sock"
 
 
 class DashboxDaemon:
+    STATE_FILE = "/data/params/d/DashboxState"
+
     def __init__(self):
         self._params = Params()
         self._ws: websocket.WebSocket | None = None
@@ -30,8 +32,14 @@ class DashboxDaemon:
         self._crash_count = 0
         self._last_connect_start = 0.0
         self._last_ping_time = 0.0
-        # Clear online flag on init — prevents stale ONLINE after crash/reboot
-        self._write_file("/data/params/d/DashboxOnline", "0")
+        self._set_state("offline")
+
+    def _set_state(self, state: str):
+        self._state = state
+        self._write_file(self.STATE_FILE, state)
+
+    def _set_online(self, online: bool):
+        self._write_file("/data/params/d/DashboxOnline", "1" if online else "0")
 
     def run(self):
         self._running = True
@@ -81,6 +89,7 @@ class DashboxDaemon:
 
     def _connect(self):
         self._close_ws()
+        self._set_state("connecting")
 
         serial = self._read_serial()
         dongle_id = self._params.get("DongleId") or ""
@@ -104,6 +113,7 @@ class DashboxDaemon:
             if data.get("method") == "register_device":
                 new_id = data["params"]["dongle_id"]
                 cloudlog.info(f"DashBox: register_device → dongle_id={new_id}")
+                self._set_state("registering")
                 # 1. Clear old DongleId
                 self._params.put("DongleId", "")
                 # 2. Write new DongleId
@@ -120,6 +130,7 @@ class DashboxDaemon:
             pass  # No register message, normal connection
 
         cloudlog.info("DashBox WS: connected")
+        self._set_state("online")
 
         # Push state snapshot on connect
         self._send_vehicle_info()
@@ -173,7 +184,7 @@ class DashboxDaemon:
                 new_state = "1" if online else "0"
                 current = self._read_dashbox_online()
                 if new_state != current:
-                    self._write_file("/data/params/d/DashboxOnline", new_state)
+                    self._set_online(online)
                     cloudlog.debug(f"DashBox: heartbeat -> {new_state}")
 
             except websocket.WebSocketTimeoutException:
@@ -182,7 +193,7 @@ class DashboxDaemon:
                 cloudlog.exception("DashBox WS read error")
                 break
 
-        self._write_file("/data/params/d/DashboxOnline", "0")
+        self._set_state("offline")
         self._close_ws()
         cloudlog.info("DashBox WS: disconnected")
 

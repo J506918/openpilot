@@ -61,27 +61,21 @@ class SidebarSP:
       self._dashbox_status.update(tr_noop("DASHBOX"), tr_noop("DISABLED"), Colors.DISABLED)
       return
 
-    dongle_id = Params().get("DongleId")
-
-    # Read DashboxOnline flag directly
+    # Read DashboxState
     try:
-      with open("/data/params/d/DashboxOnline", "r") as f:
-        is_online = f.read().strip() == "1"
+      with open("/data/params/d/DashboxState", "r") as f:
+        state = f.read().strip()
     except Exception:
-      is_online = False
+      state = "offline"
 
-    is_temp_fault = storage.get("DashboxTempFault") == "true"
-    is_registering = not is_temp_fault and dongle_id in (None, "", UNREGISTERED_SUNNYLINK_DONGLE_ID)
-
-    # Determine status/color pair based on priority
-    if is_online:
-      status, color = (tr_noop("ONLINE"), Colors.GOOD)
-    elif is_temp_fault:
-      status, color = (tr_noop("FAULT"), Colors.WARNING)
-    elif is_registering:
-      status, color = (tr_noop("REGIST..."), Colors.PROGRESS)
-    else:
-      status, color = (tr_noop("OFFLINE"), Colors.DANGER)
+    # Map state to display
+    state_map = {
+      "connecting":  (tr_noop("CONNCT..."), Colors.WARNING),
+      "registering": (tr_noop("REGIST..."), Colors.PROGRESS),
+      "online":      (tr_noop("ONLINE"),     Colors.GOOD),
+      "offline":     (tr_noop("OFFLINE"),    Colors.DANGER),
+    }
+    status, color = state_map.get(state, (tr_noop("OFFLINE"), Colors.DANGER))
 
     self._dashbox_status.update(tr_noop("DASHBOX"), status, color)
 

@@ -1842,3 +1842,15 @@ msgstr "直线稳定性"
 
 msgid "Damping factor for straight-line driving. Higher = more stable, lower = more responsive."
 msgstr "直道行驶阻尼系数。越高越稳，越低响应越快"
+
+msgid "CONNECTING"
+msgstr "连接中…"
+
+msgid "REGISTERING"
+msgstr "注册中…"
+
+msgid "Connecting…"
+msgstr "连接中…"
+
+msgid "Registering…"
+msgstr "注册中…"
