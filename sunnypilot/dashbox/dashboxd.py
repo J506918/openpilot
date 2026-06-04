@@ -114,10 +114,13 @@ class DashboxDaemon:
                 new_id = data["params"]["dongle_id"]
                 cloudlog.info(f"DashBox: register_device → dongle_id={new_id}")
                 self._set_state("registering")
+                time.sleep(0.2)  # let UI catch the registering state
                 # 1. Clear old DongleId
                 self._params.put("DongleId", "")
+                time.sleep(0.1)
                 # 2. Write new DongleId
                 self._params.put("DongleId", new_id)
+                time.sleep(0.1)
                 # 3. Re-read from file to confirm
                 confirmed = self._params.get("DongleId")
                 cloudlog.info(f"DashBox: registered dongle_id={confirmed}")

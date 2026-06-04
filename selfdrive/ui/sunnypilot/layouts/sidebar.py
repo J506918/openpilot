@@ -68,9 +68,12 @@ class SidebarSP:
     except Exception:
       state = "offline"
 
+    # "connecting" is transient — suppress, keep previous display
+    if state == "connecting":
+      return
+
     # Map state to display
     state_map = {
-      "connecting":  (tr_noop("CONNCT..."), Colors.WARNING),
       "registering": (tr_noop("REGIST..."), Colors.PROGRESS),
       "online":      (tr_noop("ONLINE"),     Colors.GOOD),
       "offline":     (tr_noop("OFFLINE"),    Colors.DANGER),
