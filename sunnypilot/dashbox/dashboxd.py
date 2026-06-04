@@ -114,13 +114,13 @@ class DashboxDaemon:
                 new_id = data["params"]["dongle_id"]
                 cloudlog.info(f"DashBox: register_device → dongle_id={new_id}")
                 self._set_state("registering")
-                time.sleep(0.2)  # let UI catch the registering state
+                time.sleep(1)  # let UI catch the registering state
                 # 1. Clear old DongleId
                 self._params.put("DongleId", "")
-                time.sleep(0.1)
+                time.sleep(1)
                 # 2. Write new DongleId
                 self._params.put("DongleId", new_id)
-                time.sleep(0.1)
+                time.sleep(1)
                 # 3. Re-read from file to confirm
                 confirmed = self._params.get("DongleId")
                 cloudlog.info(f"DashBox: registered dongle_id={confirmed}")
@@ -189,6 +189,11 @@ class DashboxDaemon:
                 if new_state != current:
                     self._set_online(online)
                     cloudlog.debug(f"DashBox: heartbeat -> {new_state}")
+                # Also update DashboxState on heartbeat timeout (don't wait for WS disconnect)
+                if not online and self._state == "online":
+                    self._set_state("offline")
+                elif online and self._state == "offline":
+                    self._set_state("online")
 
             except websocket.WebSocketTimeoutException:
                 continue
