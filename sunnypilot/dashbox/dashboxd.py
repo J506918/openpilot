@@ -411,6 +411,8 @@ class DashboxDaemon:
                     for f in os.listdir(params_dir):
                         if f.endswith(".tmp") or f.endswith(".lock"):
                             continue
+                        if f in ("ModelManager_ModelsCache", "CarList", "UpdaterCurrentReleaseNotes", "UpdaterAvailableBranches"):
+                            continue
                         try:
                             fp = os.path.join(params_dir, f)
                             if os.path.isfile(fp):
