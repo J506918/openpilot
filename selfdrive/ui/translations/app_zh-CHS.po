@@ -1805,3 +1805,40 @@ msgstr "此设备的唯一标识符。"
 
 msgid "Enter this code in the DashBox app:"
 msgstr "在 DashBox App 中输入此码："
+
+# Hybrid Lateral Control
+msgid "Hybrid Lateral Control"
+msgstr "混合横向控制"
+
+msgid "Combines NNLC's predictive lookahead with stock's rock-solid stability."
+msgstr "结合 NNLC 预测性前瞻与原生稳定性"
+
+msgid "Customize Hybrid Lateral"
+msgstr "自定义混合横向参数"
+
+msgid "Enable Hybrid Lateral Control - combines NNLC's predictive lookahead with stock's rock-solid stability."
+msgstr "启用混合横向控制 - 结合 NNLC 预测性前瞻与原生稳定性"
+
+msgid "Blend Aggressiveness"
+msgstr "混合激进程度"
+
+msgid "Higher values = more predictive (NNLC-like) behavior on curves. Lower values = more stable (stock-like) behavior."
+msgstr "值越高弯道越趋近 NNLC 预测模式，越低越接近原生稳定风格"
+
+msgid "Curve Sensitivity"
+msgstr "弯道灵敏度"
+
+msgid "How quickly the controller transitions to predictive mode when detecting curves."
+msgstr "检测到弯道时切换到预测模式的速度"
+
+msgid "Lookahead Distance"
+msgstr "前瞻距离"
+
+msgid "How far ahead (in seconds) to predict curves. Higher = smoother but less responsive."
+msgstr "预测弯道的前瞻时间。越高越平顺但响应越慢"
+
+msgid "Straight-Line Stability"
+msgstr "直线稳定性"
+
+msgid "Damping factor for straight-line driving. Higher = more stable, lower = more responsive."
+msgstr "直道行驶阻尼系数。越高越稳，越低响应越快"
