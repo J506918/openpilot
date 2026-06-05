@@ -117,6 +117,12 @@ class HybridLateralControl(LatControl):
     self.last_blend_factor = 0.0
     self.last_predictive_ff = 0.0
 
+  def update_live_torque_params(self, latAccelFactor, latAccelOffset, friction):
+    self.torque_params.latAccelFactor = latAccelFactor
+    self.torque_params.latAccelOffset = latAccelOffset
+    self.torque_params.friction = friction
+    self.update_limits()
+
   def update_limits(self):
     self.pid.set_limits(self.lateral_accel_from_torque(self.steer_max, self.torque_params),
                         self.lateral_accel_from_torque(-self.steer_max, self.torque_params))
