@@ -208,6 +208,7 @@ inline static std::unordered_map<std::string, ParamKeyAttributes> keys = {
     {"HybridCurveSensitivity", {PERSISTENT | BACKUP, INT, "50"}},
     {"HybridLookaheadDistance", {PERSISTENT | BACKUP, INT, "8"}},
     {"HybridStabilityFactor", {PERSISTENT | BACKUP, INT, "100"}},
+    {"HybridLateralControlV2", {PERSISTENT | BACKUP, BOOL, "0"}},
 
     // sunnylink params
     {"EnableSunnylinkUploader", {PERSISTENT | BACKUP, BOOL}},

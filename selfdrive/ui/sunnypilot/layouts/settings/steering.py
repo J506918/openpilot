@@ -16,6 +16,7 @@ from openpilot.selfdrive.ui.sunnypilot.layouts.settings.steering_sub_layouts.lan
 from openpilot.selfdrive.ui.sunnypilot.layouts.settings.steering_sub_layouts.mads_settings import MadsSettingsLayout
 from openpilot.selfdrive.ui.sunnypilot.layouts.settings.steering_sub_layouts.torque_settings import TorqueSettingsLayout
 from openpilot.selfdrive.ui.sunnypilot.layouts.settings.steering_sub_layouts.hybrid_lateral_settings import HybridLateralSettingsLayout
+from openpilot.selfdrive.ui.sunnypilot.layouts.settings.steering_sub_layouts.hybrid_lateral_settings_v2 import HybridLateralSettingsV2Layout
 
 
 class PanelType(IntEnum):
@@ -24,6 +25,7 @@ class PanelType(IntEnum):
   LANE_CHANGE = 2
   TORQUE_CONTROL = 3
   HYBRID_LATERAL = 4
+  HYBRID_LATERAL_V2 = 5
 
 
 class SteeringLayout(Widget):
@@ -35,6 +37,7 @@ class SteeringLayout(Widget):
     self._mads_settings_layout = MadsSettingsLayout(lambda: self._set_current_panel(PanelType.STEERING))
     self._torque_control_layout = TorqueSettingsLayout(lambda: self._set_current_panel(PanelType.STEERING))
     self._hybrid_lateral_layout = HybridLateralSettingsLayout(lambda: self._set_current_panel(PanelType.STEERING))
+    self._hybrid_lateral_v2_layout = HybridLateralSettingsV2Layout(lambda: self._set_current_panel(PanelType.STEERING))
 
     items = self._initialize_items()
     self._scroller = Scroller(items, line_separator=False, spacing=0)
@@ -109,6 +112,16 @@ class SteeringLayout(Widget):
       button_width=850,
       callback=lambda: self._set_current_panel(PanelType.HYBRID_LATERAL)
     )
+    self._hybrid_lateral_v2_toggle = toggle_item_sp(
+      param="HybridLateralControlV2",
+      title=lambda: tr("Hybrid Lateral Control V2"),
+      description=lambda: tr("Model-driven lateral control. Direct torque from model predictions, no PID.")
+    )
+    self._hybrid_lateral_v2_settings_button = simple_button_item_sp(
+      button_text=lambda: tr("Customize Hybrid Lateral V2"),
+      button_width=850,
+      callback=lambda: self._set_current_panel(PanelType.HYBRID_LATERAL_V2)
+    )
 
     items = [
       self._mads_toggle,
@@ -127,6 +140,9 @@ class SteeringLayout(Widget):
       LineSeparatorSP(40),
       self._hybrid_lateral_toggle,
       self._hybrid_lateral_settings_button,
+      LineSeparatorSP(40),
+      self._hybrid_lateral_v2_toggle,
+      self._hybrid_lateral_v2_settings_button,
     ]
     return items
 
@@ -151,11 +167,15 @@ class SteeringLayout(Widget):
     enforce_torque_enabled = self._torque_control_toggle.action_item.get_state()
     nnlc_enabled = self._nnlc_toggle.action_item.get_state()
     hybrid_enabled = self._hybrid_lateral_toggle.action_item.get_state()
-    self._nnlc_toggle.action_item.set_enabled(ui_state.is_offroad() and torque_allowed and not enforce_torque_enabled and not hybrid_enabled)
-    self._torque_control_toggle.action_item.set_enabled(ui_state.is_offroad() and torque_allowed and not nnlc_enabled and not hybrid_enabled)
+    hybrid_v2_enabled = self._hybrid_lateral_v2_toggle.action_item.get_state()
+    other_mode = enforce_torque_enabled or nnlc_enabled or hybrid_enabled or hybrid_v2_enabled
+    self._nnlc_toggle.action_item.set_enabled(ui_state.is_offroad() and torque_allowed and not (other_mode and not nnlc_enabled))
+    self._torque_control_toggle.action_item.set_enabled(ui_state.is_offroad() and torque_allowed and not (other_mode and not enforce_torque_enabled))
     self._torque_customization_button.action_item.set_enabled(self._torque_control_toggle.action_item.get_state())
-    self._hybrid_lateral_toggle.action_item.set_enabled(ui_state.is_offroad() and torque_allowed and not enforce_torque_enabled and not nnlc_enabled)
+    self._hybrid_lateral_toggle.action_item.set_enabled(ui_state.is_offroad() and torque_allowed and not (other_mode and not hybrid_enabled))
     self._hybrid_lateral_settings_button.action_item.set_enabled(ui_state.is_offroad() and hybrid_enabled)
+    self._hybrid_lateral_v2_toggle.action_item.set_enabled(ui_state.is_offroad() and torque_allowed and not (other_mode and not hybrid_v2_enabled))
+    self._hybrid_lateral_v2_settings_button.action_item.set_enabled(ui_state.is_offroad() and hybrid_v2_enabled)
 
   def _render(self, rect):
     if self._current_panel == PanelType.LANE_CHANGE:
@@ -166,6 +186,8 @@ class SteeringLayout(Widget):
       self._torque_control_layout.render(rect)
     elif self._current_panel == PanelType.HYBRID_LATERAL:
       self._hybrid_lateral_layout.render(rect)
+    elif self._current_panel == PanelType.HYBRID_LATERAL_V2:
+      self._hybrid_lateral_v2_layout.render(rect)
     else:
       self._scroller.render(rect)
 
