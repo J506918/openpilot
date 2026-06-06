@@ -202,12 +202,7 @@ inline static std::unordered_map<std::string, ParamKeyAttributes> keys = {
     // Neural Network Lateral Control
     {"NeuralNetworkLateralControl", {PERSISTENT | BACKUP, BOOL, "0"}},
 
-    // Hybrid Lateral Control
-    {"HybridLateralControl", {PERSISTENT | BACKUP, BOOL, "0"}},
-    {"HybridBlendAggressiveness", {PERSISTENT | BACKUP, INT, "50"}},
-    {"HybridCurveSensitivity", {PERSISTENT | BACKUP, INT, "50"}},
-    {"HybridLookaheadDistance", {PERSISTENT | BACKUP, INT, "8"}},
-    {"HybridStabilityFactor", {PERSISTENT | BACKUP, INT, "100"}},
+    // Hybrid Lateral Control V2 (MPC)
     {"HybridLateralControlV2", {PERSISTENT | BACKUP, BOOL, "0"}},
 
     // sunnylink params
