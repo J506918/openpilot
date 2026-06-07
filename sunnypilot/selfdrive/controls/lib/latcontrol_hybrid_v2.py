@@ -110,10 +110,11 @@ class HybridLateralControlV2(LatControl):
 
     # ─── Build MPC reference from model predictions ────────────────────
     if self.model_valid:
-      n = min(len(self.model_v2.position.y), MPC_N + 1)
-      self._y_pts[:n] = self.model_v2.position.y[:n]
-      self._heading_pts[:n] = self.model_v2.orientation.z[:n]
-      self._yaw_rate_pts[:n] = self.model_v2.orientationRate.z[:n]
+      n = min(int(len(self.model_v2.position.y)), MPC_N + 1)
+      for i in range(n):
+        self._y_pts[i] = self.model_v2.position.y[i]
+        self._heading_pts[i] = self.model_v2.orientation.z[i]
+        self._yaw_rate_pts[i] = self.model_v2.orientationRate.z[i]
       if n < MPC_N + 1:
         self._y_pts[n:] = self._y_pts[n - 1]
         self._heading_pts[n:] = self._heading_pts[n - 1]
