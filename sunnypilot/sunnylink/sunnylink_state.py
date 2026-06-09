@@ -58,9 +58,12 @@ class Role:
 
 
 def _parse_roles(roles: str) -> list[Role]:
-  lst_roles = []
+  lst_roles: list[Role] = []
   try:
     roles_list = json.loads(roles)
+    if not isinstance(roles_list, list):
+      cloudlog.warning(f"Expected roles list, got {type(roles_list).__name__}: {roles_list}")
+      return lst_roles
     for r in roles_list:
       try:
         role = Role(r)

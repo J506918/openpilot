@@ -230,7 +230,7 @@ class DaemonProcess(ManagerProcess):
         pass
 
     cloudlog.info(f"starting daemon {self.name}")
-    proc = subprocess.Popen(['python', '-m', self.module],
+    proc = subprocess.Popen(['/usr/local/venv/bin/python', '-m', self.module],
                                stdin=open('/dev/null'),
                                stdout=open('/dev/null', 'w'),
                                stderr=open('/dev/null', 'w'),

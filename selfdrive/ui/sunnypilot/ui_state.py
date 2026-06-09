@@ -56,6 +56,7 @@ class UIStateSP:
     self.enforce_torque_control: bool = False
     self.custom_torque_params: bool = False
     self.torque_override_enabled: bool = False
+    self.dashbox_enabled: bool = False
     self._sp_initialized: bool = False
 
     # DashBox real-time UI refresh via Unix socket
