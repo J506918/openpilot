@@ -377,7 +377,6 @@ class Updater:
     setup_git_options(OVERLAY_MERGED)
 
     run(["git", "config", "--replace-all", "remote.origin.fetch", "+refs/heads/*:refs/remotes/origin/*"], OVERLAY_MERGED)
-    run(["git", "config", "remote.origin.url", "https://github.com/J506918/sunnypilot.git"], OVERLAY_MERGED)
 
     branch = self.target_branch
     git_fetch_output = run(["git", "fetch", "origin", branch], OVERLAY_MERGED)
