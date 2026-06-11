@@ -17,7 +17,7 @@ from openpilot.sunnypilot.livedelay.helpers import get_lat_delay
 from openpilot.sunnypilot.modeld_v2.modeld_base import ModelStateBase
 from openpilot.sunnypilot.selfdrive.controls.lib.blinker_pause_lateral import BlinkerPauseLateral
 from openpilot.sunnypilot.selfdrive.controls.lib.latcontrol_torque_v0 import LatControlTorque as LatControlTorqueV0
-from openpilot.sunnypilot.selfdrive.controls.lib.latcontrol_v2 import LatControlV2
+from openpilot.sunnypilot.selfdrive.controls.lib.latcontrol_lqr import LatControlLQR
 
 
 class ControlsExt(ModelStateBase):
@@ -39,7 +39,7 @@ class ControlsExt(ModelStateBase):
     # LQR Lateral Control — physics feedforward + bounded state feedback
     lqr_enabled = self.params.get_bool("LateralControlLQR")
     if lqr_enabled and self.CP.lateralTuning.which() == 'torque':
-      return LatControlV2(self.CP, self.CP_SP, CI, dt)
+      return LatControlLQR(self.CP, self.CP_SP, CI, dt)
 
     enforce_torque_control = self.params.get_bool("EnforceTorqueControl")
     torque_versions = self.params.get("TorqueControlTune")

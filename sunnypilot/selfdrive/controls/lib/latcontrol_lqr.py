@@ -1,5 +1,5 @@
 """
-LQR Lateral Control V2 — Physics Feedforward + Bounded State Feedback
+LQR Lateral Control — Physics Feedforward + Bounded State Feedback
 Copyright (c) 2026, sunnypilot contributors
 
 Architecture:
@@ -46,7 +46,7 @@ LQR_CURV_RATE_GAIN = 0.25      # curvature rate feedforward gain (s)
 LQR_CURV_RATE_LP = 3.0         # Hz, low-pass for curvature rate
 FRICTION_THRESHOLD = 0.3
 
-VERSION = 2
+VERSION = 90
 
 
 def _compute_lookahead_idx(lookahead_s: float) -> int:
@@ -55,7 +55,7 @@ def _compute_lookahead_idx(lookahead_s: float) -> int:
   return min(max(idx, 1), CONTROL_N - 1)  # at least 1, at most CONTROL_N-1
 
 
-class LatControlV2(LatControl):
+class LatControlLQR(LatControl):
   """LQR-style lateral controller: feedforward-dominant, no integral."""
 
   def __init__(self, CP, CP_SP, CI, dt):
