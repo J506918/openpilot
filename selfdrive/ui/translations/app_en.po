@@ -874,8 +874,8 @@ msgstr "🔥 Firehose Mode 🔥"
 
 #: sunnypilot/selfdrive/ui/sunnypilot/layouts/settings/steering.py
 msgid "Lateral Control V2 (LQR)"
-msgstr "Lateral Control V2 (LQR)"
+msgstr ""
 
 #: sunnypilot/selfdrive/ui/sunnypilot/layouts/settings/steering.py
 msgid "Physics feedforward + LQR state feedback. No integral windup. Smooth, precise, immediate response on all curves."
-msgstr "Physics feedforward + LQR state feedback. No integral windup. Smooth, precise, immediate response on all curves."
+msgstr ""
