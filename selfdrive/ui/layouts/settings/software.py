@@ -141,7 +141,7 @@ class SoftwareLayout(Widget):
     self._branch_btn.action_item.set_value(current_branch)
 
     # Update install button
-    self._install_btn.set_visible(ui_state.is_offroad() and update_available and updater_state == "idle")
+    self._install_btn.set_visible(ui_state.is_offroad() and update_available)
     if update_available:
       new_desc = ui_state.params.get("UpdaterNewDescription") or ""
       new_release_notes = (ui_state.params.get("UpdaterNewReleaseNotes") or b"").decode("utf-8", "replace")

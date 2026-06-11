@@ -464,7 +464,6 @@ def main() -> None:
 
         # check for update
         params.put("UpdaterState", "checking...", block=True)
-        params.put_bool("UpdateAvailable", False, block=True)
         updater.check_for_update()
 
         # download update
