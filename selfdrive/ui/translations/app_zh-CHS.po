@@ -711,7 +711,7 @@ msgstr "启用后，踩下加速踏板将脱离 sunnypilot。"
 
 #: openpilot/selfdrive/ui/layouts/sidebar.py
 msgid "Wi-Fi"
-msgstr "Wi‑Fi"
+msgstr "Wi-Fi"
 
 #: system/ui/widgets/network.py
 msgid "Wi-Fi Network Metered"
