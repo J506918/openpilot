@@ -65,10 +65,10 @@ def _menu_codepoints() -> tuple[int, ...]:
     return tuple(sorted(ord(c) for c in (base_ascii | all_lang_names)))
 
 
-def _glyph_metrics(glyphs, rects, codepoints):
+def _glyph_metrics(glyphs, rects, glyph_count: int):
     entries = []
     min_offset_y, max_extent = None, 0
-    for idx, codepoint in enumerate(codepoints):
+    for idx in range(glyph_count):
         glyph = glyphs[idx]
         rect = rects[idx]
         width = int(round(rect.width))
@@ -77,7 +77,7 @@ def _glyph_metrics(glyphs, rects, codepoints):
         min_offset_y = offset_y if min_offset_y is None else min(min_offset_y, offset_y)
         max_extent = max(max_extent, offset_y + height)
         entries.append({
-            "id": codepoint,
+            "id": glyph.value,
             "x": int(round(rect.x)),
             "y": int(round(rect.y)),
             "width": width,
@@ -125,14 +125,15 @@ def _process(font_file: str, font_size: int, stem: str, codepoints: tuple[int, .
     file_buf = rl.ffi.new("unsigned char[]", data)
     cp_buffer = rl.ffi.new("int[]", codepoints)
     cp_ptr = rl.ffi.cast("int *", cp_buffer)
+    glyph_count = rl.ffi.new("int *", len(codepoints))
     glyphs = rl.load_font_data(
         rl.ffi.cast("unsigned char *", file_buf), len(data),
-        font_size, cp_ptr, len(codepoints), rl.FontType.FONT_DEFAULT, rl.ffi.new("int *", [0]))
+        font_size, cp_ptr, len(codepoints), rl.FontType.FONT_DEFAULT, glyph_count)
     if glyphs == rl.ffi.NULL:
         raise RuntimeError("raylib failed to load font data")
 
     rects_ptr = rl.ffi.new("Rectangle **")
-    image = rl.gen_image_font_atlas(glyphs, rects_ptr, len(codepoints),
+    image = rl.gen_image_font_atlas(glyphs, rects_ptr, glyph_count[0],
                                      font_size, GLYPH_PADDING, 0)
     if image.width == 0 or image.height == 0:
         raise RuntimeError("raylib returned an empty atlas")
@@ -140,7 +141,7 @@ def _process(font_file: str, font_size: int, stem: str, codepoints: tuple[int, .
     rects = rects_ptr[0]
     atlas_name = f"{stem}.png"
     atlas_path = FONT_DIR / atlas_name
-    entries, line_height, base = _glyph_metrics(glyphs, rects, codepoints)
+    entries, line_height, base = _glyph_metrics(glyphs, rects, glyph_count[0])
 
     if not rl.export_image(image, atlas_path.as_posix()):
         raise RuntimeError("Failed to export atlas image")
