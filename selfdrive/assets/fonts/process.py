@@ -127,7 +127,7 @@ def _process(font_file: str, font_size: int, stem: str, codepoints: tuple[int, .
     cp_ptr = rl.ffi.cast("int *", cp_buffer)
     glyphs = rl.load_font_data(
         rl.ffi.cast("unsigned char *", file_buf), len(data),
-        font_size, cp_ptr, len(codepoints), rl.FontType.FONT_DEFAULT)
+        font_size, cp_ptr, len(codepoints), rl.FontType.FONT_DEFAULT, 0)
     if glyphs == rl.ffi.NULL:
         raise RuntimeError("raylib failed to load font data")
 
