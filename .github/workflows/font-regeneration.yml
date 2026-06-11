@@ -28,7 +28,7 @@ jobs:
 
       - name: Install pyray
         run: |
-          pip install raylib-py pyray
+          pip install raylib
 
       - name: Regenerate fonts
         run: |
