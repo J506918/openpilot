@@ -26,6 +26,7 @@ SP_BRANCH_MIGRATIONS = {
   ("tizi", "master-dev-c3-new"): "master-dev",
   ("tizi", "release3"): "release-tizi",
   ("tizi", "release3-staging"): "release-tizi-staging",
+  ("tizi", "c3x"): "c3x",
   ("mici", "release3"): "release-mici",
   ("mici", "release3-staging"): "release-mici-staging",
 }
