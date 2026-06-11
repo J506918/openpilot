@@ -1,0 +1,47 @@
+name: Regenerate Fonts on Translation Change
+
+on:
+  push:
+    branches: [c3x]
+    paths:
+      - 'selfdrive/ui/translations/*.po'
+      - 'selfdrive/ui/translations/languages.json'
+
+jobs:
+  regenerate-fonts:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install raylib
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq libasound2-dev libx11-dev libxrandr-dev \
+            libxi-dev libgl1-mesa-dev libglu1-mesa-dev libxcursor-dev \
+            libxinerama-dev libwayland-dev libxkbcommon-dev
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install pyray
+        run: |
+          pip install raylib-py pyray
+
+      - name: Regenerate fonts
+        run: |
+          python3 selfdrive/assets/fonts/process.py
+
+      - name: Commit font changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add selfdrive/assets/fonts/*.fnt selfdrive/assets/fonts/*.png
+          if git diff --cached --quiet; then
+            echo "No font changes"
+          else
+            git commit -m "chore: regenerate font atlases [skip ci]"
+            git push
+          fi
