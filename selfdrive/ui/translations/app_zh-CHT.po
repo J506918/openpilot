@@ -883,3 +883,13 @@ msgstr "连接中…"
 
 msgid "Registering…"
 msgstr "注册中…"
+
+#: sunnypilot/selfdrive/ui/sunnypilot/layouts/settings/steering.py
+msgid "Lateral Control V2 (LQR)"
+msgstr "LQR 橫向控制"
+msgstr ""
+
+#: sunnypilot/selfdrive/ui/sunnypilot/layouts/settings/steering.py
+msgid "Physics feedforward + LQR state feedback. No integral windup. Smooth, precise, immediate response on all curves."
+msgstr "物理前饋 + LQR 狀態反饋，無積分飽和。全速域平滑精準即時響應。"
+msgstr ""
