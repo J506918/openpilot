@@ -46,6 +46,11 @@ LQR_CURV_RATE_GAIN = 0.25      # curvature rate feedforward gain (s)
 LQR_CURV_RATE_LP = 3.0         # Hz, low-pass for curvature rate
 FRICTION_THRESHOLD = 0.3
 
+# Deadband crossing: minimum torque factor relative to friction.
+# Friction * factor must exceed EPS torque deadband (STEER_THRESHOLD/STEER_MAX).
+# Honda Accord 11G: friction=0.17, deadband=0.234 → factor >= 1.38
+DEADBAND_FACTOR = 1.5
+
 VERSION = 90
 
 
@@ -81,6 +86,7 @@ class LatControlLQR(LatControl):
     )
     self._prev_desired_curvature = 0.0
     self._first_active_frame = True
+    self._prev_output_torque = 0.0
 
   def update_live_torque_params(self, latAccelFactor, latAccelOffset, friction):
     self.torque_params.latAccelFactor = latAccelFactor
@@ -98,6 +104,7 @@ class LatControlLQR(LatControl):
     self._curv_rate_filter.x = 0.0
     self._prev_desired_curvature = 0.0
     self._first_active_frame = True
+    self._prev_output_torque = 0.0
 
   def update_model_v2(self, model_v2):
     self.model_v2 = model_v2
@@ -197,6 +204,15 @@ class LatControlLQR(LatControl):
 
     # ─── 6. TOTAL OUTPUT ────────────────────────────────────────────
     output_torque = ff_torque + fb_torque + curv_rate_torque + roll_torque + friction_torque
+
+    # Deadband crossing: torque below EPS threshold won't move the wheel.
+    # Boost to minimum to ensure any steering intent actually reaches the rack.
+    # During direction changes, allow zero-crossing to prevent oscillation.
+    min_torque = self.torque_params.friction * DEADBAND_FACTOR
+    if output_torque != 0.0 and abs(output_torque) < min_torque:
+      if self._prev_output_torque == 0.0 or (output_torque > 0) == (self._prev_output_torque > 0):
+        output_torque = math.copysign(min_torque, output_torque)
+    self._prev_output_torque = output_torque
 
     if steer_limited_by_safety:
       output_torque = 0.0
