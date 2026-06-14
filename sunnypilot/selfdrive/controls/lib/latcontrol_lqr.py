@@ -45,6 +45,12 @@ FF_GAIN = 1.3                  # feedforward multiplier
 RETURN_TO_CENTER_GAIN = 0.02   # normalized torque per degree of steering angle
 FRICTION_THRESHOLD = 0.3
 
+# Low-speed torque boost: compensate for v² scaling that makes
+# feedforward and feedback nearly zero at parking-lot speeds.
+# V0 uses KP=250 at 1 m/s for the same reason.
+LOW_SPEED_BP = [1.0, 2.0, 5.0, 10.0, 15.0]    # m/s
+LOW_SPEED_GAIN = [5.0, 3.5, 2.0, 1.3, 1.0]    # multiplier
+
 VERSION = 91
 
 
@@ -191,6 +197,10 @@ class LatControlLQR(LatControl):
     # ─── 7. TOTAL OUTPUT ─────────────────────────────────────────────
     output_torque = (ff_torque + fb_torque + curv_rate_torque
                      + center_torque + roll_torque + friction_torque)
+
+    # Low-speed boost: v² scaling makes torque nearly zero at low speeds
+    low_speed_factor = float(np.interp(CS.vEgo, LOW_SPEED_BP, LOW_SPEED_GAIN))
+    output_torque *= low_speed_factor
 
     # Driver intervening: halve torque each frame to yield control
     if CS.steeringPressed:
