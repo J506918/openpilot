@@ -198,9 +198,9 @@ class LatControlLQR(LatControl):
       math.radians(steering_angle_deadzone_deg), CS.vEgo, 0.0))
     lateral_accel_deadzone = curvature_deadzone * CS.vEgo ** 2
 
-    friction_torque = get_friction(
+    friction_torque = self._to_torque(get_friction(
       lat_accel_error, lateral_accel_deadzone,
-      FRICTION_THRESHOLD, self.torque_params)
+      FRICTION_THRESHOLD, self.torque_params))
 
     # ─── 6. TOTAL OUTPUT ────────────────────────────────────────────
     output_torque = ff_torque + fb_torque + curv_rate_torque + roll_torque + friction_torque
