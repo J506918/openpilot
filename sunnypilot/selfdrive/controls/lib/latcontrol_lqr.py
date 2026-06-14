@@ -214,10 +214,7 @@ class LatControlLQR(LatControl):
         output_torque = math.copysign(min_torque, output_torque)
     self._prev_output_torque = output_torque
 
-    if steer_limited_by_safety:
-      output_torque = 0.0
-    else:
-      output_torque = float(np.clip(output_torque, -self.steer_max, self.steer_max))
+    output_torque = float(np.clip(output_torque, -self.steer_max, self.steer_max))
 
     # ─── LOGGING ────────────────────────────────────────────────────
     pid_log.active = True
