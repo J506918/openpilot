@@ -866,3 +866,15 @@ msgstr "✓ สมัครแล้ว"
 msgid "🔥 Firehose Mode 🔥"
 msgstr "🔥 โหมด Firehose 🔥"
 
+
+msgid "CONNECTING"
+msgstr "连接中…"
+
+msgid "REGISTERING"
+msgstr "注册中…"
+
+msgid "Connecting…"
+msgstr "连接中…"
+
+msgid "Registering…"
+msgstr "注册中…"

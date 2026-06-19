@@ -15,14 +15,6 @@ UI_DIR = files("openpilot.selfdrive.ui")
 TRANSLATIONS_DIR = UI_DIR.joinpath("translations")
 LANGUAGES_FILE = TRANSLATIONS_DIR.joinpath("languages.json")
 
-UNIFONT_LANGUAGES = [
-  "th",
-  "zh-CHT",
-  "zh-CHS",
-  "ko",
-  "ja",
-]
-
 # Plural form selectors for supported languages
 PLURAL_SELECTORS = {
   'en': lambda n: 0 if n == 1 else 1,
@@ -155,15 +147,15 @@ class Multilang:
     self._translations: dict[str, str] = {}
     self._plurals: dict[str, list[str]] = {}
     self._plural_selector = PLURAL_SELECTORS.get('en', lambda n: 0)
+    self._language_callbacks: list = []
     self._load_languages()
 
   @property
   def language(self) -> str:
     return self._language
 
-  def requires_unifont(self) -> bool:
-    """Certain languages require unifont to render their glyphs."""
-    return self._language in UNIFONT_LANGUAGES
+  def on_language_change(self, callback):
+    self._language_callbacks.append(callback)
 
   def setup(self):
     try:
@@ -180,6 +172,8 @@ class Multilang:
     self._params.put("LanguageSetting", language_code)
     self._language = language_code
     self.setup()
+    for cb in self._language_callbacks:
+      cb(language_code)
 
   def tr(self, text: str) -> str:
     return self._translations.get(text, text) or text

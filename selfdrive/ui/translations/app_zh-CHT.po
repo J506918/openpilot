@@ -871,3 +871,15 @@ msgstr "✓ 已訂閱"
 msgid "🔥 Firehose Mode 🔥"
 msgstr "🔥 Firehose 模式 🔥"
 
+
+msgid "CONNECTING"
+msgstr "连接中…"
+
+msgid "REGISTERING"
+msgstr "注册中…"
+
+msgid "Connecting…"
+msgstr "连接中…"
+
+msgid "Registering…"
+msgstr "注册中…"

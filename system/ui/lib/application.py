@@ -90,31 +90,41 @@ DEFAULT_TEXT_COLOR = rl.Color(255, 255, 255, int(255 * 0.9))
 
 # Qt draws fonts accounting for ascent/descent differently, so compensate to match old styles
 # The real scales for the fonts below range from 1.212 to 1.266
-FONT_SCALE = 1.242 if BIG_UI else 1.16
+FONT_SCALE = 1.242 if BIG_UI else 1.30
 
 ASSETS_DIR = files("openpilot.selfdrive").joinpath("assets")
 FONT_DIR = ASSETS_DIR.joinpath("fonts")
 
 
+# Language code → atlas file (matches process.py output filenames)
+
+
 class FontWeight(StrEnum):
-  NORMAL = "Inter-Regular.fnt" if BIG_UI else "Inter-Medium.fnt"
-  MEDIUM = "Inter-Medium.fnt"
-  BOLD = "Inter-Bold.fnt"
-  SEMI_BOLD = "Inter-SemiBold.fnt"
-  UNIFONT = "unifont.fnt"
-  AUDIOWIDE = "Audiowide-Regular.fnt"
+  NORMAL = "current"
+  MEDIUM = "current"
+  BOLD = "current"
+  SEMI_BOLD = "current"
+  UNIFONT = "current"
+  AUDIOWIDE = "current"
+  MENU = "menu"  # unique value so != other FontWeight members (StrEnum compares by value)
 
   # Small UI fonts
-  DISPLAY_REGULAR = "Inter-Regular.fnt"
-  ROMAN = "Inter-Regular.fnt"
-  DISPLAY = "Inter-Bold.fnt"
+  DISPLAY_REGULAR = "current"
+  ROMAN = "current"
+  DISPLAY = "current"
 
 
 def font_fallback(font: rl.Font) -> rl.Font:
-  """Fall back to unifont for languages that require it."""
-  if multilang.requires_unifont():
-    return gui_app.font(FontWeight.UNIFONT)
+  """Redirect to current language's atlas (all pre-loaded).
+  Never redirect the MENU font — it must stay unifont for language names."""
+  if font is _menu_font:
+    return font
+  lang = multilang.language
+  if lang in gui_app._all_fonts:
+    return gui_app._all_fonts[lang]
   return font
+
+_menu_font = None
 
 
 class MousePos(NamedTuple):
@@ -327,6 +337,7 @@ class GuiApplication(GuiApplicationExt):
       self._target_fps = fps
       self._set_styles()
       self._load_fonts()
+      multilang.on_language_change(self._reload_fonts)
       self._patch_text_functions()
       self._patch_scissor_mode()
       if BURN_IN_MODE and self._burn_in_shader is None:
@@ -554,8 +565,16 @@ class GuiApplication(GuiApplicationExt):
       rl.unload_texture(texture)
     self._textures = {}
 
+    unloaded = set()
     for font in self._fonts.values():
-      rl.unload_font(font)
+      if id(font) not in unloaded:
+        rl.unload_font(font)
+        unloaded.add(id(font))
+    if hasattr(self, '_all_fonts'):
+      for font in self._all_fonts.values():
+        if id(font) not in unloaded:
+          rl.unload_font(font)
+          unloaded.add(id(font))
     self._fonts = {}
 
     if self._render_texture is not None:
@@ -687,15 +706,51 @@ class GuiApplication(GuiApplicationExt):
     return self._height
 
   def _load_fonts(self):
-    for font_weight_file in FontWeight:
-      with as_file(FONT_DIR) as fspath:
-        fnt_path = fspath / font_weight_file
-        font = rl.load_font(fnt_path.as_posix())
-        if font_weight_file != FontWeight.UNIFONT:
-          rl.gen_texture_mipmaps(font.texture)
-          rl.set_texture_filter(font.texture, rl.TextureFilter.TEXTURE_FILTER_TRILINEAR)
-        self._fonts[font_weight_file] = font
-    rl.gui_set_font(self._fonts[FontWeight.NORMAL])
+    """Lazy-load: only current language atlas at startup. Others on demand."""
+    self._all_fonts: dict[str, rl.Font] = {}
+
+    # Load only the current language
+    current_lang = multilang.language or "en"
+    self._load_lang_font(current_lang)
+
+    # Menu font: unifont 16px for language selection — always loaded
+    global _menu_font
+    with as_file(FONT_DIR) as fspath:
+      _menu_font = rl.load_font((fspath / "menu.fnt").as_posix())
+      rl.gen_texture_mipmaps(_menu_font.texture)
+      rl.set_texture_filter(_menu_font.texture, rl.TextureFilter.TEXTURE_FILTER_TRILINEAR)
+    self._fonts[FontWeight.MENU] = _menu_font
+
+    # All other weights → current language; font_fallback redirects on switch
+    default = self._all_fonts.get(current_lang)
+    for fw in FontWeight:
+      if fw != FontWeight.MENU:
+        self._fonts[fw] = default
+    rl.gui_set_font(default)
+
+  def _load_lang_font(self, lang_code: str):
+    """Load a single language atlas, unloading the previous one."""
+    if lang_code in self._all_fonts:
+      return
+    # Unload previous language
+    for prev_lang, prev_font in list(self._all_fonts.items()):
+      rl.unload_font(prev_font)
+      del self._all_fonts[prev_lang]
+    fnt_name = f"{lang_code}.fnt"
+    with as_file(FONT_DIR) as fspath:
+      fnt_path = fspath / fnt_name
+      if not fnt_path.exists():
+        return
+      font = rl.load_font(fnt_path.as_posix())
+      rl.gen_texture_mipmaps(font.texture)
+      rl.set_texture_filter(font.texture, rl.TextureFilter.TEXTURE_FILTER_TRILINEAR)
+      self._all_fonts[lang_code] = font
+
+  def _reload_fonts(self, lang_code: str = ""):
+    """Language switch: lazy-load target atlas, then update raygui default."""
+    self._load_lang_font(lang_code)
+    font = self._all_fonts.get(lang_code, self._all_fonts.get("en"))
+    rl.gui_set_font(font)
 
   def _set_styles(self):
     rl.gui_set_style(rl.GuiControl.DEFAULT, rl.GuiControlProperty.BORDER_WIDTH, 0)
