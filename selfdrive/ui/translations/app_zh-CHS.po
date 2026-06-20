@@ -2712,40 +2712,44 @@ msgstr "• 可能不符合安全标准。"
 msgid "• It may damage your device and/or vehicle."
 msgstr "• 可能损坏您的设备和/或车辆。"
 
-msgid "sunnypilot learns to drive by watching humans, like you, drive.
+msgid ""
+"sunnypilot learns to drive by watching humans, like you, drive.\n"
+"\n"
+"Firehose Mode allows you to maximize your training data uploads to improve openpilot's driving models. More data means bigger models, which means better Experimental Mode."
+msgstr ""
+"sunnypilot 通过观察人类驾驶来学习。\n"
+"\n"
+"Firehose 模式可最大化训练数据上传量以改进 openpilot 的驾驶模型。更多数据意味着更大的模型，进而带来更好的实验模式。"
 
-Firehose Mode allows you to maximize your training data uploads to improve openpilot's driving models. More data means bigger models, which means better Experimental Mode."
-msgstr "sunnypilot 通过观察人类驾驶来学习。
 
-Firehose 模式可最大化训练数据上传量以改进 openpilot 的驾驶模型。更多数据意味着更大的模型，进而带来更好的实验模式。"
-
-
-msgid "For maximum effectiveness, bring your device inside and connect to a good USB-C adapter and Wi-Fi weekly.
-
-Firehose Mode can also work while you're driving if connected to a hotspot or unlimited SIM card.
-
-Frequently Asked Questions
-
-Does it matter how or where I drive? Nope, just drive as you normally would.
-
-Do all of my segments get pulled in Firehose Mode? No, we selectively pull a subset of your segments.
-
-What's a good USB-C adapter? Any fast phone or laptop charger should be fine.
-
-Does it matter which software I run? Yes, only upstream openpilot (and particular forks) are able to be used for training."
-msgstr "为达到最佳效果，请每周将设备带入室内并连接优质 USB-C 适配器和 Wi-Fi。
-
-如果连接了热点或无限流量 SIM 卡，Firehose 模式也可在驾驶时使用。
-
-常见问题
-
-驾驶方式或地点有影响吗？没有，正常驾驶即可。
-
-Firehose 模式会拉取我的全部数据片段吗？不会，我们只选择性拉取一部分。
-
-推荐什么 USB-C 适配器？任意快充手机/笔记本充电器均可。
-
-使用的软件版本有影响吗？是的，仅上游 openpilot（及特定分支）可用于训练。"
+msgid ""
+"For maximum effectiveness, bring your device inside and connect to a good USB-C adapter and Wi-Fi weekly.\n"
+"\n"
+"Firehose Mode can also work while you're driving if connected to a hotspot or unlimited SIM card.\n"
+"\n"
+"Frequently Asked Questions\n"
+"\n"
+"Does it matter how or where I drive? Nope, just drive as you normally would.\n"
+"\n"
+"Do all of my segments get pulled in Firehose Mode? No, we selectively pull a subset of your segments.\n"
+"\n"
+"What's a good USB-C adapter? Any fast phone or laptop charger should be fine.\n"
+"\n"
+"Does it matter which software I run? Yes, only upstream openpilot (and particular forks) are able to be used for training."
+msgstr ""
+"为达到最佳效果，请每周将设备带入室内并连接优质 USB-C 适配器和 Wi-Fi。\n"
+"\n"
+"如果连接了热点或无限流量 SIM 卡，Firehose 模式也可在驾驶时使用。\n"
+"\n"
+"常见问题\n"
+"\n"
+"驾驶方式或地点有影响吗？没有，正常驾驶即可。\n"
+"\n"
+"Firehose 模式会拉取我的全部数据片段吗？不会，我们只选择性拉取一部分。\n"
+"\n"
+"推荐什么 USB-C 适配器？任意快充手机/笔记本充电器均可。\n"
+"\n"
+"使用的软件版本有影响吗？是的，仅上游 openpilot（及特定分支）可用于训练。"
 
 
 msgid "When enabled, sunnypilot will attempt to manage the built-in cruise control buttons by emulating button presses for limited longitudinal control."
