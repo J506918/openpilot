@@ -130,14 +130,14 @@ class CruiseLayout(Widget):
         ui_state.params.remove("IntelligentCruiseButtonManagement")
         self.icbm_toggle.action_item.set_enabled(False)
 
-        long_desc = ICMB_UNAVAILABLE
+        long_desc = tr(ICMB_UNAVAILABLE)
         if has_long:
           if ui_state.CP.alphaLongitudinalAvailable:
-            long_desc += " " + ICMB_UNAVAILABLE_LONG_AVAILABLE
+            long_desc += " " + tr(ICMB_UNAVAILABLE_LONG_AVAILABLE)
           else:
-            long_desc += " " + ICMB_UNAVAILABLE_LONG_UNAVAILABLE
+            long_desc += " " + tr(ICMB_UNAVAILABLE_LONG_UNAVAILABLE)
 
-        new_desc = "<b>" + tr(long_desc) + "</b>\n\n" + tr(ICBM_DESC)
+        new_desc = "<b>" + long_desc + "</b>\n\n" + tr(ICBM_DESC)
         if self.icbm_toggle.description != new_desc:
           self.icbm_toggle.set_description(new_desc)
           self.icbm_toggle.show_description(True)
