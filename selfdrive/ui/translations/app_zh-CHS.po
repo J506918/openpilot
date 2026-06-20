@@ -873,7 +873,7 @@ msgstr "🔥 Firehose 模式 🔥"
 
 #: openpilot/selfdrive/ui/
 msgid " (Default)"
-msgstr " (Default)"
+msgstr " (默认)"
 
 #: openpilot/selfdrive/ui/
 msgid "%"
@@ -889,7 +889,7 @@ msgstr "，但随时欢迎您回来。"
 
 #: openpilot/selfdrive/ui/
 msgid "0 mb"
-msgstr "0 mb"
+msgstr "0 MB"
 
 #: openpilot/selfdrive/ui/
 msgid "ACC."
@@ -901,7 +901,7 @@ msgstr "激活"
 
 #: openpilot/selfdrive/ui/
 msgid "active model"
-msgstr "active model"
+msgstr "当前模型"
 
 #: openpilot/selfdrive/ui/
 msgid "ACTUAL L.A."
@@ -909,19 +909,19 @@ msgstr "实际 L.A."
 
 #: openpilot/selfdrive/ui/
 msgid "Actuator Delay:"
-msgstr "Actuator Delay:"
+msgstr "执行器延迟："
 
 #: openpilot/selfdrive/ui/
 msgid "Adjust Lane Turn Speed"
-msgstr "Adjust Lane Turn Speed"
+msgstr "调整过弯速度"
 
 #: openpilot/selfdrive/ui/
 msgid "Adjust Software Delay"
-msgstr "Adjust Software Delay"
+msgstr "调整软件延迟"
 
 #: openpilot/selfdrive/ui/
 msgid "Adjust the software delay when Live Learning Steer Delay is toggled off. The default software delay value is 0.2"
-msgstr "Adjust the software delay when Live Learning Steer Delay is toggled off. The default software delay value is 0.2"
+msgstr "关闭在线学习转向延迟后，可手动调整软件延迟。默认值为 0.2。"
 
 #: openpilot/selfdrive/ui/
 msgid "AHEAD"
@@ -933,7 +933,7 @@ msgstr "全部"
 
 #: openpilot/selfdrive/ui/
 msgid "All states (~6.0 GB)"
-msgstr "All states (~6.0 GB)"
+msgstr "全部状态（约 6.0 GB）"
 
 #: openpilot/selfdrive/ui/
 msgid "ALL TIME"
@@ -941,7 +941,7 @@ msgstr "全部时间"
 
 #: openpilot/selfdrive/ui/
 msgid "Allows the driver to provide limited steering input while openpilot is engaged."
-msgstr "Allows the driver to provide limited steering input while openpilot is engaged."
+msgstr "允许驾驶员在 openpilot 激活时提供有限的转向输入。"
 
 #: openpilot/selfdrive/ui/
 msgid "ALT."
@@ -949,11 +949,11 @@ msgstr "ALT."
 
 #: openpilot/selfdrive/ui/
 msgid "Always On"
-msgstr "Always On"
+msgstr "始终开启"
 
 #: openpilot/selfdrive/ui/
 msgid "Any fast phone or laptop charger should be fine."
-msgstr "Any fast phone or laptop charger should be fine."
+msgstr "任意快充手机/笔记本充电器均可。"
 
 #: openpilot/selfdrive/ui/
 msgid "Are you sure you want to backup your current sunnypilot settings?"
@@ -961,15 +961,15 @@ msgstr "确认备份当前 sunnypilot 设置？"
 
 #: openpilot/selfdrive/ui/
 msgid "Are you sure you want to enter Always Offroad mode?"
-msgstr "Are you sure you want to enter Always Offroad mode?"
+msgstr "确认进入始终离线模式？"
 
 #: openpilot/selfdrive/ui/
 msgid "Are you sure you want to exit Always Offroad mode?"
-msgstr "Are you sure you want to exit Always Offroad mode?"
+msgstr "确认退出始终离线模式？"
 
 #: openpilot/selfdrive/ui/
 msgid "Are you sure you want to reset all sunnypilot settings to default? Once the settings are reset, there is no going back."
-msgstr "Are you sure you want to reset all sunnypilot settings to default? Once the settings are reset, there is no going back."
+msgstr "确认重置所有 sunnypilot 设置为默认值？重置后无法恢复。"
 
 #: openpilot/selfdrive/ui/
 msgid "Are you sure you want to restore the last backed up sunnypilot settings?"
@@ -981,15 +981,15 @@ msgstr "辅助"
 
 #: openpilot/selfdrive/ui/
 msgid "Assist: Adjusts the vehicle's cruise speed based on the current road's speed limit when operating the +/- buttons."
-msgstr "Assist: Adjusts the vehicle's cruise speed based on the current road's speed limit when operating the +/- buttons."
+msgstr "辅助：操作 +/- 按钮时根据当前道路限速调整巡航速度。"
 
 #: openpilot/selfdrive/ui/
 msgid "Auto (Dark)"
-msgstr "Auto (Dark)"
+msgstr "自动（深色）"
 
 #: openpilot/selfdrive/ui/
 msgid "Auto (Default)"
-msgstr "Auto (Default)"
+msgstr "自动（默认）"
 
 #: openpilot/selfdrive/ui/
 msgid "Auto Lane Change by Blinker"
@@ -997,7 +997,7 @@ msgstr "打灯自动变道"
 
 #: openpilot/selfdrive/ui/
 msgid "Auto Lane Change: Delay with Blind Spot"
-msgstr "Auto Lane Change: Delay with Blind Spot"
+msgstr "自动变道：盲区延迟"
 
 #: openpilot/selfdrive/ui/
 msgid "B.D."
@@ -1033,7 +1033,7 @@ msgstr "成为 sunnypilot 赞助者，抢先体验 sunnylink 新功能。"
 
 #: openpilot/selfdrive/ui/
 msgid "become a sunnypilot sponsor"
-msgstr "become a sunnypilot sponsor"
+msgstr "成为 sunnypilot 赞助者"
 
 #: openpilot/selfdrive/ui/
 msgid "Bottom"
@@ -1041,7 +1041,7 @@ msgstr "下"
 
 #: openpilot/selfdrive/ui/
 msgid "cache size"
-msgstr "cache size"
+msgstr "缓存大小"
 
 #: openpilot/selfdrive/ui/
 msgid "Cancel Download"
@@ -1049,7 +1049,7 @@ msgstr "取消下载"
 
 #: openpilot/selfdrive/ui/
 msgid "cancel download"
-msgstr "cancel download"
+msgstr "取消下载"
 
 #: openpilot/selfdrive/ui/
 msgid "Car First"
@@ -1057,7 +1057,7 @@ msgstr "车辆优先"
 
 #: openpilot/selfdrive/ui/
 msgid "Car First: Use Speed Limit data from Car if available, else use from OpenStreetMaps"
-msgstr "Car First: Use Speed Limit data from Car if available, else use from OpenStreetMaps"
+msgstr "车辆优先：优先使用车辆限速数据，否则使用 OSM 数据"
 
 #: openpilot/selfdrive/ui/
 msgid "Car Only"
@@ -1065,11 +1065,11 @@ msgstr "仅车辆"
 
 #: openpilot/selfdrive/ui/
 msgid "Car Only: Use Speed Limit data only from Car"
-msgstr "Car Only: Use Speed Limit data only from Car"
+msgstr "仅车辆：仅使用车辆限速数据"
 
 #: openpilot/selfdrive/ui/
 msgid "Choose how Automatic Lane Centering (ALC) behaves after the brake pedal is manually pressed in sunnypilot."
-msgstr "Choose how Automatic Lane Centering (ALC) behaves after the brake pedal is manually pressed in sunnypilot."
+msgstr "选择 sunnypilot 中踩下刹车后自动车道居中 (ALC) 的行为。"
 
 #: openpilot/selfdrive/ui/
 msgid "CLEAR"
@@ -1089,7 +1089,7 @@ msgstr "点击赞助按钮了解详情"
 
 #: openpilot/selfdrive/ui/
 msgid "Colors represent vehicle fingerprint status:"
-msgstr "Colors represent vehicle fingerprint status:"
+msgstr "颜色代表车辆指纹状态："
 
 #: openpilot/selfdrive/ui/
 msgid "Combined"
@@ -1097,7 +1097,7 @@ msgstr "组合"
 
 #: openpilot/selfdrive/ui/
 msgid "Combined: Use combined Speed Limit data from Car & OpenStreetMaps"
-msgstr "Combined: Use combined Speed Limit data from Car & OpenStreetMaps"
+msgstr "合并：合并车辆与 OSM 限速数据"
 
 #: openpilot/selfdrive/ui/
 msgid "Confirm"
@@ -1105,11 +1105,11 @@ msgstr "确认"
 
 #: openpilot/selfdrive/ui/
 msgid "Controls state of the device after boot/sleep."
-msgstr "Controls state of the device after boot/sleep."
+msgstr "控制设备启动/休眠后的状态。"
 
 #: openpilot/selfdrive/ui/
 msgid "Cooperative Steering (Beta)"
-msgstr "Cooperative Steering (Beta)"
+msgstr "协同转向（测试版）"
 
 #: openpilot/selfdrive/ui/
 msgid "copyparty Service"
@@ -1129,11 +1129,11 @@ msgstr "当前模型"
 
 #: openpilot/selfdrive/ui/
 msgid "Custom ACC Speed Increments"
-msgstr "Custom ACC Speed Increments"
+msgstr "自定义 ACC 调速步长"
 
 #: openpilot/selfdrive/ui/
 msgid "Custom Longitudinal Tuning"
-msgstr "Custom Longitudinal Tuning"
+msgstr "自定义纵向调校"
 
 #: openpilot/selfdrive/ui/
 msgid "Customize Lane Change"
@@ -1145,11 +1145,11 @@ msgstr "自定义 MADS"
 
 #: openpilot/selfdrive/ui/
 msgid "Customize Source"
-msgstr "Customize Source"
+msgstr "自定义来源"
 
 #: openpilot/selfdrive/ui/
 msgid "Customize Torque Params"
-msgstr "Customize Torque Params"
+msgstr "自定义扭矩参数"
 
 #: openpilot/selfdrive/ui/
 msgid "Database Update"
@@ -1165,15 +1165,15 @@ msgstr "默认模型"
 
 #: openpilot/selfdrive/ui/
 msgid "default model"
-msgstr "default model"
+msgstr "默认模型"
 
 #: openpilot/selfdrive/ui/
 msgid "Default: Device will boot/wake-up normally & will be ready to engage."
-msgstr "Default: Device will boot/wake-up normally & will be ready to engage."
+msgstr "默认：设备正常启动/唤醒，就绪可激活。"
 
 #: openpilot/selfdrive/ui/
 msgid "Delay before lateral control resumes after the turn signal ends."
-msgstr "Delay before lateral control resumes after the turn signal ends."
+msgstr "转向灯关闭后横向控制恢复前的延迟。"
 
 #: openpilot/selfdrive/ui/
 msgid "DELETE"
@@ -1181,7 +1181,7 @@ msgstr "删除"
 
 #: openpilot/selfdrive/ui/
 msgid "DELETING..."
-msgstr "DELETING..."
+msgstr "删除中..."
 
 #: openpilot/selfdrive/ui/
 msgid "DESIRED L.A."
@@ -1201,7 +1201,7 @@ msgstr "设备 ID"
 
 #: openpilot/selfdrive/ui/
 msgid "Device must be registered with the comma.ai backend to pair."
-msgstr "Device must be registered with the comma.ai backend to pair."
+msgstr "设备需在 comma.ai 后端注册才能配对。"
 
 #: openpilot/selfdrive/ui/
 msgid ""
@@ -1215,7 +1215,7 @@ msgstr ""
 
 #: openpilot/selfdrive/ui/
 msgid "Disable"
-msgstr "Disable"
+msgstr "禁用"
 
 #: openpilot/selfdrive/ui/
 msgid ""
@@ -1229,11 +1229,11 @@ msgstr ""
 
 #: openpilot/selfdrive/ui/
 msgid "Disable the sunnypilot Longitudinal Control (alpha) toggle to allow Intelligent Cruise Button Management."
-msgstr "Disable the sunnypilot Longitudinal Control (alpha) toggle to allow Intelligent Cruise Button Management."
+msgstr "禁用 sunnypilot 纵向控制（测试版）开关以启用智能巡航按键管理。"
 
 #: openpilot/selfdrive/ui/
 msgid "Disable Updates"
-msgstr "Disable Updates"
+msgstr "禁用更新"
 
 #: openpilot/selfdrive/ui/
 msgid "DISABLED"
@@ -1245,15 +1245,15 @@ msgstr "断开"
 
 #: openpilot/selfdrive/ui/
 msgid "disengage to enable always offroad"
-msgstr "disengage to enable always offroad"
+msgstr "断开以启用始终离线模式"
 
 #: openpilot/selfdrive/ui/
 msgid "Disengage to Enter Always Offroad Mode"
-msgstr "Disengage to Enter Always Offroad Mode"
+msgstr "断开以进入始终离线模式"
 
 #: openpilot/selfdrive/ui/
 msgid "Disengage: ALC will disengage when the brake pedal is pressed."
-msgstr "Disengage: ALC will disengage when the brake pedal is pressed."
+msgstr "断开：踩刹车时 ALC 将断开。"
 
 #: openpilot/selfdrive/ui/
 msgid "Display"
@@ -1261,11 +1261,11 @@ msgstr "显示"
 
 #: openpilot/selfdrive/ui/
 msgid "Display Metrics Below Chevron"
-msgstr "Display Metrics Below Chevron"
+msgstr "V 形图标下方显示指标"
 
 #: openpilot/selfdrive/ui/
 msgid "Display real-time parameters and metrics from various sources."
-msgstr "Display real-time parameters and metrics from various sources."
+msgstr "显示来自各来源的实时参数和指标。"
 
 #: openpilot/selfdrive/ui/
 msgid "Display Road Name"
@@ -1273,7 +1273,7 @@ msgstr "显示道路名称"
 
 #: openpilot/selfdrive/ui/
 msgid "Display steering arc on the driving screen when lateral control is enabled."
-msgstr "Display steering arc on the driving screen when lateral control is enabled."
+msgstr "横向控制启用时在驾驶界面显示转向弧线。"
 
 #: openpilot/selfdrive/ui/
 msgid "Display Turn Signals"
@@ -1285,15 +1285,15 @@ msgstr "距离"
 
 #: openpilot/selfdrive/ui/
 msgid "Do all of my segments get pulled in Firehose Mode?"
-msgstr "Do all of my segments get pulled in Firehose Mode?"
+msgstr "Firehose 模式会拉取我的全部数据片段吗？"
 
 #: openpilot/selfdrive/ui/
 msgid "Does it matter how or where I drive?"
-msgstr "Does it matter how or where I drive?"
+msgstr "驾驶方式或地点有影响吗？"
 
 #: openpilot/selfdrive/ui/
 msgid "Does it matter which software I run?"
-msgstr "Does it matter which software I run?"
+msgstr "使用的软件版本有影响吗？"
 
 #: openpilot/selfdrive/ui/
 msgid "download failed"
@@ -1321,7 +1321,7 @@ msgstr "下载地图中..."
 
 #: openpilot/selfdrive/ui/
 msgid "Driver Camera Preview"
-msgstr "Driver Camera Preview"
+msgstr "驾驶员摄像头预览"
 
 #: openpilot/selfdrive/ui/
 msgid "Drives"
@@ -1351,23 +1351,23 @@ msgstr "Enable \"Always Offroad\" in Device panel, or turn vehicle off to toggle
 
 #: openpilot/selfdrive/ui/
 msgid "Enable Always Offroad"
-msgstr "Enable Always Offroad"
+msgstr "启用始终离线模式"
 
 #: openpilot/selfdrive/ui/
 msgid "Enable custom Short & Long press increments for cruise speed increase/decrease."
-msgstr "Enable custom Short & Long press increments for cruise speed increase/decrease."
+msgstr "启用自定义短按/长按巡航速度增减步长。"
 
 #: openpilot/selfdrive/ui/
 msgid "Enable Custom Tuning"
-msgstr "Enable Custom Tuning"
+msgstr "启用自定义调校"
 
 #: openpilot/selfdrive/ui/
 msgid "Enable Dynamic Experimental Control"
-msgstr "Enable Dynamic Experimental Control"
+msgstr "启用动态实验控制"
 
 #: openpilot/selfdrive/ui/
 msgid "Enable Standstill Timer"
-msgstr "Enable Standstill Timer"
+msgstr "启用停车计时器"
 
 #: openpilot/selfdrive/ui/
 msgid "Enable sunnylink"
@@ -1387,39 +1387,39 @@ msgstr "启用 sunnylink 上传器，将驾驶数据上传至 sunnypilot 服务�
 
 #: openpilot/selfdrive/ui/
 msgid "Enable Tesla Rainbow Mode"
-msgstr "Enable Tesla Rainbow Mode"
+msgstr "启用 Tesla 彩虹模式"
 
 #: openpilot/selfdrive/ui/
 msgid "Enable this to enforce sunnypilot to steer with Torque lateral control."
-msgstr "Enable this to enforce sunnypilot to steer with Torque lateral control."
+msgstr "启用以强制 sunnypilot 使用扭矩横向控制。"
 
 #: openpilot/selfdrive/ui/
 msgid "Enable toggle to allow the model to determine when to use sunnypilot ACC or sunnypilot End to End Longitudinal."
-msgstr "Enable toggle to allow the model to determine when to use sunnypilot ACC or sunnypilot End to End Longitudinal."
+msgstr "启用开关让模型决定何时使用 sunnypilot ACC 或端到端纵向控制。"
 
 #: openpilot/selfdrive/ui/
 msgid "Enables or disables the GitHub runner service."
-msgstr "Enables or disables the GitHub runner service."
+msgstr "启用或禁用 GitHub runner 服务。"
 
 #: openpilot/selfdrive/ui/
 msgid "Enforce Factory Longitudinal Control"
-msgstr "Enforce Factory Longitudinal Control"
+msgstr "强制原厂纵向控制"
 
 #: openpilot/selfdrive/ui/
 msgid "Enforce Torque Lateral Control"
-msgstr "Enforce Torque Lateral Control"
+msgstr "强制扭矩横向控制"
 
 #: openpilot/selfdrive/ui/
 msgid "Engage lateral and longitudinal control with cruise control engagement."
-msgstr "Engage lateral and longitudinal control with cruise control engagement."
+msgstr "随巡航控制一起启用横向和纵向控制。"
 
 #: openpilot/selfdrive/ui/
 msgid "Enter model year (e.g., 2021) and model (Toyota Corolla):"
-msgstr "Enter model year (e.g., 2021) and model (Toyota Corolla):"
+msgstr "输入车型年份（如 2021）和型号（如 Toyota Corolla）："
 
 #: openpilot/selfdrive/ui/
 msgid "error"
-msgstr "error"
+msgstr "错误"
 
 #: openpilot/selfdrive/ui/
 msgid "Error Log"
@@ -1427,15 +1427,15 @@ msgstr "错误日志"
 
 #: openpilot/selfdrive/ui/
 msgid "Error: Invalid download. Retry."
-msgstr "Error: Invalid download. Retry."
+msgstr "错误：下载无效，请重试。"
 
 #: openpilot/selfdrive/ui/
 msgid "Exit Always Offroad"
-msgstr "Exit Always Offroad"
+msgstr "退出始终离线模式"
 
 #: openpilot/selfdrive/ui/
 msgid "Experimental feature to enable auto-resume during stop-and-go for certain supported Subaru platforms."
-msgstr "Experimental feature to enable auto-resume during stop-and-go for certain supported Subaru platforms."
+msgstr "实验性功能：为特定 Subaru 平台启用启停自动恢复。"
 
 #: openpilot/selfdrive/ui/
 msgid "failed"
@@ -1447,7 +1447,7 @@ msgstr "故障"
 
 #: openpilot/selfdrive/ui/
 msgid "Favorites"
-msgstr "Favorites"
+msgstr "收藏"
 
 #: openpilot/selfdrive/ui/
 msgid "Fetching Latest Models"
@@ -1459,7 +1459,7 @@ msgstr "获取中..."
 
 #: openpilot/selfdrive/ui/
 msgid "Fingerprinted automatically"
-msgstr "Fingerprinted automatically"
+msgstr "自动识别指纹"
 
 #: openpilot/selfdrive/ui/
 msgid "Fixed"
@@ -1467,11 +1467,11 @@ msgstr "固定"
 
 #: openpilot/selfdrive/ui/
 msgid "Fixed: Adds a fixed offset [Speed Limit + Offset]"
-msgstr "Fixed: Adds a fixed offset [Speed Limit + Offset]"
+msgstr "固定：添加固定偏移 [限速 + 偏移量]"
 
 #: openpilot/selfdrive/ui/
 msgid "For applicable vehicles, always display the true vehicle current speed from wheel speed sensors."
-msgstr "For applicable vehicles, always display the true vehicle current speed from wheel speed sensors."
+msgstr "适用车型始终显示来自轮速传感器的真实车速。"
 
 #: openpilot/selfdrive/ui/
 msgid "For secure backup, restore, and remote configuration"
@@ -1487,7 +1487,7 @@ msgstr "摩擦"
 
 #: openpilot/selfdrive/ui/
 msgid "Friction"
-msgstr "Friction"
+msgstr "摩擦力"
 
 #: openpilot/selfdrive/ui/
 msgid "GitHub Runner Service"
@@ -1507,7 +1507,7 @@ msgstr "绿灯提醒 (测试版)"
 
 #: openpilot/selfdrive/ui/
 msgid "h"
-msgstr "h"
+msgstr "小时"
 
 #: openpilot/selfdrive/ui/
 msgid "Hours"
@@ -1515,7 +1515,7 @@ msgstr "小时"
 
 #: openpilot/selfdrive/ui/
 msgid "INACTIVE: connect to an unmetered network"
-msgstr "INACTIVE: connect to an unmetered network"
+msgstr "未激活：连接到不计流量网络"
 
 #: openpilot/selfdrive/ui/
 msgid "Info"
@@ -1523,19 +1523,19 @@ msgstr "信息"
 
 #: openpilot/selfdrive/ui/
 msgid "Information: Displays the current road's speed limit."
-msgstr "Information: Displays the current road's speed limit."
+msgstr "信息：显示当前道路限速。"
 
 #: openpilot/selfdrive/ui/
 msgid "Intelligent Cruise Button Management (ICBM) (Alpha)"
-msgstr "Intelligent Cruise Button Management (ICBM) (Alpha)"
+msgstr "智能巡航按键管理 ICBM（测试版）"
 
 #: openpilot/selfdrive/ui/
 msgid "Intelligent Cruise Button Management is currently unavailable on this platform."
-msgstr "Intelligent Cruise Button Management is currently unavailable on this platform."
+msgstr "智能巡航按键管理当前在此平台不可用。"
 
 #: openpilot/selfdrive/ui/
 msgid "Interactivity Timeout"
-msgstr "Interactivity Timeout"
+msgstr "交互超时"
 
 #: openpilot/selfdrive/ui/
 msgid "KM"
@@ -1543,11 +1543,11 @@ msgstr "公里"
 
 #: openpilot/selfdrive/ui/
 msgid "Last checked {}"
-msgstr "Last checked {}"
+msgstr "上次检查 {}"
 
 #: openpilot/selfdrive/ui/
 msgid "Lateral Acceleration Factor"
-msgstr "Lateral Acceleration Factor"
+msgstr "横向加速度系数"
 
 #: openpilot/selfdrive/ui/
 msgid "Lead Departure Alert (Beta)"
@@ -1565,7 +1565,7 @@ msgstr ""
 
 #: openpilot/selfdrive/ui/
 msgid "Less Restrict Settings for Self-Tune (Beta)"
-msgstr "Less Restrict Settings for Self-Tune (Beta)"
+msgstr "自调校宽松设置（测试版）"
 
 #: openpilot/selfdrive/ui/
 msgid "LIMIT"
@@ -1573,11 +1573,11 @@ msgstr "限制"
 
 #: openpilot/selfdrive/ui/
 msgid "Live Learning Steer Delay"
-msgstr "Live Learning Steer Delay"
+msgstr "在线学习转向延迟"
 
 #: openpilot/selfdrive/ui/
 msgid "Live Steer Delay:"
-msgstr "Live Steer Delay:"
+msgstr "实时转向延迟："
 
 #: openpilot/selfdrive/ui/
 msgid "Loading..."
@@ -1585,19 +1585,19 @@ msgstr "加载中..."
 
 #: openpilot/selfdrive/ui/
 msgid "Long Press Increment"
-msgstr "Long Press Increment"
+msgstr "长按步长"
 
 #: openpilot/selfdrive/ui/
 msgid "m"
-msgstr "m"
+msgstr "米"
 
 #: openpilot/selfdrive/ui/
 msgid "Manual Real-Time Tuning"
-msgstr "Manual Real-Time Tuning"
+msgstr "手动实时调参"
 
 #: openpilot/selfdrive/ui/
 msgid "Manually selected fingerprint"
-msgstr "Manually selected fingerprint"
+msgstr "手动选择指纹"
 
 #: openpilot/selfdrive/ui/
 msgid "Map First"
@@ -1605,7 +1605,7 @@ msgstr "地图优先"
 
 #: openpilot/selfdrive/ui/
 msgid "Map First: Use Speed Limit data from OpenStreetMaps if available, else use from Car"
-msgstr "Map First: Use Speed Limit data from OpenStreetMaps if available, else use from Car"
+msgstr "地图优先：优先使用 OSM 限速数据，否则使用车辆数据"
 
 #: openpilot/selfdrive/ui/
 msgid "Map Only"
@@ -1613,7 +1613,7 @@ msgstr "仅地图"
 
 #: openpilot/selfdrive/ui/
 msgid "Map Only: Use Speed Limit data only from OpenStreetMaps"
-msgstr "Map Only: Use Speed Limit data only from OpenStreetMaps"
+msgstr "仅地图：仅使用 OSM 限速数据"
 
 #: openpilot/selfdrive/ui/
 msgid "Mapd Version"
@@ -1629,11 +1629,11 @@ msgstr "英里"
 
 #: openpilot/selfdrive/ui/
 msgid "Minimum Speed to Pause Lateral Control"
-msgstr "Minimum Speed to Pause Lateral Control"
+msgstr "暂停横向控制的最低速度"
 
 #: openpilot/selfdrive/ui/
 msgid "Model download has started in the background. We suggest resetting calibration. Would you like to do that now?"
-msgstr "Model download has started in the background. We suggest resetting calibration. Would you like to do that now?"
+msgstr "模型已在后台开始下载。建议重置校准，是否现在执行？"
 
 #: openpilot/selfdrive/ui/
 msgid "Models"
@@ -1641,7 +1641,7 @@ msgstr "模型"
 
 #: openpilot/selfdrive/ui/
 msgid "models"
-msgstr "models"
+msgstr "模型"
 
 #: openpilot/selfdrive/ui/
 msgid "Modular Assistive Driving System (MADS)"
@@ -1657,7 +1657,7 @@ msgstr "附近"
 
 #: openpilot/selfdrive/ui/
 msgid "Neural Network Lateral Control (NNLC)"
-msgstr "Neural Network Lateral Control (NNLC)"
+msgstr "神经网络横向控制 (NNLC)"
 
 #: openpilot/selfdrive/ui/
 msgid "No"
@@ -1665,7 +1665,7 @@ msgstr "否"
 
 #: openpilot/selfdrive/ui/
 msgid "no alerts"
-msgstr "no alerts"
+msgstr "无警报"
 
 #: openpilot/selfdrive/ui/
 msgid "no internet"
@@ -1673,15 +1673,15 @@ msgstr "无网络"
 
 #: openpilot/selfdrive/ui/
 msgid "No vehicle selected"
-msgstr "No vehicle selected"
+msgstr "未选择车辆"
 
 #: openpilot/selfdrive/ui/
 msgid "No, we selectively pull a subset of your segments."
-msgstr "No, we selectively pull a subset of your segments."
+msgstr "不会，我们只选择性拉取一部分片段。"
 
 #: openpilot/selfdrive/ui/
 msgid "Non-Prebuilt Branches"
-msgstr "Non-Prebuilt Branches"
+msgstr "非预构建分支"
 
 #: openpilot/selfdrive/ui/
 msgid "None"
@@ -1689,15 +1689,15 @@ msgstr "无"
 
 #: openpilot/selfdrive/ui/
 msgid "None: No Offset"
-msgstr "None: No Offset"
+msgstr "无：不加偏移"
 
 #: openpilot/selfdrive/ui/
 msgid "Nope, just drive as you normally would."
-msgstr "Nope, just drive as you normally would."
+msgstr "没有，正常驾驶即可。"
 
 #: openpilot/selfdrive/ui/
 msgid "Not fingerprinted or manually selected"
-msgstr "Not fingerprinted or manually selected"
+msgstr "未识别或手动选择"
 
 #: openpilot/selfdrive/ui/
 msgid "Not going to lie, it's sad to see you disabled sunnylink"
@@ -1713,11 +1713,11 @@ msgstr "非赞助者"
 
 #: openpilot/selfdrive/ui/
 msgid "Note: For vehicles without LFA/LKAS button, disabling this will prevent lateral control engagement."
-msgstr "Note: For vehicles without LFA/LKAS button, disabling this will prevent lateral control engagement."
+msgstr "注意：对于无 LFA/LKAS 按键的车辆，禁用此项将阻止横向控制激活。"
 
 #: openpilot/selfdrive/ui/
 msgid "Note: Once lateral control is engaged via UEM, it will remain engaged until it is manually disabled via the MADS button or car shut off."
-msgstr "Note: Once lateral control is engaged via UEM, it will remain engaged until it is manually disabled via the MADS button or car shut off."
+msgstr "注意：通过 UEM 激活横向控制后，将保持激活直到手动通过 MADS 按键禁用或车辆熄火。"
 
 #: openpilot/selfdrive/ui/
 msgid "Nudge"
@@ -1741,15 +1741,15 @@ msgstr "OFF"
 
 #: openpilot/selfdrive/ui/
 msgid "Off-Policy Model"
-msgstr "Off-Policy Model"
+msgstr "离线策略模型"
 
 #: openpilot/selfdrive/ui/
 msgid "Off: Disables the Speed Limit functions."
-msgstr "Off: Disables the Speed Limit functions."
+msgstr "关闭：禁用限速功能。"
 
 #: openpilot/selfdrive/ui/
 msgid "Offline Only"
-msgstr "Offline Only"
+msgstr "仅离线"
 
 #: openpilot/selfdrive/ui/
 msgid "Offroad"
@@ -1757,15 +1757,15 @@ msgstr "离线模式"
 
 #: openpilot/selfdrive/ui/
 msgid "Offroad: Device will be in Always Offroad mode after boot/wake-up."
-msgstr "Offroad: Device will be in Always Offroad mode after boot/wake-up."
+msgstr "离线：设备启动/唤醒后处于始终离线模式。"
 
 #: openpilot/selfdrive/ui/
 msgid "On-Policy Model"
-msgstr "On-Policy Model"
+msgstr "在线策略模型"
 
 #: openpilot/selfdrive/ui/
 msgid "Only available when vehicle is off, or always offroad mode is on"
-msgstr "Only available when vehicle is off, or always offroad mode is on"
+msgstr "仅在车辆熄火或始终离线模式开启时可用"
 
 #: openpilot/selfdrive/ui/
 msgid "Onroad Brightness"
@@ -1773,11 +1773,11 @@ msgstr "行驶亮度"
 
 #: openpilot/selfdrive/ui/
 msgid "Onroad Brightness Delay"
-msgstr "Onroad Brightness Delay"
+msgstr "驾驶亮度延迟"
 
 #: openpilot/selfdrive/ui/
 msgid "Onroad Uploads"
-msgstr "Onroad Uploads"
+msgstr "驾驶中上传"
 
 #: openpilot/selfdrive/ui/
 msgid "OSM"
@@ -1793,11 +1793,11 @@ msgstr "配对 GitHub 账户"
 
 #: openpilot/selfdrive/ui/
 msgid "pair with comma connect"
-msgstr "pair with comma connect"
+msgstr "与 comma connect 配对"
 
 #: openpilot/selfdrive/ui/
 msgid "pair with sunnylink"
-msgstr "pair with sunnylink"
+msgstr "与 sunnylink 配对"
 
 #: openpilot/selfdrive/ui/
 msgid "Pair your GitHub account to grant your device sponsor benefits, including API access on sunnylink."
@@ -1821,31 +1821,31 @@ msgstr "暂停"
 
 #: openpilot/selfdrive/ui/
 msgid "Pause Lateral Control with Blinker"
-msgstr "Pause Lateral Control with Blinker"
+msgstr "打转向灯暂停横向控制"
 
 #: openpilot/selfdrive/ui/
 msgid "Pause lateral control with blinker when traveling below the desired speed selected."
-msgstr "Pause lateral control with blinker when traveling below the desired speed selected."
+msgstr "低于所选速度时打转向灯暂停横向控制。"
 
 #: openpilot/selfdrive/ui/
 msgid "Pause: ALC will pause when the brake pedal is pressed."
-msgstr "Pause: ALC will pause when the brake pedal is pressed."
+msgstr "暂停：踩刹车时 ALC 将暂停。"
 
 #: openpilot/selfdrive/ui/
 msgid "pending"
-msgstr "pending"
+msgstr "等待中"
 
 #: openpilot/selfdrive/ui/
 msgid "Percent: Adds a percent offset [Speed Limit + (Offset % Speed Limit)]"
-msgstr "Percent: Adds a percent offset [Speed Limit + (Offset % Speed Limit)]"
+msgstr "百分比：添加百分比偏移 [限速 + (偏移 % 限速)]"
 
 #: openpilot/selfdrive/ui/
 msgid "Perform a search"
-msgstr "Perform a search"
+msgstr "搜索"
 
 #: openpilot/selfdrive/ui/
 msgid "Please connect to Wi-Fi to complete initial pairing."
-msgstr "Please connect to Wi-Fi to complete initial pairing."
+msgstr "请连接 Wi-Fi 以完成初始配对。"
 
 #: openpilot/selfdrive/ui/
 msgid "Please connect to Wi-Fi to update."
@@ -1873,11 +1873,11 @@ msgstr "策略模型"
 
 #: openpilot/selfdrive/ui/
 msgid "Post-Blinker Delay"
-msgstr "Post-Blinker Delay"
+msgstr "转向灯后恢复延迟"
 
 #: openpilot/selfdrive/ui/
 msgid "Prebuilt Branches"
-msgstr "Prebuilt Branches"
+msgstr "预构建分支"
 
 #: openpilot/selfdrive/ui/
 msgid "Predictive"
@@ -1885,7 +1885,7 @@ msgstr "预测"
 
 #: openpilot/selfdrive/ui/
 msgid "progress"
-msgstr "progress"
+msgstr "进度"
 
 #: openpilot/selfdrive/ui/
 msgid "Quickboot Mode"
@@ -1893,7 +1893,7 @@ msgstr "快速启动模式"
 
 #: openpilot/selfdrive/ui/
 msgid "Quickboot mode requires updates to be disabled.<br>Enable 'Disable Updates' in the Software panel first."
-msgstr "Quickboot mode requires updates to be disabled.<br>Enable 'Disable Updates' in the Software panel first."
+msgstr "快速启动模式需要禁用更新。<br>请先在软件面板中启用"禁用更新"。"
 
 #: openpilot/selfdrive/ui/
 msgid "Quiet Mode"
@@ -1901,7 +1901,7 @@ msgstr "静音模式"
 
 #: openpilot/selfdrive/ui/
 msgid "ready"
-msgstr "ready"
+msgstr "就绪"
 
 #: openpilot/selfdrive/ui/
 msgid "REAL STEER"
@@ -1909,11 +1909,11 @@ msgstr "实际转向"
 
 #: openpilot/selfdrive/ui/
 msgid "Real-Time & Offline"
-msgstr "Real-Time & Offline"
+msgstr "实时与离线"
 
 #: openpilot/selfdrive/ui/
 msgid "Real-time Acceleration Bar"
-msgstr "Real-time Acceleration Bar"
+msgstr "实时加速度条"
 
 #: openpilot/selfdrive/ui/
 msgid "REFRESH"
@@ -1941,7 +1941,7 @@ msgstr "保持激活"
 
 #: openpilot/selfdrive/ui/
 msgid "Remain Active: ALC will remain active when the brake pedal is pressed."
-msgstr "Remain Active: ALC will remain active when the brake pedal is pressed."
+msgstr "保持激活：踩刹车时 ALC 保持激活。"
 
 #: openpilot/selfdrive/ui/
 msgid "Reset Settings"
@@ -1981,7 +1981,7 @@ msgstr "右下"
 
 #: openpilot/selfdrive/ui/
 msgid "s"
-msgstr "s"
+msgstr "秒"
 
 #: openpilot/selfdrive/ui/
 msgid "Scan"
@@ -2025,27 +2025,27 @@ msgstr "选择车辆"
 
 #: openpilot/selfdrive/ui/
 msgid "select model"
-msgstr "select model"
+msgstr "选择模型"
 
 #: openpilot/selfdrive/ui/
 msgid "Select the version of Torque Control Tune to use."
-msgstr "Select the version of Torque Control Tune to use."
+msgstr "选择要使用的扭矩控制调校版本。"
 
 #: openpilot/selfdrive/ui/
 msgid "Select Torque Control Tune Version"
-msgstr "Select Torque Control Tune Version"
+msgstr "选择扭矩调校版本"
 
 #: openpilot/selfdrive/ui/
 msgid "Select vehicle to force fingerprint manually."
-msgstr "Select vehicle to force fingerprint manually."
+msgstr "选择车辆以强制手动匹配指纹。"
 
 #: openpilot/selfdrive/ui/
 msgid "Self-Tune"
-msgstr "Self-Tune"
+msgstr "自调校"
 
 #: openpilot/selfdrive/ui/
 msgid "Set the maximum speed for lane turn desires. Default is 19 mph."
-msgstr "Set the maximum speed for lane turn desires. Default is 19 mph."
+msgstr "设置车道转弯意图的最高速度。默认 19 mph。"
 
 #: openpilot/selfdrive/ui/
 msgid "settings backed up"
@@ -2061,11 +2061,11 @@ msgstr "设置已恢复，确认重启界面。"
 
 #: openpilot/selfdrive/ui/
 msgid "Short Press Increment"
-msgstr "Short Press Increment"
+msgstr "短按步长"
 
 #: openpilot/selfdrive/ui/
 msgid "Show a timer on the HUD when the car is at a standstill."
-msgstr "Show a timer on the HUD when the car is at a standstill."
+msgstr "车辆停车时在 HUD 上显示计时器。"
 
 #: openpilot/selfdrive/ui/
 msgid "Show Advanced Controls"
@@ -2081,11 +2081,11 @@ msgstr "滑动以备份"
 
 #: openpilot/selfdrive/ui/
 msgid "slide to exit always offroad"
-msgstr "slide to exit always offroad"
+msgstr "滑动以退出始终离线模式"
 
 #: openpilot/selfdrive/ui/
 msgid "slide to force offroad"
-msgstr "slide to force offroad"
+msgstr "滑动以强制离线"
 
 #: openpilot/selfdrive/ui/
 msgid "slide to restart"
@@ -2105,7 +2105,7 @@ msgstr "智能巡航 - 视觉"
 
 #: openpilot/selfdrive/ui/
 msgid "Software Delay:"
-msgstr "Software Delay:"
+msgstr "软件延迟："
 
 #: openpilot/selfdrive/ui/
 msgid "Speed"
@@ -2129,11 +2129,11 @@ msgstr "限速来源"
 
 #: openpilot/selfdrive/ui/
 msgid "Speedometer: Always Display True Speed"
-msgstr "Speedometer: Always Display True Speed"
+msgstr "速度表：始终显示真实速度"
 
 #: openpilot/selfdrive/ui/
 msgid "Speedometer: Hide from Onroad Screen"
-msgstr "Speedometer: Hide from Onroad Screen"
+msgstr "速度表：驾驶界面隐藏"
 
 #: openpilot/selfdrive/ui/
 msgid "SPONSOR"
@@ -2161,7 +2161,7 @@ msgstr "开始下载"
 
 #: openpilot/selfdrive/ui/
 msgid "Start the vehicle to check vehicle compatibility."
-msgstr "Start the vehicle to check vehicle compatibility."
+msgstr "启动车辆以检查兼容性。"
 
 #: openpilot/selfdrive/ui/
 msgid "State"
@@ -2173,23 +2173,23 @@ msgstr "转向"
 
 #: openpilot/selfdrive/ui/
 msgid "Steering Arc"
-msgstr "Steering Arc"
+msgstr "转向弧线"
 
 #: openpilot/selfdrive/ui/
 msgid "Steering Mode on Brake Pedal"
-msgstr "Steering Mode on Brake Pedal"
+msgstr "踩刹车时的转向模式"
 
 #: openpilot/selfdrive/ui/
 msgid "Stop and Go (Beta)"
-msgstr "Stop and Go (Beta)"
+msgstr "启停功能（测试版）"
 
 #: openpilot/selfdrive/ui/
 msgid "Stop and Go for Manual Parking Brake (Beta)"
-msgstr "Stop and Go for Manual Parking Brake (Beta)"
+msgstr "手动驻车启停（测试版）"
 
 #: openpilot/selfdrive/ui/
 msgid "Stop and Go Hack (Alpha)"
-msgstr "Stop and Go Hack (Alpha)"
+msgstr "启停破解（测试版）"
 
 #: openpilot/selfdrive/ui/
 msgid "STOPPED"
@@ -2213,7 +2213,7 @@ msgstr "未找到 sunnylink Dongle ID。"
 
 #: openpilot/selfdrive/ui/
 msgid "sunnylink enables secured remote access to your comma device from anywhere."
-msgstr "sunnylink enables secured remote access to your comma device from anywhere."
+msgstr "sunnylink 支持从任何地方安全远程访问您的 comma 设备。"
 
 #: openpilot/selfdrive/ui/
 msgid "sunnylink uploader"
@@ -2221,15 +2221,15 @@ msgstr "sunnylink 上传器"
 
 #: openpilot/selfdrive/ui/
 msgid "sunnypilot Longitudinal Control is the default longitudinal control for this platform."
-msgstr "sunnypilot Longitudinal Control is the default longitudinal control for this platform."
+msgstr "sunnypilot 纵向控制是该平台的默认纵向控制。"
 
 #: openpilot/selfdrive/ui/
 msgid "sunnypilot Longitudinal Control must be available and enabled for your vehicle to use this feature."
-msgstr "sunnypilot Longitudinal Control must be available and enabled for your vehicle to use this feature."
+msgstr "您的车辆需要 sunnypilot 纵向控制可用并启用才能使用此功能。"
 
 #: openpilot/selfdrive/ui/
 msgid "sunnypilot will not take over control of gas and brakes. Factory Toyota longitudinal control will be used."
-msgstr "sunnypilot will not take over control of gas and brakes. Factory Toyota longitudinal control will be used."
+msgstr "sunnypilot 不会接管油门和刹车，将使用原厂 Toyota 纵向控制。"
 
 #: openpilot/selfdrive/ui/
 msgid "SW"
@@ -2237,7 +2237,7 @@ msgstr "SW"
 
 #: openpilot/selfdrive/ui/
 msgid "System reboot required for changes to take effect. Reboot now?"
-msgstr "System reboot required for changes to take effect. Reboot now?"
+msgstr "需要重启系统以使更改生效。现在重启？"
 
 #: openpilot/selfdrive/ui/
 msgid "thanks"
@@ -2249,39 +2249,39 @@ msgstr "感谢 ♥"
 
 #: openpilot/selfdrive/ui/
 msgid "The reset cannot be undone. You have been warned."
-msgstr "The reset cannot be undone. You have been warned."
+msgstr "重置不可撤销，已警告。"
 
 #: openpilot/selfdrive/ui/
 msgid "This feature can only be used with sunnypilot longitudinal control enabled."
-msgstr "This feature can only be used with sunnypilot longitudinal control enabled."
+msgstr "此功能仅在启用 sunnypilot 纵向控制时可用。"
 
 #: openpilot/selfdrive/ui/
 msgid "This feature defaults to OFF, and does not allow selection due to vehicle limitations."
-msgstr "This feature defaults to OFF, and does not allow selection due to vehicle limitations."
+msgstr "此功能默认为关闭，因车辆限制不允许选择。"
 
 #: openpilot/selfdrive/ui/
 msgid "This feature defaults to ON, and does not allow selection due to vehicle limitations."
-msgstr "This feature defaults to ON, and does not allow selection due to vehicle limitations."
+msgstr "此功能默认为开启，因车辆限制不允许选择。"
 
 #: openpilot/selfdrive/ui/
 msgid "This feature is currently not available on this platform."
-msgstr "This feature is currently not available on this platform."
+msgstr "此功能当前在此平台不可用。"
 
 #: openpilot/selfdrive/ui/
 msgid "This feature is not supported on this platform due to vehicle limitations."
-msgstr "This feature is not supported on this platform due to vehicle limitations."
+msgstr "此功能因车辆限制在此平台不支持。"
 
 #: openpilot/selfdrive/ui/
 msgid "This feature is unavailable because sunnypilot Longitudinal Control (Alpha) is not enabled."
-msgstr "This feature is unavailable because sunnypilot Longitudinal Control (Alpha) is not enabled."
+msgstr "此功能不可用，因为 sunnypilot 纵向控制（测试版）未启用。"
 
 #: openpilot/selfdrive/ui/
 msgid "This feature is unavailable while the car is onroad."
-msgstr "This feature is unavailable while the car is onroad."
+msgstr "此功能在车辆行驶中不可用。"
 
 #: openpilot/selfdrive/ui/
 msgid "This feature requires sunnypilot longitudinal control to be available."
-msgstr "This feature requires sunnypilot longitudinal control to be available."
+msgstr "此功能需要 sunnypilot 纵向控制可用。"
 
 #: openpilot/selfdrive/ui/
 msgid "This is the master switch, it will allow you to cutoff any sunnylink requests should you want to do that."
@@ -2293,23 +2293,23 @@ msgstr "可能是网络连接弱或 sunnylink 注册问题。"
 
 #: openpilot/selfdrive/ui/
 msgid "This platform only supports Disengage mode due to vehicle limitations."
-msgstr "This platform only supports Disengage mode due to vehicle limitations."
+msgstr "此平台因车辆限制仅支持断开模式。"
 
 #: openpilot/selfdrive/ui/
 msgid "This platform supports all MADS settings."
-msgstr "This platform supports all MADS settings."
+msgstr "此平台支持全部 MADS 设置。"
 
 #: openpilot/selfdrive/ui/
 msgid "This platform supports limited MADS settings."
-msgstr "This platform supports limited MADS settings."
+msgstr "此平台支持有限的 MADS 设置。"
 
 #: openpilot/selfdrive/ui/
 msgid "This setting will take effect immediately."
-msgstr "This setting will take effect immediately."
+msgstr "此设置立即生效。"
 
 #: openpilot/selfdrive/ui/
 msgid "This setting will take effect once the device enters offroad state."
-msgstr "This setting will take effect once the device enters offroad state."
+msgstr "此设置将在设备进入离线状态后生效。"
 
 #: openpilot/selfdrive/ui/
 msgid ""
@@ -2326,11 +2326,11 @@ msgstr ""
 
 #: openpilot/selfdrive/ui/
 msgid "This will delete ALL downloaded models from the cache except the currently active model. Are you sure?"
-msgstr "This will delete ALL downloaded models from the cache except the currently active model. Are you sure?"
+msgstr "这将删除缓存中除当前模型外的所有已下载模型，确认？"
 
 #: openpilot/selfdrive/ui/
 msgid "This will start the download process and it might take a while to complete."
-msgstr "This will start the download process and it might take a while to complete."
+msgstr "这将启动下载过程，可能需要一段时间完成。"
 
 #: openpilot/selfdrive/ui/
 msgid "Time"
@@ -2338,15 +2338,15 @@ msgstr "时间"
 
 #: openpilot/selfdrive/ui/
 msgid "Toggle with Main Cruise"
-msgstr "Toggle with Main Cruise"
+msgstr "随主巡航开关切换"
 
 #: openpilot/selfdrive/ui/
 msgid "Torque Control Tune Version"
-msgstr "Torque Control Tune Version"
+msgstr "扭矩调校版本"
 
 #: openpilot/selfdrive/ui/
 msgid "Total Delay:"
-msgstr "Total Delay:"
+msgstr "总延迟："
 
 #: openpilot/selfdrive/ui/
 msgid "Training Guide"
@@ -2374,23 +2374,23 @@ msgstr "统一激活模式 (UEM)"
 
 #: openpilot/selfdrive/ui/
 msgid "Unrecognized Vehicle"
-msgstr "Unrecognized Vehicle"
+msgstr "未识别车辆"
 
 #: openpilot/selfdrive/ui/
 msgid "Updated"
-msgstr "Updated"
+msgstr "已更新"
 
 #: openpilot/selfdrive/ui/
 msgid "Use Lane Turn Desires"
-msgstr "Use Lane Turn Desires"
+msgstr "使用车道转弯意图"
 
 #: openpilot/selfdrive/ui/
 msgid "Use map data to estimate the appropriate speed to drive through turns ahead."
-msgstr "Use map data to estimate the appropriate speed to drive through turns ahead."
+msgstr "使用地图数据估算前方弯道的合适速度。"
 
 #: openpilot/selfdrive/ui/
 msgid "Use vision path predictions to estimate the appropriate speed to drive through turns ahead."
-msgstr "Use vision path predictions to estimate the appropriate speed to drive through turns ahead."
+msgstr "使用视觉路径预测估算前方弯道的合适速度。"
 
 #: openpilot/selfdrive/ui/
 msgid "Vehicle"
@@ -2398,7 +2398,7 @@ msgstr "车辆"
 
 #: openpilot/selfdrive/ui/
 msgid "View the error log for sunnypilot crashes."
-msgstr "View the error log for sunnypilot crashes."
+msgstr "查看 sunnypilot 崩溃错误日志。"
 
 #: openpilot/selfdrive/ui/
 msgid "Vision Model"
@@ -2410,7 +2410,7 @@ msgstr "视觉"
 
 #: openpilot/selfdrive/ui/
 msgid "Wake Up Behavior"
-msgstr "Wake Up Behavior"
+msgstr "唤醒行为"
 
 #: openpilot/selfdrive/ui/
 msgid "Warning"
@@ -2418,7 +2418,7 @@ msgstr "警告"
 
 #: openpilot/selfdrive/ui/
 msgid "Warning: Provides a warning when exceeding the current road's speed limit."
-msgstr "Warning: Provides a warning when exceeding the current road's speed limit."
+msgstr "警告：超速时发出警告。"
 
 #: openpilot/selfdrive/ui/
 msgid "Welcome back!! We're excited to see you've enabled sunnylink again!"
@@ -2426,23 +2426,23 @@ msgstr "欢迎回来！很高兴您重新启用 sunnylink！"
 
 #: openpilot/selfdrive/ui/
 msgid "What's a good USB-C adapter?"
-msgstr "What's a good USB-C adapter?"
+msgstr "推荐什么 USB-C 适配器？"
 
 #: openpilot/selfdrive/ui/
 msgid "When enabled, automatic software updates will be off.<br><b>This requires a reboot to take effect.</b>"
-msgstr "When enabled, automatic software updates will be off.<br><b>This requires a reboot to take effect.</b>"
+msgstr "启用后自动软件更新将关闭。<br><b>需要重启才能生效。</b>"
 
 #: openpilot/selfdrive/ui/
 msgid "When enabled, the speedometer on the onroad screen is not displayed."
-msgstr "When enabled, the speedometer on the onroad screen is not displayed."
+msgstr "启用后驾驶界面不显示速度表。"
 
 #: openpilot/selfdrive/ui/
 msgid "When enabled, visual turn indicators are drawn on the HUD."
-msgstr "When enabled, visual turn indicators are drawn on the HUD."
+msgstr "启用后在 HUD 上绘制转向指示灯。"
 
 #: openpilot/selfdrive/ui/
 msgid "Would you like to delete this log?"
-msgstr "Would you like to delete this log?"
+msgstr "确认删除此日志？"
 
 #: openpilot/selfdrive/ui/
 msgid "Yes"
@@ -2450,23 +2450,23 @@ msgstr "是"
 
 #: openpilot/selfdrive/ui/
 msgid "Yes, delete all maps"
-msgstr "Yes, delete all maps"
+msgstr "是，删除所有地图"
 
 #: openpilot/selfdrive/ui/
 msgid "Yes, only upstream openpilot (and particular forks) are able to be used for training."
-msgstr "Yes, only upstream openpilot (and particular forks) are able to be used for training."
+msgstr "是的，仅上游 openpilot（及特定分支）可用于训练。"
 
 #: openpilot/selfdrive/ui/
 msgid "Your vehicle will use the Default longitudinal tuning."
-msgstr "Your vehicle will use the Default longitudinal tuning."
+msgstr "您的车辆将使用默认纵向调校。"
 
 #: openpilot/selfdrive/ui/
 msgid "Your vehicle will use the Dynamic longitudinal tuning."
-msgstr "Your vehicle will use the Dynamic longitudinal tuning."
+msgstr "您的车辆将使用动态纵向调校。"
 
 #: openpilot/selfdrive/ui/
 msgid "Your vehicle will use the Predictive longitudinal tuning."
-msgstr "Your vehicle will use the Predictive longitudinal tuning."
+msgstr "您的车辆将使用预测纵向调校。"
 
 #: openpilot/selfdrive/ui/
 msgid "🚀 sunnylink 🚀"
