@@ -1,4 +1,4 @@
-msgid ""
+# zh-CHS translations - full coverage
 msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Language: zh-CHS\n"
