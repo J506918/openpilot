@@ -9,6 +9,7 @@ from dataclasses import dataclass
 
 from openpilot.common.constants import CV
 from openpilot.selfdrive.ui.ui_state import ui_state
+from openpilot.system.ui.lib.multilang import tr
 from openpilot.system.ui.lib.text_measure import measure_text_cached
 
 
@@ -92,7 +93,7 @@ class RelDistElement(LeadInfoElement):
     lead_status, lead_d_rel, _ = self.get_lead_status(sm)
     value = f"{lead_d_rel:.0f}" if lead_status else "-"
     color = self.get_lead_color(lead_d_rel) if lead_status else rl.WHITE
-    return UiElement(value, "REL DIST", self.unit, color)
+    return UiElement(value, tr("REL DIST"), self.unit, color)
 
 
 class RelSpeedElement(LeadInfoElement):
@@ -108,7 +109,7 @@ class RelSpeedElement(LeadInfoElement):
     value = f"{lead_v_rel * conversion:.0f}" if lead_status else "-"
     color = self.get_lead_color(0, lead_v_rel, use_v_rel=True) if lead_status else rl.WHITE
 
-    return UiElement(value, "REL SPEED", self.unit, color)
+    return UiElement(value, tr("REL SPEED"), self.unit, color)
 
 
 class SteeringAngleElement(LateralControlElement):
@@ -124,7 +125,7 @@ class SteeringAngleElement(LateralControlElement):
     value = f"{angle_steers:.1f}°"
     color = self.get_lat_color(lat_active, steer_override, angle_steers, check_angle=True)
 
-    return UiElement(value, "REAL STEER", self.unit, color)
+    return UiElement(value, tr("REAL STEER"), self.unit, color)
 
 
 class DesiredSteeringAngleElement(LateralControlElement):
@@ -149,7 +150,7 @@ class DesiredSteeringAngleElement(LateralControlElement):
       else:
         color = rl.Color(0, 255, 0, 255)
 
-    return UiElement(value, "DESIRED STEER", self.unit, color)
+    return UiElement(value, tr("DESIRED STEER"), self.unit, color)
 
 
 class ActualLateralAccelElement(LateralControlElement):
@@ -168,7 +169,7 @@ class ActualLateralAccelElement(LateralControlElement):
     value = f"{actual_lat_accel:.2f}"
     color = self.get_lat_color(lat_active, steer_override)
 
-    return UiElement(value, "ACTUAL L.A.", self.unit, color)
+    return UiElement(value, tr("ACTUAL L.A."), self.unit, color)
 
 
 class DesiredLateralAccelElement(LateralControlElement):
@@ -187,7 +188,7 @@ class DesiredLateralAccelElement(LateralControlElement):
     value = f"{desired_lat_accel:.2f}" if lat_active else "-"
     color = self.get_lat_color(lat_active, steer_override)
 
-    return UiElement(value, "DESIRED L.A.", self.unit, color)
+    return UiElement(value, tr("DESIRED L.A."), self.unit, color)
 
 
 class DesiredSteeringPIDElement(LateralControlElement):
@@ -212,7 +213,7 @@ class DesiredSteeringPIDElement(LateralControlElement):
       else:
         color = rl.Color(0, 255, 0, 255)
 
-    return UiElement(value, "DESIRED STEER", self.unit, color)
+    return UiElement(value, tr("DESIRED STEER"), self.unit, color)
 
 
 class AEgoElement:
@@ -222,7 +223,7 @@ class AEgoElement:
   def update(self, sm, is_metric: bool) -> UiElement:
     a_ego = sm['carState'].aEgo
     value = f"{a_ego:.1f}"
-    return UiElement(value, "ACC.", self.unit, rl.WHITE)
+    return UiElement(value, tr("ACC."), self.unit, rl.WHITE)
 
 
 class LeadSpeedElement(LeadInfoElement):
@@ -248,12 +249,12 @@ class FrictionCoefficientElement:
 
   def update(self, sm, is_metric: bool) -> UiElement:
     if ui_state.enforce_torque_control and ui_state.custom_torque_params and ui_state.torque_override_enabled:
-      return UiElement(f"{ui_state.torque_override_friction:.3f}", "FRIC.", self.unit, rl.WHITE)
+      return UiElement(f"{ui_state.torque_override_friction:.3f}", tr("FRIC."), self.unit, rl.WHITE)
 
     ltp = sm['liveTorqueParameters']
     value = f"{ltp.frictionCoefficientFiltered:.3f}"
     color = rl.Color(0, 255, 0, 255) if ltp.liveValid else rl.WHITE
-    return UiElement(value, "FRIC.", self.unit, color)
+    return UiElement(value, tr("FRIC."), self.unit, color)
 
 
 class LatAccelFactorElement:
@@ -297,7 +298,7 @@ class BearingDegElement(GpsInfoElement):
   def update(self, sm, is_metric: bool) -> UiElement:
     gps_data, valid = self.get_gps_data(sm)
     if not valid:
-      return UiElement("OFF | -", "B.D.", self.unit, rl.WHITE)
+      return UiElement(f"{tr('OFF')} | -", tr("B.D."), self.unit, rl.WHITE)
 
     bearing_accuracy_deg = gps_data.bearingAccuracyDeg
     bearing_deg = gps_data.bearingDeg
@@ -307,24 +308,24 @@ class BearingDegElement(GpsInfoElement):
       if (337.5 <= bearing_deg <= 360) or (0 <= bearing_deg <= 22.5):
         dir_value = "N"
       elif 22.5 < bearing_deg < 67.5:
-        dir_value = "NE"
+        dir_value = tr("NE")
       elif 67.5 <= bearing_deg <= 112.5:
         dir_value = "E"
       elif 112.5 < bearing_deg < 157.5:
-        dir_value = "SE"
+        dir_value = tr("SE")
       elif 157.5 <= bearing_deg <= 202.5:
         dir_value = "S"
       elif 202.5 < bearing_deg < 247.5:
-        dir_value = "SW"
+        dir_value = tr("SW")
       elif 247.5 <= bearing_deg <= 292.5:
         dir_value = "W"
       else:  # 292.5 < bearing_deg < 337.5
-        dir_value = "NW"
+        dir_value = tr("NW")
     else:
       value = "-"
-      dir_value = "OFF"
+      dir_value = tr("OFF")
 
-    return UiElement(f"{dir_value} | {value}", "B.D.", self.unit, rl.WHITE)
+    return UiElement(f"{dir_value} | {value}", tr("B.D."), self.unit, rl.WHITE)
 
 
 class AltitudeElement(GpsInfoElement):
@@ -345,4 +346,4 @@ class AltitudeElement(GpsInfoElement):
         gps_accuracy = 1.0  # Simulate valid for legacy check
 
     value = f"{altitude:.1f}" if gps_accuracy != 0.0 else "-"
-    return UiElement(value, "ALT.", self.unit, rl.WHITE)
+    return UiElement(value, tr("ALT."), self.unit, rl.WHITE)

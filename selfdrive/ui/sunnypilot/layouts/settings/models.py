@@ -164,14 +164,14 @@ class ModelsLayout(Widget):
       if label := labels.get(getattr(model.type, 'raw', model.type)):
         label.set_visible(True)
         p = model.artifact.downloadProgress
-        text, show, color = f"pending - {bundle.displayName}", False, rl.GRAY
+        text, show, color = f"{tr('pending')} - {bundle.displayName}", False, rl.GRAY
         if p.status == custom.ModelManagerSP.DownloadStatus.downloading:
           text, show = f"{int(p.progress)}% - {bundle.displayName}", True
         elif p.status in (custom.ModelManagerSP.DownloadStatus.downloaded, custom.ModelManagerSP.DownloadStatus.cached):
           status_text = tr("from cache" if p.status == custom.ModelManagerSP.DownloadStatus.cached else "downloaded")
           text, color = f"{bundle.displayName} - {status_text if status_changed else tr('ready')}", ON_COLOR
         elif p.status == custom.ModelManagerSP.DownloadStatus.failed:
-          text, color = f"download failed - {bundle.displayName}", rl.RED
+          text, color = f"{tr('download failed')} - {bundle.displayName}", rl.RED
         label.action_item.update(p.progress, text, show, color)
 
   @staticmethod
@@ -210,11 +210,11 @@ class ModelsLayout(Widget):
     folders_list = [TreeFolder("", [TreeNode("Default", {'display_name': tr("Default Model"), 'short_name': "Default"})])]
     for folder, folder_bundles in sorted(folders.items(), key=lambda x: max((bundle.index for bundle in x[1]), default=-1), reverse=True):
       folder_bundles.sort(key=lambda bundle: bundle.index, reverse=True)
-      name = folder + (f" - (Updated: {m.group(1)})" if folder_bundles and (m := re.search(r'\(([^)]*)\)[^(]*$', folder_bundles[0].displayName)) else "")
+      name = folder + (f" - ({tr('Updated')}: {m.group(1)})" if folder_bundles and (m := re.search(r'\\(([^)]*)\\)[^(]*$', folder_bundles[0].displayName)) else "")
       folders_list.append(TreeFolder(name, [self._bundle_to_node(bundle) for bundle in folder_bundles]))
 
     if favorites and (fav_bundles := [bundle for bundle in bundles if bundle.ref in favorites]):
-      folders_list.insert(1, TreeFolder("Favorites", [self._bundle_to_node(bundle) for bundle in fav_bundles]))
+      folders_list.insert(1, TreeFolder(tr("Favorites"), [self._bundle_to_node(bundle) for bundle in fav_bundles]))
     return folders_list
 
   def _handle_current_model_clicked(self):

@@ -29,8 +29,8 @@ class CurrentModelInfo(Widget):
     self.current_model_header = UnifiedLabel(tr("active model"), 48, max_width=max_width, text_color=header_color, font_weight=FontWeight.DISPLAY)
     self.current_model_text = UnifiedLabel(tr("default model"), 32, max_width=max_width, text_color=subheader_color, font_weight=FontWeight.ROMAN, scroll=True)
 
-    self.info_header = UnifiedLabel("cache size", 48, max_width=max_width, text_color=header_color, font_weight=FontWeight.DISPLAY)
-    self.info_text = UnifiedLabel("0 mb", 32, max_width=max_width, text_color=subheader_color, font_weight=FontWeight.ROMAN)
+    self.info_header = UnifiedLabel(tr("cache size"), 48, max_width=max_width, text_color=header_color, font_weight=FontWeight.DISPLAY)
+    self.info_text = UnifiedLabel(tr("0 mb"), 32, max_width=max_width, text_color=subheader_color, font_weight=FontWeight.ROMAN)
 
   def _render(self, _):
     self.current_model_header.set_position(self._rect.x + 20, self._rect.y - 10)
@@ -104,7 +104,7 @@ class ModelsLayoutMici(NavScroller):
 
     for folder in sorted(folders.keys(), key=lambda f: max((bundle.index for bundle in folders[f]), default=-1), reverse=True):
       if folder.lower() in ["release models", "master models", "favorites"]:
-        btn = BigButton(folder.lower())
+        btn = BigButton(tr(folder.lower()))
         btn.set_click_callback(lambda f=folder: self._select_folder(f))
         if folder.lower() == "favorites":
           folder_buttons.insert(0, btn)
