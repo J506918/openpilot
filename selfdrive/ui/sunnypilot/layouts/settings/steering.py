@@ -96,10 +96,10 @@ class SteeringLayout(Widget):
       title=lambda: tr("Neural Network Lateral Control (NNLC)"),
       description=""
     )
-    self._lqr_toggle = toggle_item_sp(
-      param="LateralControlLQR",
-      title=lambda: tr("Lateral Control V2 (LQR)"),
-      description=lambda: tr("Physics feedforward + LQR state feedback. No integral windup. Smooth, precise, immediate response on all curves.")
+    self._adrc_toggle = toggle_item_sp(
+      param="LateralControlADRC",
+      title=lambda: tr("Lateral Control V3 (ADRC Experimental)"),
+      description=lambda: tr("Two-point preview + ADRC. ESO estimates and compensates all disturbances in real time. Experimental — not for daily driving yet.")
     )
 
     items = [
@@ -117,7 +117,7 @@ class SteeringLayout(Widget):
       LineSeparatorSP(40),
       self._nnlc_toggle,
       LineSeparatorSP(40),
-      self._lqr_toggle,
+      self._adrc_toggle,
     ]
     return items
 
@@ -141,12 +141,12 @@ class SteeringLayout(Widget):
 
     enforce_torque_enabled = self._torque_control_toggle.action_item.get_state()
     nnlc_enabled = self._nnlc_toggle.action_item.get_state()
-    lqr_enabled = self._lqr_toggle.action_item.get_state()
-    other_mode = enforce_torque_enabled or nnlc_enabled or lqr_enabled
+    adrc_enabled = self._adrc_toggle.action_item.get_state()
+    other_mode = enforce_torque_enabled or nnlc_enabled or adrc_enabled
     self._nnlc_toggle.action_item.set_enabled(ui_state.is_offroad() and torque_allowed and not (other_mode and not nnlc_enabled))
     self._torque_control_toggle.action_item.set_enabled(ui_state.is_offroad() and torque_allowed and not (other_mode and not enforce_torque_enabled))
     self._torque_customization_button.action_item.set_enabled(self._torque_control_toggle.action_item.get_state())
-    self._lqr_toggle.action_item.set_enabled(ui_state.is_offroad() and torque_allowed and not (other_mode and not lqr_enabled))
+    self._adrc_toggle.action_item.set_enabled(ui_state.is_offroad() and torque_allowed and not (other_mode and not adrc_enabled))
 
   def _render(self, rect):
     if self._current_panel == PanelType.LANE_CHANGE:

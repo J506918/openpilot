@@ -118,6 +118,9 @@ sections:
     - type: param
       key: NeuralNetworkLateralControl
       equals: false
+    - type: param
+      key: LateralControlADRC
+      equals: false
   sub_panels:
   - id: torque_settings
     label: Torque Settings
@@ -216,6 +219,28 @@ sections:
         label: v0.0
       enablement:
       - $ref: '#/macros/offroad'
+  - key: LateralControlADRC
+    widget: toggle
+    title: Lateral Control V3 (ADRC Experimental)
+    description: Two-point preview + ADRC. ESO estimates and compensates all disturbances in real time. Experimental — not for daily driving yet.
+    visibility:
+    - type: not
+      condition:
+        type: capability
+        field: steer_control_type
+        equals: angle
+    enablement:
+    - $ref: '#/macros/offroad'
+    - type: capability
+      field: torque_allowed
+      equals: true
+    - type: param
+      key: EnforceTorqueControl
+      equals: false
+    - type: param
+      key: NeuralNetworkLateralControl
+      equals: false
+
 - id: lane_change
   title: Lane Change
   description: Automatic lane change timing and behavior
