@@ -121,6 +121,9 @@ sections:
     - type: param
       key: LateralControlADRC
       equals: false
+    - type: param
+      key: LateralControlFFv1
+      equals: false
   sub_panels:
   - id: torque_settings
     label: Torque Settings
@@ -219,6 +222,30 @@ sections:
         label: v0.0
       enablement:
       - $ref: '#/macros/offroad'
+  - key: LateralControlFFv1
+    widget: toggle
+    title: Lateral Control V4 (Predictive FF+FB)
+    description: Delay-anticipatory feedforward + Smith Predictor feedback + RLS online adaptation + disturbance observer. Designed for Honda Accord 11th-gen.
+    visibility:
+    - type: not
+      condition:
+        type: capability
+        field: steer_control_type
+        equals: angle
+    enablement:
+    - $ref: '#/macros/offroad'
+    - type: capability
+      field: torque_allowed
+      equals: true
+    - type: param
+      key: EnforceTorqueControl
+      equals: false
+    - type: param
+      key: NeuralNetworkLateralControl
+      equals: false
+    - type: param
+      key: LateralControlADRC
+      equals: false
   - key: LateralControlADRC
     widget: toggle
     title: Lateral Control V3 (ADRC Experimental)
@@ -239,6 +266,9 @@ sections:
       equals: false
     - type: param
       key: NeuralNetworkLateralControl
+      equals: false
+    - type: param
+      key: LateralControlFFv1
       equals: false
 
 - id: lane_change

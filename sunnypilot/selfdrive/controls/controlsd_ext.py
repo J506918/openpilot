@@ -17,6 +17,7 @@ from openpilot.sunnypilot.livedelay.helpers import get_lat_delay
 from openpilot.sunnypilot.modeld_v2.modeld_base import ModelStateBase
 from openpilot.sunnypilot.selfdrive.controls.lib.blinker_pause_lateral import BlinkerPauseLateral
 from openpilot.sunnypilot.selfdrive.controls.lib.latcontrol_torque_v0 import LatControlTorque as LatControlTorqueV0
+from openpilot.sunnypilot.selfdrive.controls.lib.latcontrol_ffv1 import LatControlFFv1
 from openpilot.sunnypilot.selfdrive.controls.lib.latcontrol_adrc import LatControlADRC
 
 
@@ -36,6 +37,11 @@ class ControlsExt(ModelStateBase):
     self.pm_services_ext = ['carControlSP']
 
   def initialize_lateral_control(self, lac, CI, dt):
+    # FFv1 Lateral Control — Predictive FF+FB with RLS adaptation (highest priority)
+    ffv1_enabled = self.params.get_bool("LateralControlFFv1")
+    if ffv1_enabled and self.CP.lateralTuning.which() == 'torque':
+      return LatControlFFv1(self.CP, self.CP_SP, CI, dt)
+
     # ADRC Lateral Control — two-point preview + ESO + Smith predictor
     adrc_enabled = self.params.get_bool("LateralControlADRC")
     if adrc_enabled and self.CP.lateralTuning.which() == 'torque':
