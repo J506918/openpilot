@@ -203,6 +203,9 @@ inline static std::unordered_map<std::string, ParamKeyAttributes> keys = {
     // Neural Network Lateral Control
     {"NeuralNetworkLateralControl", {PERSISTENT | BACKUP, BOOL, "0"}},
 
+    // ADRC Lateral Control V3 (Experimental)
+    {"LateralControlADRC", {PERSISTENT | BACKUP, BOOL, "0"}},
+
     // sunnylink params
     {"EnableSunnylinkUploader", {PERSISTENT | BACKUP, BOOL}},
     {"LastSunnylinkPingTime", {CLEAR_ON_MANAGER_START, INT}},
