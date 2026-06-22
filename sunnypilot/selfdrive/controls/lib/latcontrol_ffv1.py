@@ -414,6 +414,8 @@ class LatControlFFv1(LatControl):
     self.torque_params.latAccelFactor = latAccelFactor
     self.torque_params.latAccelOffset = latAccelOffset
     self.torque_params.friction = friction
+    self.lat_accel_factor = latAccelFactor
+    self.friction = friction
 
   def reset(self):
     super().reset()
@@ -443,7 +445,7 @@ class LatControlFFv1(LatControl):
     """
     v_safe = max(v, MIN_SPEED)
     # Scale factor: reference speed / actual speed, capped
-    scale = clip(FB_REF_SPEED / v_safe, 0.15, 3.0)
+    scale = clip(FB_REF_SPEED / v_safe, 0.15, 1.5)
     return (FB_KY * scale, FB_KPSI * scale, FB_KBETA * scale * scale, FB_KR * scale)
 
   @staticmethod
@@ -577,6 +579,10 @@ class LatControlFFv1(LatControl):
     r_p = state_predicted[3]        # predicted yaw rate
 
     # Gain-scheduled feedback
+    # Low-speed gate: disable feedback entirely below 5 m/s to avoid instability
+    if v < 5.0:
+      return 0.0, measured_curvature, 0.0
+
     Ky, Kpsi, Kbeta, Kr = self._get_scheduled_gains(v)
 
     tau_fb = -(Ky * e_y + Kpsi * e_psi + Kbeta * beta_p + Kr * r_p)
@@ -678,7 +684,9 @@ class LatControlFFv1(LatControl):
       CS, VM, params, v, desired_curvature, lat_delay, alpha_current)
 
     # ─── Integrator accumulation (lateral position error → torque) ─────
-    self.integrator += INTEGRATOR_GAIN * e_y_pred * dt
+    freeze = steer_limited_by_safety or CS.steeringPressed or v < 5.0
+    if not freeze:
+      self.integrator += INTEGRATOR_GAIN * e_y_pred * dt
 
     # ─── Layer 3: Disturbance Compensation ────────────────────────────
     tau_dist = self._compute_disturbance(v, measured_curvature, CS, alpha_current)
