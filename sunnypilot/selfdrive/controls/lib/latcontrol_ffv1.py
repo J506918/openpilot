@@ -68,8 +68,8 @@ BANK_CUTOFF_HZ = 0.05             # LPF cutoff for bank angle estimation
 BANK_STRAIGHT_KAPPA = 0.001       # curvature threshold for straight detection
 
 # ─── Constraint & Safety ──────────────────────────────────────────────
-TORQUE_RATE_NORMAL = 100.0        # unit/s — comfort limit
-TORQUE_RATE_EMERGENCY = 300.0     # unit/s — safety override
+TORQUE_RATE_NORMAL = 10.0         # unit/s — comfort limit
+TORQUE_RATE_EMERGENCY = 30.0      # unit/s — safety override
 LAT_ACCEL_COMFORT = 2.0           # m/s² comfort limit
 LAT_ACCEL_SAFETY = 4.0            # m/s² absolute limit
 YAW_RATE_LIMIT = 0.5              # rad/s stability limit
@@ -487,6 +487,9 @@ class LatControlFFv1(LatControl):
     a_lat_desired = kappa_ff * v_safe ** 2
     tau_ff = self.torque_from_lateral_accel(a_lat_desired, self.torque_params)
 
+    # RLS friction compensation: add adaptive friction estimate as normalized torque
+    tau_ff += friction_est * sign_with_deadzone(kappa_ff)
+
     # Dynamic feedforward (curvature rate compensation)
     if self._first_frame:
       dkappa_dt = 0.0
@@ -620,23 +623,24 @@ class LatControlFFv1(LatControl):
   #  Layer 4: Constraint Handling & Safety
   # ═══════════════════════════════════════════════════════════════════
 
-  def _apply_constraints(self, tau_total, v, steer_max, steer_limited_by_safety, dt):
+  def _apply_constraints(self, tau_total, v, steer_max, steer_limited_by_safety, dt, freeze=False):
     """
     1. Hard torque limit (steer_max from safety)
-    2. Anti-windup back-calculation
+    2. Anti-windup back-calculation (skipped when integrator is frozen)
     3. Torque rate limiting (comfort)
     4. Predictive constraint check (simplified single-step)
     """
     # 4a. Hard torque constraint
     tau_clipped = clip(tau_total, -steer_max, steer_max)
 
-    # 4b. Anti-windup: back-calculate saturation into integrator
-    saturation = tau_clipped - tau_total
-    if abs(saturation) > 1e-6:
-      self.integrator += ANTI_WINDUP_GAIN * saturation * dt
-      self.saturation_counter += 1
-    else:
-      self.saturation_counter = max(0, self.saturation_counter - 1)
+    # 4b. Anti-windup: back-calculate saturation into integrator (skip when frozen)
+    if not freeze:
+      saturation = tau_clipped - tau_total
+      if abs(saturation) > 1e-6:
+        self.integrator += ANTI_WINDUP_GAIN * saturation * dt
+        self.saturation_counter += 1
+      else:
+        self.saturation_counter = max(0, self.saturation_counter - 1)
 
     # Clamp integrator to prevent excessive windup
     self.integrator = clip(self.integrator, -steer_max * 0.5, steer_max * 0.5)
@@ -679,6 +683,12 @@ class LatControlFFv1(LatControl):
     tau_ff, kappa_ff, alpha_current, friction_current = self._compute_feedforward(
       desired_curvature, v, lat_delay)
 
+    # Smith predictor cold-start: pre-fill input buffer with current feedforward
+    # instead of zeros, giving the predictor a reasonable initial guess
+    if self._first_frame:
+      max_delay_frames = self.input_buffer.maxlen or 20
+      self.input_buffer = deque([tau_ff] * max_delay_frames, maxlen=max_delay_frames)
+
     # ─── Layer 2: Predictive Feedback ─────────────────────────────────
     tau_fb, measured_curvature, e_y_pred = self._compute_feedback(
       CS, VM, params, v, desired_curvature, lat_delay, alpha_current)
@@ -699,7 +709,7 @@ class LatControlFFv1(LatControl):
     tau_total = tau_ff + tau_fb + tau_dist + tau_roll + self.integrator
 
     # ─── Layer 4: Constraint & Safety ─────────────────────────────────
-    tau_final = self._apply_constraints(tau_total, v, self.steer_max, steer_limited_by_safety, dt)
+    tau_final = self._apply_constraints(tau_total, v, self.steer_max, steer_limited_by_safety, dt, freeze=freeze)
 
     # ─── Update input buffer ──────────────────────────────────────────
     self.input_buffer.append(tau_final)
