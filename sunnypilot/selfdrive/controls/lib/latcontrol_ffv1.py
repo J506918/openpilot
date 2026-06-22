@@ -28,7 +28,9 @@ from collections import deque
 from cereal import log
 from openpilot.common.constants import ACCELERATION_DUE_TO_GRAVITY
 from openpilot.common.filter_simple import FirstOrderFilter
+from openpilot.selfdrive.controls.lib.drive_helpers import CONTROL_N
 from openpilot.selfdrive.controls.lib.latcontrol import LatControl
+from openpilot.selfdrive.modeld.constants import ModelConstants
 
 # ─── Version ───────────────────────────────────────────────────────────
 VERSION = 100
@@ -85,6 +87,12 @@ OBSERVER_L = 0.3                  # observer gain, low bandwidth (< 1/(3*lat_del
 
 # ─── Minimum Speed ────────────────────────────────────────────────────
 MIN_SPEED = 1.0                   # avoid division by zero
+
+# ─── Integrator Gain ──────────────────────────────────────────────────
+INTEGRATOR_GAIN = 0.3             # lateral error → torque conversion gain
+
+# ─── Heading Error Integration ────────────────────────────────────────
+HEADING_ERROR_MAX = 0.15          # max heading error [rad] (~8.6°)
 
 
 def sign_with_deadzone(x, dz=0.01):
@@ -367,6 +375,7 @@ class LatControlFFv1(LatControl):
 
     # ─── Feedforward State ────────────────────────────────────────────
     self.prev_kappa_ff = 0.0
+    self.heading_error_state = 0.0  # integrated heading error [rad]
 
     # ─── Constraint State ─────────────────────────────────────────────
     self.prev_torque = 0.0
@@ -413,6 +422,7 @@ class LatControlFFv1(LatControl):
     self.integrator = 0.0
     self.prev_error = 0.0
     self.prev_kappa_ff = 0.0
+    self.heading_error_state = 0.0
     self.prev_torque = 0.0
     self.saturation_counter = 0
     self._first_frame = True
@@ -470,10 +480,10 @@ class LatControlFFv1(LatControl):
     # so no additional buffer delay-compensation is needed.
     kappa_ff = desired_curvature
 
-    # Steady-state feedforward torque
+    # Steady-state feedforward torque (proper inverse model, not α·a_lat)
     v_safe = max(v, MIN_SPEED)
     a_lat_desired = kappa_ff * v_safe ** 2
-    tau_ff = alpha * a_lat_desired + friction_est * sign_with_deadzone(a_lat_desired)
+    tau_ff = self.torque_from_lateral_accel(a_lat_desired, self.torque_params)
 
     # Dynamic feedforward (curvature rate compensation)
     if self._first_frame:
@@ -507,8 +517,10 @@ class LatControlFFv1(LatControl):
     # Heading error: difference between actual yaw rate and desired
     kappa_ref = desired_curvature
     heading_error_rate = CS.yawRate - kappa_ref * v
-    # Integrate to get heading error estimate (simplified — use rate directly)
-    heading_error = heading_error_rate * lat_delay  # approximate accumulated error
+    # Integrate heading error over time with clamping (not one-step approximation)
+    self.heading_error_state += heading_error_rate * self.dt
+    self.heading_error_state = clip(self.heading_error_state, -HEADING_ERROR_MAX, HEADING_ERROR_MAX)
+    heading_error = self.heading_error_state
 
     # Sideslip angle estimate from lateral velocity
     try:
@@ -519,14 +531,19 @@ class LatControlFFv1(LatControl):
     beta_estimate = math.atan2(v_lat, v_safe) if v_safe > MIN_SPEED else 0.0
 
     # Current state vector
-    # Read measured lateral error from model_v2 (fallback to 0 if unavailable)
+    # Read measured lateral error from model_v2 using T_IDXS binary search
+    # for proper lookahead (ADRC pattern: position.y at lookahead time, not index 0)
     ey_measured = 0.0
     if self.model_valid and self.model_v2 is not None:
       try:
         pos_y = self.model_v2.position.y
-        if len(pos_y) > 0:
-          # Use first point (nearest to vehicle) as lateral deviation measurement
-          ey_measured = float(pos_y[0])
+        n_pos = min(len(pos_y), CONTROL_N)
+        if n_pos > 0:
+          # Lookahead time for lateral error measurement (near point ~0.3s)
+          ey_lookahead_s = 0.3
+          idx = int(np.searchsorted(ModelConstants.T_IDXS[:n_pos], ey_lookahead_s))
+          idx = min(max(idx, 0), n_pos - 1)
+          ey_measured = float(pos_y[idx])
       except (AttributeError, IndexError, TypeError):
         ey_measured = 0.0
 
@@ -660,8 +677,8 @@ class LatControlFFv1(LatControl):
     tau_fb, measured_curvature, e_y_pred = self._compute_feedback(
       CS, VM, params, v, desired_curvature, lat_delay, alpha_current)
 
-    # ─── Integrator accumulation (lateral position error) ─────────────
-    self.integrator += e_y_pred * dt
+    # ─── Integrator accumulation (lateral position error → torque) ─────
+    self.integrator += INTEGRATOR_GAIN * e_y_pred * dt
 
     # ─── Layer 3: Disturbance Compensation ────────────────────────────
     tau_dist = self._compute_disturbance(v, measured_curvature, CS, alpha_current)
