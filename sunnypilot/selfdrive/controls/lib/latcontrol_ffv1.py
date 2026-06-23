@@ -77,7 +77,7 @@ ANTI_WINDUP_GAIN = 0.5            # anti-windup back-calculation gain
 
 # ─── Dynamic Feedforward ──────────────────────────────────────────────
 # K_dκ = (I_z · L) / (2 · C_f · l_f)  — curvature-rate feedforward gain
-K_DKAPPA = (DEFAULT_IZ * DEFAULT_WHEELBASE) / (2.0 * DEFAULT_CF * DEFAULT_LF)
+# (computed per-vehicle in __init__ as self.k_dkappa)
 
 # ─── Delay Margin ─────────────────────────────────────────────────────
 DELAY_MARGIN_S = 0.020            # extra 20ms safety margin on lat_delay
@@ -343,16 +343,19 @@ class LatControlFFv1(LatControl):
     # Act as own extension for controlsd's extension.update_model_v2() call
     self.extension = self
 
-    # ─── Vehicle Parameters ───────────────────────────────────────────
+    # ─── Vehicle Parameters (from CP with fallback to defaults) ─────
     self.lat_accel_factor = self.torque_params.latAccelFactor
     self.friction = self.torque_params.friction
-    self.wheelbase = DEFAULT_WHEELBASE
-    self.mass = DEFAULT_MASS
-    self.iz = DEFAULT_IZ
-    self.lf = DEFAULT_LF
-    self.lr = DEFAULT_LR
-    self.cf = DEFAULT_CF
-    self.cr = DEFAULT_CR
+    self.wheelbase = CP.wheelbase if CP.wheelbase > 0 else DEFAULT_WHEELBASE
+    self.mass = CP.mass if CP.mass > 0 else DEFAULT_MASS
+    self.iz = CP.rotationalInertia if CP.rotationalInertia > 0 else DEFAULT_IZ
+    self.lf = CP.centerToFront if CP.centerToFront > 0 else DEFAULT_LF
+    self.lr = (CP.wheelbase - CP.centerToFront) if CP.wheelbase > 0 else DEFAULT_LR
+    self.cf = CP.tireStiffnessFront if CP.tireStiffnessFront > 0 else DEFAULT_CF
+    self.cr = CP.tireStiffnessRear if CP.tireStiffnessRear > 0 else DEFAULT_CR
+
+    # Dynamic feedforward gain: K_dκ = (I_z · L) / (2 · C_f · l_f)
+    self.k_dkappa = (self.iz * self.wheelbase) / (2.0 * self.cf * self.lf)
 
     # ─── RLS Online Adaptor ──────────────────────────────────────────
     self.rls = RLSAdaptor(self.lat_accel_factor, self.friction)
@@ -497,7 +500,7 @@ class LatControlFFv1(LatControl):
       dkappa_dt = (kappa_ff - self.prev_kappa_ff) / self.dt
     self.prev_kappa_ff = kappa_ff
 
-    tau_ff_dynamic = K_DKAPPA * dkappa_dt * v_safe
+    tau_ff_dynamic = self.k_dkappa * dkappa_dt * v_safe
 
     return tau_ff + tau_ff_dynamic, kappa_ff, alpha
 
