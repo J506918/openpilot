@@ -462,7 +462,7 @@ class LatControlFFv1(LatControl):
   #  Layer 1: Intelligent Feedforward
   # ═══════════════════════════════════════════════════════════════════
 
-  def _compute_feedforward(self, desired_curvature, v, lat_delay):
+  def _compute_feedforward(self, desired_curvature, v):
     """
     Delay-anticipatory feedforward:
       1. Take κ at t + lat_delay from curvature buffer
@@ -487,8 +487,8 @@ class LatControlFFv1(LatControl):
     a_lat_desired = kappa_ff * v_safe ** 2
     tau_ff = self.torque_from_lateral_accel(a_lat_desired, self.torque_params)
 
-    # RLS friction compensation: add adaptive friction estimate as normalized torque
-    tau_ff += friction_est * sign_with_deadzone(kappa_ff)
+    # RLS friction compensation: convert m/s² friction estimate to torque space
+    tau_ff += (friction_est / max(alpha, 0.1)) * sign_with_deadzone(kappa_ff)
 
     # Dynamic feedforward (curvature rate compensation)
     if self._first_frame:
@@ -499,7 +499,7 @@ class LatControlFFv1(LatControl):
 
     tau_ff_dynamic = K_DKAPPA * dkappa_dt * v_safe
 
-    return tau_ff + tau_ff_dynamic, kappa_ff, alpha, friction_est
+    return tau_ff + tau_ff_dynamic, kappa_ff, alpha
 
   # ═══════════════════════════════════════════════════════════════════
   #  Layer 2: Predictive Feedback (Smith Predictor + FB)
@@ -522,18 +522,15 @@ class LatControlFFv1(LatControl):
     # Heading error: difference between actual yaw rate and desired
     kappa_ref = desired_curvature
     heading_error_rate = CS.yawRate - kappa_ref * v
-    # Integrate heading error over time with clamping (not one-step approximation)
-    self.heading_error_state += heading_error_rate * self.dt
+    # Integrate heading error over time with clamping
+    # Only accumulate above 5 m/s where heading error estimate is meaningful
+    if v >= 5.0:
+      self.heading_error_state += heading_error_rate * self.dt
     self.heading_error_state = clip(self.heading_error_state, -HEADING_ERROR_MAX, HEADING_ERROR_MAX)
     heading_error = self.heading_error_state
 
-    # Sideslip angle estimate from lateral velocity
-    try:
-      v_lat = VM.get_lateral_vel()
-    except Exception:
-      v_lat = 0.0
-    v_safe = max(v, MIN_SPEED)
-    beta_estimate = math.atan2(v_lat, v_safe) if v_safe > MIN_SPEED else 0.0
+    # Sideslip angle estimate — VM.get_lateral_vel() does not exist, so use 0
+    beta_estimate = 0.0
 
     # Current state vector
     # Read measured lateral error from model_v2 using T_IDXS binary search
@@ -680,8 +677,8 @@ class LatControlFFv1(LatControl):
     self._prev_lat_delay = lat_delay
 
     # ─── Layer 1: Intelligent Feedforward ─────────────────────────────
-    tau_ff, kappa_ff, alpha_current, friction_current = self._compute_feedforward(
-      desired_curvature, v, lat_delay)
+    tau_ff, kappa_ff, alpha_current = self._compute_feedforward(
+      desired_curvature, v)
 
     # Smith predictor cold-start: pre-fill input buffer with current feedforward
     # instead of zeros, giving the predictor a reasonable initial guess
@@ -728,6 +725,7 @@ class LatControlFFv1(LatControl):
     # ─── Driver intervention ──────────────────────────────────────────
     if CS.steeringPressed:
       tau_final *= 0.5
+      self.integrator = 0.0  # reset integrator to stop fighting the driver
 
     # Final clip
     tau_final = clip(tau_final, -self.steer_max, self.steer_max)
@@ -743,6 +741,6 @@ class LatControlFFv1(LatControl):
     pid_log.output = float(-tau_final)
     pid_log.actualLateralAccel = float(v * CS.yawRate)
     pid_log.desiredLateralAccel = float(kappa_ff * v ** 2)
-    pid_log.saturated = bool(self.saturation_counter > 5)
+    pid_log.saturated = bool(self._check_saturation(self.steer_max - abs(tau_final) < 1e-3, CS, steer_limited_by_safety, curvature_limited))
 
     return -tau_final, 0.0, pid_log
