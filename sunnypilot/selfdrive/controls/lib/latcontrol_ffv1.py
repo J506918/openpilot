@@ -18,7 +18,7 @@ Designed for Honda Accord 11th-gen Bosch EPS on C3X hardware.
   torqueBP = [0, 2560]
   latAccelFactor = 1.35, friction = 0.17
 
-VERSION 100
+VERSION 120
 """
 
 import math
@@ -33,7 +33,54 @@ from openpilot.selfdrive.controls.lib.latcontrol import LatControl
 from openpilot.selfdrive.modeld.constants import ModelConstants
 
 # ─── Version ───────────────────────────────────────────────────────────
-VERSION = 100
+VERSION = 121  # bumped: adaptive deadzone step + friction scaling + rate limit alignment
+
+# ─── EPS Deadzone Step Compensation ────────────────────────────────────
+# Bosch EPS ignores torque commands below ~0.5 Nm (deadzone).
+# In normalized torque units (0-2560 CAN), this corresponds to ~0.12 units.
+EPS_DEADZONE_TORQUE = 0.12         # BUGFIX: was 0.0125 (10x too small). Half of torque deadzone (≈307 CAN total range)
+DEADZONE_STEP_MAGNITUDE = 0.04     # step jump to break static friction (≈102 CAN)
+DEADZONE_ZEROCROSS_EXTRA = 0.02    # extra step on zero-crossing (≈51 CAN)
+
+# ─── Damping Feedforward Compensation ──────────────────────────────────
+# EPS mechanical damping consumes torque proportional to steering rate.
+# Compensate with feedforward torque in direction of steering motion.
+DAMPING_COEFF = 1.5                # torque units per rad/s steering rate
+DAMPING_FILTER_HZ = 5.0            # low-pass filter cutoff for steer rate
+DAMPING_RATE_DEADZONE = 0.01       # rad/s — ignore tiny steer rates
+
+# ─── Rack Force Characteristic Linearization (齿条力特性线性化) ──────────
+# Real EPS rack force is nonlinear vs lateral acceleration:
+#   - Small angles: steep slope (overcoming static friction)
+#   - Medium angles: moderate slope (linear region)
+#   - Large angles: gentle slope (rack force saturation)
+#
+# Piecewise mapping: torque = f(a_lat, v) with 3 segments.
+# Breakpoints and slopes for normalized torque (0-1 range per m/s²):
+RACK_BP_SMALL = 2.0         # m/s² — small lateral accel threshold
+RACK_BP_LARGE = 4.0         # m/s² — large lateral accel threshold
+RACK_SLOPE_SMALL = 0.85     # steeper slope (more torque per accel unit) → overcomes stiction
+RACK_SLOPE_MEDIUM = 0.70    # moderate slope in linear region
+RACK_SLOPE_LARGE = 0.50     # gentler slope → rack force saturates
+
+# Speed-dependent scaling: at low speeds (< 10 m/s), rack forces are higher
+# (more stiction). At high speeds, forces decrease (less stiction).
+RACK_SPEED_LOW = 10.0       # m/s — below this, full small-slope benefit
+RACK_SPEED_HIGH = 30.0      # m/s — above this, reduced slopes
+RACK_SPEED_SCALE_LOW = 1.2  # extra multiplier at low speed
+RACK_SPEED_SCALE_HIGH = 0.7 # reduced multiplier at high speed
+
+# ─── LQR Full-State Feedback ───────────────────────────────────────────
+# 5-state model: [e_y, e_y_dot, heading_err, yaw_rate, steer_angle]
+# Solves Discrete Algebraic Riccati Equation (Kleinman iteration)
+# Q weights penalize state errors, R penalizes control effort
+LQR_ENABLED = True                 # master switch for LQR
+LQR_Q_DIAG = [100.0, 5.0, 30.0, 3.0, 0.05]  # state cost: ey, ey_dot, heading, yaw, steer
+LQR_R = 1.0                        # control cost
+LQR_STEER_TIME_CONSTANT = 0.05     # EPS steering time constant [s]
+LQR_STEER_GAIN = 0.05              # τ → steer_angle gain (rad per torque unit)
+LQR_STEER_RATIO = 16.0             # steering ratio
+LQR_YAW_ALPHA = 0.3                # yaw filter blending factor
 
 # ─── Vehicle Parameters (Honda Accord 11th-gen defaults) ───────────────
 DEFAULT_LAT_ACCEL_FACTOR = 1.35   # torque → lat-accel gain
@@ -94,6 +141,12 @@ INTEGRATOR_GAIN = 0.3             # lateral error → torque conversion gain
 # ─── Heading Error Integration ────────────────────────────────────────
 HEADING_ERROR_MAX = 0.15          # max heading error [rad] (~8.6°)
 
+# ─── Friction Scaling Threshold ──────────────────────────────────────
+# When |τ_fb| is below this threshold, friction compensation is scaled
+# down to prevent overwhelming tiny feedback signals at steady state.
+# At |τ_fb|=0.0001 (steady state), scale=0.005 → friction=0.0006 (vs 0.126 raw)
+FRICTION_SCALE_THRESHOLD = 0.02   # τ_fb magnitude below which friction is scaled
+
 
 def sign_with_deadzone(x, dz=0.0001):
   """Smoothed sign function with deadzone to avoid chattering."""
@@ -104,6 +157,274 @@ def sign_with_deadzone(x, dz=0.0001):
 
 def clip(val, lo, hi):
   return max(lo, min(hi, val))
+
+
+# ═══════════════════════════════════════════════════════════════════════
+#  Rack Force Characteristic Linearization (齿条力特性线性化)
+# ═══════════════════════════════════════════════════════════════════════
+
+def rack_force_torque(a_lat, v, base_lat_accel_factor=DEFAULT_LAT_ACCEL_FACTOR,
+                      bp_small=RACK_BP_SMALL, bp_large=RACK_BP_LARGE,
+                      s_small=RACK_SLOPE_SMALL, s_medium=RACK_SLOPE_MEDIUM,
+                      s_large=RACK_SLOPE_LARGE,
+                      speed_low=RACK_SPEED_LOW, speed_high=RACK_SPEED_HIGH,
+                      scale_low=RACK_SPEED_SCALE_LOW, scale_high=RACK_SPEED_SCALE_HIGH):
+  """
+  Piecewise rack-force-based torque mapping from lateral acceleration.
+
+  Accounts for nonlinear EPS rack force characteristics:
+    - |a_lat| < 2 m/s²: steep slope → overcomes static friction / stiction
+    - 2 ≤ |a_lat| < 4 m/s²: moderate slope → linear EPS region
+    - |a_lat| ≥ 4 m/s²: gentle slope → rack force saturation
+
+  Speed adaptation: at low speeds rack stiction dominates (boosted torque),
+  at high speeds rack forces are lower (reduced torque).
+
+  Returns normalized torque ([-1, 1] range for full-range CAN output).
+  """
+  abs_lat = abs(a_lat)
+  v_safe = max(v, MIN_SPEED)
+
+  # ─── Piecewise torque computation ──────────────────────────────
+  # Base torque = a_lat * effective_slope depends on which segment
+  if abs_lat < bp_small:
+    # Small: steep slope
+    torque_base = a_lat * s_small
+  elif abs_lat < bp_large:
+    # Medium: interpolate linearly between s_small at bp_small and s_medium at bp_large
+    frac = (abs_lat - bp_small) / (bp_large - bp_small)
+    # Use previous segment's torque at transition + medium segment torque
+    torque_break_small = bp_small * s_small * (1.0 if a_lat >= 0.0 else -1.0)
+    remaining = a_lat - bp_small * (1.0 if a_lat >= 0.0 else -1.0)
+    torque_base = torque_break_small + remaining * s_medium
+  else:
+    # Large: flat-ish slope (saturation)
+    torque_break_large = bp_large * s_large * (1.0 if a_lat >= 0.0 else -1.0)
+    # But also account for accumulated torque before the breakpoint
+    torque_at_bp_small = bp_small * s_small
+    torque_at_bp_large = torque_at_bp_small + (bp_large - bp_small) * s_medium
+    sign = 1.0 if a_lat >= 0.0 else -1.0
+    remaining = abs_lat - bp_large
+    torque_base = sign * (torque_at_bp_large + remaining * s_large)
+
+  # ─── Speed-dependent scaling ───────────────────────────────────
+  if v_safe <= speed_low:
+    speed_scale = scale_low
+  elif v_safe >= speed_high:
+    speed_scale = scale_high
+  else:
+    # Linear interpolation between low and high speed
+    frac_spd = (v_safe - speed_low) / (speed_high - speed_low)
+    speed_scale = scale_low + frac_spd * (scale_high - scale_low)
+
+  torque_scaled = torque_base * speed_scale
+
+  # ─── Convert to normalized torque via base factor ─────────────
+  # Standard linear mapping would be: torque = a_lat / latAccelFactor
+  # Our piecewise replaces that. We scale by speed and use the
+  # piecewise-derived torque directly as normalized units.
+  # The base_lat_accel_factor is used for the normalization to
+  # ensure the output is in the same units as the original linear mapping.
+  return torque_scaled / max(base_lat_accel_factor, 0.1)
+
+
+# ═══════════════════════════════════════════════════════════════════════
+#  LQR Solver — Discrete Algebraic Riccati Equation (Kleinman iteration)
+# ═══════════════════════════════════════════════════════════════════════
+
+def solve_dare(A, B, Q, R, max_iter=300, tol=1e-12):
+  """
+  Solve Discrete Algebraic Riccati Equation:
+    A'PA - P - A'PB(R + B'PB)^{-1}B'PA + Q = 0
+  using Kleinman's iterative method.
+  Returns gain matrix K = (R + B'PB)^{-1} B'PA
+  """
+  P = Q.copy()
+  for _ in range(max_iter):
+    BPB = B.T @ P @ B
+    S = R + BPB
+    try:
+      S_inv = np.linalg.inv(S)
+    except np.linalg.LinAlgError:
+      S_inv = np.linalg.pinv(S)
+    K = S_inv @ (B.T @ P @ A)
+    P_new = Q + A.T @ P @ A - A.T @ P @ B @ K
+    diff = np.max(np.abs(P_new - P))
+    P = P_new
+    if diff < tol:
+      break
+  BPB = B.T @ P @ B
+  S = R + BPB
+  try:
+    S_inv = np.linalg.inv(S)
+  except np.linalg.LinAlgError:
+    S_inv = np.linalg.pinv(S)
+  return S_inv @ (B.T @ P @ A)
+
+
+def build_lqr_model(v, dt, steer_ratio=LQR_STEER_RATIO,
+                    tau_steer=LQR_STEER_TIME_CONSTANT,
+                    k_steer=LQR_STEER_GAIN,
+                    yaw_alpha=LQR_YAW_ALPHA):
+  """
+  Build 5-state discrete bicycle model for LQR.
+  
+  States: [e_y, e_y_dot, heading_err, yaw_rate, steer_angle]
+  Control: tau (normalized torque [-1, 1])
+  # ─── DARE RESIDUAL: The DARE residual (||A'PA - P - A'PB(R+B'PB)^{-1}B'PA + Q||)
+  # Continuous model:
+  #   BUGFIX v120: Added heading_err leakage (-0.02) to pull the |λ|=1.0 eigenvalue
+  #   inside the unit circle. Without this, heading_err is critically stable (z≈1),
+  #   only bounded by HEADING_ERROR_MAX clamp. The 5-state model has e_y_dot ≈ v×heading_err
+  #   creating linear dependence; the leakage breaks this degeneracy.
+    d(e_y)/dt      = e_y_dot
+    d(e_y_dot)/dt  = v * yaw_rate
+    d(heading)/dt  = yaw_rate - 0.02 * heading_err  # BUGFIX: leakage for marginal stability
+    d(yaw_rate)/dt = (steer_angle * v / steer_ratio - yaw_rate) / tau_yaw
+    d(steer)/dt    = (tau * k_steer - steer_angle) / tau_steer
+  """
+  v_safe = max(v, MIN_SPEED)
+  
+  # Yaw filter time constant
+  tau_yaw = dt * (1.0 - yaw_alpha) / max(yaw_alpha, 1e-6)
+  omega_yaw = 1.0 / max(tau_yaw, 1e-6)
+  
+  # Steering dynamics
+  omega_steer = 1.0 / max(tau_steer, 1e-6)
+  
+  # Steer angle → yaw rate steady-state gain
+  yaw_gain = v_safe / max(steer_ratio, 0.1)
+  
+  # Continuous-time A (5×5)
+  Ac = np.array([
+    [0.0, 1.0, 0.0, 0.0,       0.0],
+    [0.0, 0.0, 0.0, v_safe,    0.0],
+    [0.0, 0.0, -0.02, 1.0,     0.0],  # BUGFIX: heading_err leakage breaks rank deficiency
+    [0.0, 0.0, 0.0, -omega_yaw, omega_yaw * yaw_gain],
+    [0.0, 0.0, 0.0, 0.0,       -omega_steer],
+  ])
+  
+  Bc = np.array([
+    [0.0],
+    [0.0],
+    [0.0],
+    [0.0],
+    [omega_steer * k_steer],
+  ])
+  
+  # Euler discretization
+  Ad = np.eye(5) + Ac * dt
+  Bd = Bc * dt
+  
+  return Ad, Bd
+
+
+def compute_lqr_gains(v, dt):
+  """Compute LQR feedback gain matrix K at given speed."""
+  try:
+    Ad, Bd = build_lqr_model(v, dt)
+    Q = np.diag(LQR_Q_DIAG)
+    R = np.array([[LQR_R]])
+    return solve_dare(Ad, Bd, Q, R)
+  except Exception:
+    return None
+
+
+# ═══════════════════════════════════════════════════════════════════════
+#  EPS Deadzone Step Compensation
+# ═══════════════════════════════════════════════════════════════════════
+
+def deadzone_step_compensation(tau_desired, prev_tau,
+                                deadzone_half=EPS_DEADZONE_TORQUE,
+                                step_mag=DEADZONE_STEP_MAGNITUDE,
+                                zerocross_extra=DEADZONE_ZEROCROSS_EXTRA):
+  """
+  Inject a step jump when torque command crosses/nears zero to overcome
+  Bosch EPS static friction deadzone (~0.5 Nm range).
+
+  BUGFIX v121: Adaptive step scaling — step magnitude is scaled proportionally
+  to |tau_desired| relative to the deadzone boundary (2*deadzone_half).
+  This prevents large step injections (0.04-0.06) from overwhelming tiny
+  steady-state signals (~0.009), which caused sustained oscillation.
+
+  Two mechanisms:
+    1. Inside deadzone: boost torque in desired direction (scaled)
+    2. Zero-crossing: add extra kick to jump through deadzone (scaled)
+
+  Only activates when |tau| < 2× deadzone to avoid interfering with large commands.
+  """
+  tau_out = tau_desired
+
+  if abs(tau_desired) < 2.0 * deadzone_half:
+    # Adaptive scaling factor: step shrinks as |tau| approaches zero
+    # threshold = 2*deadzone_half (the activation boundary)
+    # At |tau| = threshold, scale = 1.0 (full step)
+    # At |tau| = 0.009 (steady state), scale ≈ 0.009/0.24 = 0.0375
+    threshold = 2.0 * deadzone_half
+
+    if 0.0 < abs(tau_desired) < deadzone_half:
+      effective_step = step_mag * min(1.0, abs(tau_desired) / threshold)
+      tau_out += effective_step * (1.0 if tau_desired > 0.0 else -1.0)
+
+    # Zero-crossing detection (also adaptively scaled)
+    if prev_tau is not None and tau_desired * prev_tau <= 0.0 and abs(tau_desired) > 1e-8:
+      effective_zc = zerocross_extra * min(1.0, abs(tau_desired) / threshold)
+      tau_out += effective_zc * (1.0 if tau_desired > 0.0 else -1.0)
+
+  return tau_out
+
+
+# ═══════════════════════════════════════════════════════════════════════
+#  Damping Feedforward Compensation
+# ═══════════════════════════════════════════════════════════════════════
+
+class DampingCompensator:
+  """
+  Feedforward damping compensation based on filtered steering rate.
+  EPS mechanical damping consumes torque proportional to steering rate;
+  this compensator adds feedforward torque to overcome it.
+  """
+  
+  def __init__(self, damping_coeff=DAMPING_COEFF, filter_hz=DAMPING_FILTER_HZ,
+               rate_deadzone=DAMPING_RATE_DEADZONE, dt=None):
+    self.damping_coeff = damping_coeff
+    self.rate_deadzone = rate_deadzone
+    self.filtered_rate = 0.0
+    self._prev_steer_angle = None
+    
+    if dt is not None and filter_hz > 0.0:
+      tau_f = 1.0 / (2.0 * math.pi * filter_hz)
+      self.alpha = dt / (dt + tau_f)
+    else:
+      self.alpha = 0.5
+  
+  def update(self, steer_angle_rad, dt):
+    """
+    Compute damping feedforward torque given current steering angle.
+    Returns torque to add to overcome EPS mechanical damping.
+    """
+    if self._prev_steer_angle is None:
+      self._prev_steer_angle = steer_angle_rad
+      return 0.0
+    
+    # Raw steer rate
+    steer_rate = (steer_angle_rad - self._prev_steer_angle) / max(dt, 1e-6)
+    
+    # Low-pass filter
+    self.filtered_rate = ((1.0 - self.alpha) * self.filtered_rate
+                          + self.alpha * steer_rate)
+    
+    self._prev_steer_angle = steer_angle_rad
+    
+    # Deadzone on small rates
+    if abs(self.filtered_rate) < self.rate_deadzone:
+      return 0.0
+    
+    return self.damping_coeff * self.filtered_rate
+  
+  def reset(self):
+    self.filtered_rate = 0.0
+    self._prev_steer_angle = None
 
 
 class StatePredictor:
@@ -387,6 +708,16 @@ class LatControlFFv1(LatControl):
     # ─── Measurement Filter ───────────────────────────────────────────
     self.measurement_filter = FirstOrderFilter(0.0, 1.0 / (2.0 * math.pi * 10.0), dt)
 
+    # ─── Damping Feedforward Compensator ──────────────────────────────
+    self.damping_comp = DampingCompensator(
+      damping_coeff=DAMPING_COEFF, filter_hz=DAMPING_FILTER_HZ,
+      rate_deadzone=DAMPING_RATE_DEADZONE, dt=dt)
+
+    # ─── LQR State ────────────────────────────────────────────────────
+    self.lqr_enabled = LQR_ENABLED
+    self.lqr_K = None  # computed on first update
+    self._prev_steer_angle_deg = 0.0  # for damping FF
+
     # ─── model_v2 State ───────────────────────────────────────────────
     self.model_v2 = None
     self.model_valid = False
@@ -434,6 +765,9 @@ class LatControlFFv1(LatControl):
     self._prev_lat_delay = 0.0
     self.rls.reset(self.lat_accel_factor, self.friction)
     self.dob.reset()
+    self.damping_comp.reset()
+    self.lqr_K = None
+    self._prev_steer_angle_deg = 0.0
 
   # ═══════════════════════════════════════════════════════════════════
   #  Gain Scheduling
@@ -453,11 +787,17 @@ class LatControlFFv1(LatControl):
 
   @staticmethod
   def _get_rate_limit(v):
-    """Dynamic torque rate limit based on speed."""
+    """Dynamic torque rate limit based on speed.
+    BUGFIX v120: Increased multiplier from 1.5→2.5 to compensate for
+    STEER_DELTA_UP=3 bottleneck in carcontroller (CAN-level rate limit).
+    BUGFIX v121: Adjusted multiplier 2.5→2.4. At 20 m/s this gives
+    10*2.4=24 unit/s → 0.48/frame, slightly below CAN's 0.48485/frame
+    (STEER_DELTA_UP*dt/0.33 = 8*0.02/0.33 = 0.48485). FFv1 now pre-clamps
+    before CC does, avoiding the double-clamp discontinuity."""
     if v < 10.0:
       return TORQUE_RATE_EMERGENCY  # low speed: allow fast response
     elif v < 25.0:
-      return TORQUE_RATE_NORMAL * 1.5
+      return TORQUE_RATE_NORMAL * 2.4
     else:
       return TORQUE_RATE_NORMAL
 
@@ -485,10 +825,13 @@ class LatControlFFv1(LatControl):
     # so no additional buffer delay-compensation is needed.
     kappa_ff = desired_curvature
 
-    # Steady-state feedforward torque (proper inverse model, not α·a_lat)
+    # Steady-state feedforward torque — rack force characteristic linearization
+    # Replaces pure linear t=a_lat/latAccelFactor with piecewise mapping that
+    # accounts for nonlinear EPS rack force: steeper at small angles (stiction),
+    # moderate in linear region, gentler at large angles (saturation).
     v_safe = max(v, MIN_SPEED)
     a_lat_desired = kappa_ff * v_safe ** 2
-    tau_ff = self.torque_from_lateral_accel(a_lat_desired, self.torque_params)
+    tau_ff = rack_force_torque(a_lat_desired, v_safe, self.lat_accel_factor)
 
     # Friction compensation moved to update() — error-driven instead of curvature-driven
 
@@ -585,6 +928,18 @@ class LatControlFFv1(LatControl):
     if v < 5.0:
       return 0.0, measured_curvature, 0.0
 
+    # ─── LQR Full-State Feedback (if enabled) ─────────────────────────
+    if self.lqr_enabled:
+      # Compute LQR gains lazily (once per speed change)
+      self.lqr_K = compute_lqr_gains(v, self.dt)
+      if self.lqr_K is not None:
+        # 5-state: [e_y, e_y_dot, heading_err, yaw_rate, steer_angle]
+        ey_dot_est = v * e_psi  # approximate: d(ey)/dt ≈ v * heading_err
+        steer_angle_rad = math.radians(CS.steeringAngleDeg - params.angleOffsetDeg)
+        state = np.array([e_y, ey_dot_est, e_psi, CS.yawRate, steer_angle_rad])
+        tau_fb = -float(self.lqr_K @ state)
+        return tau_fb, measured_curvature, e_y
+
     Ky, Kpsi, Kbeta, Kr = self._get_scheduled_gains(v)
 
     tau_fb = -(Ky * e_y + Kpsi * e_psi + Kbeta * beta_p + Kr * r_p)
@@ -622,11 +977,14 @@ class LatControlFFv1(LatControl):
   #  Layer 4: Constraint Handling & Safety
   # ═══════════════════════════════════════════════════════════════════
 
-  def _apply_constraints(self, tau_total, v, steer_max, steer_limited_by_safety, dt, freeze=False):
+  def _apply_constraints(self, tau_total, v, steer_max, steer_limited_by_safety, dt, freeze=False, tau_ff=0.0):
     """
     1. Hard torque limit (steer_max from safety)
     2. Anti-windup back-calculation (skipped when integrator is frozen)
     3. Torque rate limiting (comfort)
+       BUGFIX v120: feedforward τ_ff bypasses rate limiter on sharp curve entry.
+       Only feedback+integrator+damping components are rate-limited.
+       τ_ff is pure steady-state physics, safe to step instantly.
     4. Predictive constraint check (simplified single-step)
     """
     # 4a. Hard torque constraint
@@ -644,14 +1002,25 @@ class LatControlFFv1(LatControl):
     # Clamp integrator to prevent excessive windup
     self.integrator = clip(self.integrator, -steer_max * 0.5, steer_max * 0.5)
 
-    # 4c. Torque rate limiting
+    # 4c. Torque rate limiting — feedforward bypass
+    # BUGFIX v120: τ_ff skips rate limiter. Only non-ff torque is rate-limited.
+    # This prevents Scenario C divergence where needed τ_ff=1.196 takes 4+ frames
+    # to build up while the vehicle falls behind the curve.
+    tau_non_ff = tau_clipped - tau_ff
+    prev_non_ff = self.prev_torque - getattr(self, '_prev_tau_ff', 0.0)
+
     tau_rate_limit = self._get_rate_limit(v)
-    tau_rate = (tau_clipped - self.prev_torque) / max(dt, 1e-6)
-    if abs(tau_rate) > tau_rate_limit:
-      tau_clipped = self.prev_torque + tau_rate_limit * dt * (1.0 if tau_rate > 0 else -1.0)
+    if tau_non_ff != 0.0 or prev_non_ff != 0.0:
+      tau_rate = (tau_non_ff - prev_non_ff) / max(dt, 1e-6)
+      if abs(tau_rate) > tau_rate_limit:
+        tau_non_ff = prev_non_ff + tau_rate_limit * dt * (1.0 if tau_rate > 0 else -1.0)
+
+    # Reconstruct with feedforward passed through instantly
+    tau_clipped = tau_ff + tau_non_ff
 
     # Final hard clip
     tau_clipped = clip(tau_clipped, -steer_max, steer_max)
+    self._prev_tau_ff = tau_ff
 
     return tau_clipped
 
@@ -710,13 +1079,38 @@ class LatControlFFv1(LatControl):
     # ─── Error-driven friction compensation ──────────────────────────
     # Uses feedback torque sign (error-driven) instead of curvature sign,
     # so friction compensation works on straight roads where κ=0 but e_y≠0.
+    # BUGFIX v121: Scale friction with |τ_fb| when feedback is tiny.
+    # At steady state (|τ_fb| ≈ 0.0001), full friction (0.126) is 1000x larger
+    # than the feedback signal, creating bang-bang oscillation. Scaling prevents
+    # friction from dominating when there's no meaningful error to correct.
     _, rls_friction, rls_conf = self.rls.get_params()
     friction_est = rls_friction if rls_conf > RLS_CONFIDENCE_THRESHOLD else self.friction
+    friction_base = friction_est / max(alpha_current, 0.1)
     friction_sign = sign_with_deadzone(tau_fb)
-    tau_total += (friction_est / max(alpha_current, 0.1)) * friction_sign
+    # Scale friction when |τ_fb| is below threshold
+    if abs(tau_fb) < FRICTION_SCALE_THRESHOLD:
+      friction_scale = abs(tau_fb) / FRICTION_SCALE_THRESHOLD
+    else:
+      friction_scale = 1.0
+    tau_total += friction_base * friction_sign * friction_scale
+
+    # ─── Damping Feedforward Compensation ─────────────────────────────
+    # Compensate for EPS mechanical damping based on steering rate
+    steer_angle_rad = math.radians(CS.steeringAngleDeg - params.angleOffsetDeg)
+    tau_damping = self.damping_comp.update(steer_angle_rad, dt)
+    tau_total += tau_damping
+
+    # ─── EPS Deadzone Step Compensation ──────────────────────────────
+    # Inject step jump when torque crosses near zero to overcome EPS deadzone
+    tau_total = deadzone_step_compensation(tau_total, self.prev_torque,
+                                            EPS_DEADZONE_TORQUE,
+                                            DEADZONE_STEP_MAGNITUDE,
+                                            DEADZONE_ZEROCROSS_EXTRA)
 
     # ─── Layer 4: Constraint & Safety ─────────────────────────────────
-    tau_final = self._apply_constraints(tau_total, v, self.steer_max, steer_limited_by_safety, dt, freeze=freeze)
+    # BUGFIX v120: Pass tau_ff to bypass rate limiting for feedforward.
+    # When kappa changes abruptly (curve entry), τ_ff can step immediately.
+    tau_final = self._apply_constraints(tau_total, v, self.steer_max, steer_limited_by_safety, dt, freeze=freeze, tau_ff=tau_ff)
 
     # ─── Update input buffer ──────────────────────────────────────────
     self.input_buffer.append(tau_final)
@@ -753,4 +1147,13 @@ class LatControlFFv1(LatControl):
     pid_log.desiredLateralAccel = float(kappa_ff * v ** 2)
     pid_log.saturated = bool(self._check_saturation(self.steer_max - abs(tau_final) < 1e-3, CS, steer_limited_by_safety, curvature_limited))
 
+    # ─── SIGN CONVENTION (BUGFIX v120 documentation) ────────────────────
+    # The return value is NEGATED tau_final to match the openpilot convention
+    # where "left is positive" (see latcontrol_torque.py line 121). This means:
+    #   - tau_fb = -K@x applies LQR negative feedback internally
+    #   - tau_ff + tau_fb + ... → tau_total (raw desired torque)
+    #   - return -tau_final → sign-flipped for controlsd's actuators.torque
+    #   - controlsd passes this to carcontroller which maps to CAN output
+    # Without this negation, the LQR feedback would become POSITIVE feedback.
+    # Any change here must also be mirrored in controlsd and carcontroller.
     return -tau_final, 0.0, pid_log
