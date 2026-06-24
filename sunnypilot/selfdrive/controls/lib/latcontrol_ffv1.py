@@ -95,7 +95,7 @@ INTEGRATOR_GAIN = 0.3             # lateral error → torque conversion gain
 HEADING_ERROR_MAX = 0.15          # max heading error [rad] (~8.6°)
 
 
-def sign_with_deadzone(x, dz=0.01):
+def sign_with_deadzone(x, dz=0.0001):
   """Smoothed sign function with deadzone to avoid chattering."""
   if abs(x) < dz:
     return 0.0
@@ -490,8 +490,7 @@ class LatControlFFv1(LatControl):
     a_lat_desired = kappa_ff * v_safe ** 2
     tau_ff = self.torque_from_lateral_accel(a_lat_desired, self.torque_params)
 
-    # RLS friction compensation: convert m/s² friction estimate to torque space
-    tau_ff += (friction_est / max(alpha, 0.1)) * sign_with_deadzone(kappa_ff)
+    # Friction compensation moved to update() — error-driven instead of curvature-driven
 
     # Dynamic feedforward (curvature rate compensation)
     if self._first_frame:
@@ -708,6 +707,14 @@ class LatControlFFv1(LatControl):
     # ─── Combine all layers ───────────────────────────────────────────
     tau_total = tau_ff + tau_fb + tau_dist + tau_roll + self.integrator
 
+    # ─── Error-driven friction compensation ──────────────────────────
+    # Uses feedback torque sign (error-driven) instead of curvature sign,
+    # so friction compensation works on straight roads where κ=0 but e_y≠0.
+    _, rls_friction, rls_conf = self.rls.get_params()
+    friction_est = rls_friction if rls_conf > RLS_CONFIDENCE_THRESHOLD else self.friction
+    friction_sign = sign_with_deadzone(tau_fb)
+    tau_total += (friction_est / max(alpha_current, 0.1)) * friction_sign
+
     # ─── Layer 4: Constraint & Safety ─────────────────────────────────
     tau_final = self._apply_constraints(tau_total, v, self.steer_max, steer_limited_by_safety, dt, freeze=freeze)
 
@@ -728,7 +735,7 @@ class LatControlFFv1(LatControl):
     # ─── Driver intervention ──────────────────────────────────────────
     if CS.steeringPressed:
       tau_final *= 0.5
-      self.integrator = 0.0  # reset integrator to stop fighting the driver
+      self.integrator *= 0.5  # halve integrator instead of resetting on driver intervention
 
     # Final clip
     tau_final = clip(tau_final, -self.steer_max, self.steer_max)
