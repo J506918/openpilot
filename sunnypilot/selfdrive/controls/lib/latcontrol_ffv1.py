@@ -870,11 +870,18 @@ class LatControlFFv1(LatControl):
     # Heading error: difference between actual yaw rate and desired
     kappa_ref = desired_curvature
     heading_error_rate = CS.yawRate - kappa_ref * v
-    # Integrate heading error over time with clamping
-    # Accumulate heading error at all speeds
-    self.heading_error_state += heading_error_rate * self.dt
+    # Heading error integration with decay — only integrate above 3 m/s
+    # Below 3 m/s, gradually decay to prevent noise accumulation
+    if v > 3.0:
+      self.heading_error_state += heading_error_rate * self.dt
+    else:
+      self.heading_error_state *= 0.95  # ~1s decay at 100Hz
     self.heading_error_state = clip(self.heading_error_state, -HEADING_ERROR_MAX, HEADING_ERROR_MAX)
     heading_error = self.heading_error_state
+
+    # Fast decay on straight roads: clear accumulated heading error
+    if abs(kappa_ref) < 0.0005 and v > 5.0:
+      self.heading_error_state *= 0.9  # ~0.2s time constant
 
     # Sideslip angle estimate — VM.get_lateral_vel() does not exist, so use 0
     beta_estimate = 0.0
@@ -1131,7 +1138,8 @@ class LatControlFFv1(LatControl):
     # ─── Driver intervention ──────────────────────────────────────────
     if CS.steeringPressed:
       tau_final *= 0.5
-      self.integrator *= 0.5  # halve integrator instead of resetting on driver intervention
+      self.integrator = 0.0  # reset integrator on driver intervention
+      self.heading_error_state *= 0.7  # decay heading error too
 
     # Final clip
     tau_final = clip(tau_final, -self.steer_max, self.steer_max)
