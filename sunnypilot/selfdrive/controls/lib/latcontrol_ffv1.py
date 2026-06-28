@@ -868,9 +868,8 @@ class LatControlFFv1(LatControl):
     kappa_ref = desired_curvature
     heading_error_rate = CS.yawRate - kappa_ref * v
     # Integrate heading error over time with clamping
-    # Only accumulate above 5 m/s where heading error estimate is meaningful
-    if v >= 5.0:
-      self.heading_error_state += heading_error_rate * self.dt
+    # Accumulate heading error at all speeds
+    self.heading_error_state += heading_error_rate * self.dt
     self.heading_error_state = clip(self.heading_error_state, -HEADING_ERROR_MAX, HEADING_ERROR_MAX)
     heading_error = self.heading_error_state
 
@@ -924,9 +923,7 @@ class LatControlFFv1(LatControl):
     r_p = state_predicted[3]        # predicted yaw rate
 
     # Gain-scheduled feedback
-    # Low-speed gate: disable feedback entirely below 5 m/s to avoid instability
-    if v < 5.0:
-      return 0.0, measured_curvature, 0.0
+    # Gain-scheduled feedback — active at all speeds (0 km/h inclusive)
 
     # ─── LQR Full-State Feedback (if enabled) ─────────────────────────
     if self.lqr_enabled:
@@ -1062,7 +1059,7 @@ class LatControlFFv1(LatControl):
       CS, VM, params, v, desired_curvature, lat_delay, alpha_current)
 
     # ─── Integrator accumulation (lateral position error → torque) ─────
-    freeze = steer_limited_by_safety or CS.steeringPressed or v < 5.0
+    freeze = steer_limited_by_safety or CS.steeringPressed
     if not freeze:
       self.integrator += INTEGRATOR_GAIN * e_y_pred * dt
 
