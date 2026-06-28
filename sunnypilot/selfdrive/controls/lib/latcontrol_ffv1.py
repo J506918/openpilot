@@ -81,6 +81,7 @@ LQR_STEER_TIME_CONSTANT = 0.05     # EPS steering time constant [s]
 LQR_STEER_GAIN = 0.05              # τ → steer_angle gain (rad per torque unit)
 LQR_STEER_RATIO = 16.0             # steering ratio
 LQR_YAW_ALPHA = 0.3                # yaw filter blending factor
+LQR_SPEED_THRESHOLD = 0.5        # re-compute LQR gains when speed changes by >0.5 m/s
 
 # ─── Vehicle Parameters (Honda Accord 11th-gen defaults) ───────────────
 DEFAULT_LAT_ACCEL_FACTOR = 1.35   # torque → lat-accel gain
@@ -716,6 +717,7 @@ class LatControlFFv1(LatControl):
     # ─── LQR State ────────────────────────────────────────────────────
     self.lqr_enabled = LQR_ENABLED
     self.lqr_K = None  # computed on first update
+    self._last_lqr_v = 0.0
     self._prev_steer_angle_deg = 0.0  # for damping FF
 
     # ─── model_v2 State ───────────────────────────────────────────────
@@ -767,6 +769,7 @@ class LatControlFFv1(LatControl):
     self.dob.reset()
     self.damping_comp.reset()
     self.lqr_K = None
+    self._last_lqr_v = 0.0
     self._prev_steer_angle_deg = 0.0
 
   # ═══════════════════════════════════════════════════════════════════
@@ -928,7 +931,9 @@ class LatControlFFv1(LatControl):
     # ─── LQR Full-State Feedback (if enabled) ─────────────────────────
     if self.lqr_enabled:
       # Compute LQR gains lazily (once per speed change)
-      self.lqr_K = compute_lqr_gains(v, self.dt)
+      if self.lqr_K is None or abs(v - self._last_lqr_v) > LQR_SPEED_THRESHOLD:
+        self.lqr_K = compute_lqr_gains(v, self.dt)
+        self._last_lqr_v = v
       if self.lqr_K is not None:
         # 5-state: [e_y, e_y_dot, heading_err, yaw_rate, steer_angle]
         ey_dot_est = v * e_psi  # approximate: d(ey)/dt ≈ v * heading_err
